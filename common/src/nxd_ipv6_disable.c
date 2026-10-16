@@ -29,6 +29,7 @@
 #ifdef FEATURE_NX_IPV6
 #include "nx_nd_cache.h"
 #include "nx_icmpv6.h"
+#include "nx_tcp.h"
 #endif /* FEATURE_NX_IPV6 */
 
 /**************************************************************************/
@@ -85,6 +86,7 @@ UINT  _nxd_ipv6_disable(NX_IP *ip_ptr)
 TX_INTERRUPT_SAVE_AREA
 ULONG address[4];
 UINT  i;
+NX_TCP_SOCKET *socket_ptr;
 
 
     /* Make sure IPv6 is not already enabled. */
@@ -160,6 +162,28 @@ UINT  i;
 
             _nx_ipv6_multicast_leave(ip_ptr, &address[0], ip_ptr -> nx_ipv6_address[i].nxd_ipv6_address_attached);
         }
+    }
+
+    /* Reset the IPv6 TCP connections. Each socket keeps a pointer to the
+       address entry it sends from, and the memset below detaches every entry
+       from its interface, which _nx_ipv6_packet_send asserts never happens:
+       the connection's next ACK, FIN, RST or retransmission would stop the
+       caller with the IP protection held.  IPv4 connections, and closed or
+       listening sockets, are left alone.  */
+    socket_ptr = ip_ptr -> nx_ip_tcp_created_sockets_ptr;
+    if (socket_ptr != NX_NULL)
+    {
+        do
+        {
+            if ((socket_ptr -> nx_tcp_socket_state > NX_TCP_LISTEN_STATE) &&
+                (socket_ptr -> nx_tcp_socket_connect_ip.nxd_ip_version == NX_IP_VERSION_V6))
+            {
+                _nx_tcp_socket_connection_reset(socket_ptr);
+            }
+
+            /* Move to the next. */
+            socket_ptr = socket_ptr -> nx_tcp_socket_created_next;
+        } while (socket_ptr != ip_ptr -> nx_ip_tcp_created_sockets_ptr);
     }
 
     /* Zero out the IPv6 address structure table. */
