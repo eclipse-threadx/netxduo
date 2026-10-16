@@ -339,14 +339,21 @@ ULONG       source[4];
                 NX_IPV6_ADDRESS_CHANGE_ENDIAN(source);
                 if ((source[0] != 0) || (source[1] != 0) ||
                     (source[2] != 0) || (source[3] != 1))
+                {
+                    printf("\nLoopback source: %08lx:%08lx:%08lx:%08lx\n",
+                           source[0], source[1], source[2], source[3]);
                     error_counter++;
+                }
                 nx_packet_release(my_packet);
             }
         }
         else if (my_packet != NX_NULL)
             nx_packet_release(my_packet);
         if (status != NX_SUCCESS)
+        {
+            printf("\nLoopback send/receive status: %u\n", status);
             error_counter++;
+        }
     }
     else
         error_counter++;
@@ -366,7 +373,11 @@ ULONG       source[4];
         status = _nxde_ip_raw_packet_send(&ip_1, &my_packet, &dest_addr,
                                           NX_IP_RAW >> 16, 0x80, NX_IP_NORMAL);
         if ((status != NX_NO_INTERFACE_ADDRESS) || (my_packet != sent_packet))
+        {
+            printf("\nNo-source status: %u packet retained: %u\n",
+                   status, my_packet == sent_packet);
             error_counter++;
+        }
         if (my_packet == sent_packet)
             nx_packet_release(my_packet);
     }
