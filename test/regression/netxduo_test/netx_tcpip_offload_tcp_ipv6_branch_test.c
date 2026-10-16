@@ -22,7 +22,15 @@
    _nxd_ipv6_interface_find. When the server's interface has no address that
    can reach the peer, the accept is refused with NX_NO_INTERFACE_ADDRESS and
    the socket is left unconnected, rather than established with no source
-   address for the send path to dereference. */
+   address for the send path to dereference.
+
+   The second part covers the receive-side refusal in
+   _nx_tcp_socket_driver_packet_receive. An offload driver hands a segment's
+   data up without an IP header, so one is built from the connection's source
+   address. When that address is deleted under an established connection, the
+   header build refuses it and the data is dropped; the connection stays
+   established, and once an address is set in that entry again, data is
+   delivered as before. */
 
 #include   "tx_api.h"
 #include   "nx_api.h"
@@ -34,24 +42,29 @@ extern void    test_control_return(UINT status);
 
 #define     DEMO_STACK_SIZE         2048
 #define     SERVER_PORT             14
+#define     SERVER_PORT_2           15
 
 static TX_THREAD               thread_0;
 
 static NX_PACKET_POOL          pool_0;
 
 /* ip_0 is the client, with a global IPv6 address. ip_1 is the server, with
-   IPv6 enabled and no address at all. */
+   IPv6 enabled and no address at all until the second part. */
 static NX_IP                   ip_0;
 static NX_IP                   ip_1;
 
 static NX_TCP_SOCKET           client_socket;
 static NX_TCP_SOCKET           server_socket;
+static NX_TCP_SOCKET           client_socket_2;
+static NX_TCP_SOCKET           server_socket_2;
 
 static NXD_ADDRESS             ipv6_address_0;
 
 static ULONG                   error_counter;
 
 static void    thread_0_entry(ULONG thread_input);
+static void    address_wait_valid(NX_IP *ip_ptr, UINT address_index);
+static void    server_data_send(CHAR *data);
 
 #ifdef CTEST
 VOID test_application_define(void *first_unused_memory)
@@ -115,7 +128,14 @@ static void    thread_0_entry(ULONG thread_input)
 
 UINT        status;
 UINT        i;
+UINT        address_index;
 NXD_ADDRESS server_address;
+NX_PACKET  *packet_ptr;
+ULONG       length;
+UCHAR       buffer[16];
+#ifndef NX_DISABLE_IP_INFO
+ULONG       invalid_transmit_packets;
+#endif
 
     NX_PARAMETER_NOT_USED(thread_input);
 
@@ -166,6 +186,95 @@ NXD_ADDRESS server_address;
     if (server_socket.nx_tcp_socket_state == NX_TCP_ESTABLISHED)
         error_counter++;
 
+    /* Second part: an established IPv6 connection, the server now having an
+       address. */
+    server_address.nxd_ip_address.v6[3] = 2;
+    status = nxd_ipv6_address_set(&ip_1, 0, &server_address, 64, &address_index);
+    if ((status) || (address_index != 0))
+        error_counter++;
+    address_wait_valid(&ip_1, 0);
+
+    status =  nx_tcp_socket_create(&ip_0, &client_socket_2, "Client Socket 2", NX_IP_NORMAL, NX_FRAGMENT_OKAY,
+                                   NX_IP_TIME_TO_LIVE, 200, NX_NULL, NX_NULL);
+    status += nx_tcp_socket_create(&ip_1, &server_socket_2, "Server Socket 2", NX_IP_NORMAL, NX_FRAGMENT_OKAY,
+                                   NX_IP_TIME_TO_LIVE, 200, NX_NULL, NX_NULL);
+    status += nx_tcp_server_socket_listen(&ip_1, SERVER_PORT_2, &server_socket_2, 5, NX_NULL);
+    status += nx_tcp_client_socket_bind(&client_socket_2, 17, NX_WAIT_FOREVER);
+    status += nxd_tcp_client_socket_connect(&client_socket_2, &server_address, SERVER_PORT_2, NX_IP_PERIODIC_RATE);
+    if (status)
+        error_counter++;
+
+    /* The engine reports the server side from its own thread. */
+    tx_thread_sleep(NX_IP_PERIODIC_RATE / 2);
+    status = nx_tcp_server_socket_accept(&server_socket_2, NX_IP_PERIODIC_RATE);
+    if ((status) ||
+        (client_socket_2.nx_tcp_socket_state != NX_TCP_ESTABLISHED) ||
+        (client_socket_2.nx_tcp_socket_connect_ip.nxd_ip_version != NX_IP_VERSION_V6) ||
+        (client_socket_2.nx_tcp_socket_ipv6_addr != &ip_0.nx_ipv6_address[0]))
+        error_counter++;
+
+    /* Data is delivered while the client's address is valid. */
+    server_data_send("before");
+    status = nx_tcp_socket_receive(&client_socket_2, &packet_ptr, NX_IP_PERIODIC_RATE);
+    if (status)
+        error_counter++;
+    else
+    {
+        length = 0;
+        nx_packet_data_retrieve(packet_ptr, buffer, &length);
+        if ((length != 6) || (memcmp(buffer, "before", 6) != 0))
+            error_counter++;
+        nx_packet_release(packet_ptr);
+    }
+
+    /* The client's address is deleted under the connection. The header build
+       for the next segment is refused and the segment dropped. */
+#ifndef NX_DISABLE_IP_INFO
+    invalid_transmit_packets = ip_0.nx_ip_invalid_transmit_packets;
+#endif
+    status = nxd_ipv6_address_delete(&ip_0, 0);
+    if ((status) || (ip_0.nx_ipv6_address[0].nxd_ipv6_address_state == NX_IPV6_ADDR_STATE_VALID))
+        error_counter++;
+
+    server_data_send("dropped");
+    tx_thread_sleep(NX_IP_PERIODIC_RATE / 2);
+    status = nx_tcp_socket_receive(&client_socket_2, &packet_ptr, NX_NO_WAIT);
+    if (status != NX_NO_PACKET)
+    {
+        error_counter++;
+        if (status == NX_SUCCESS)
+            nx_packet_release(packet_ptr);
+    }
+#ifndef NX_DISABLE_IP_INFO
+    if (ip_0.nx_ip_invalid_transmit_packets != invalid_transmit_packets + 1)
+        error_counter++;
+#endif
+    if (client_socket_2.nx_tcp_socket_state != NX_TCP_ESTABLISHED)
+        error_counter++;
+
+    /* With the address set in the same entry again, data is delivered. */
+    status = nxd_ipv6_address_set(&ip_0, 0, &ipv6_address_0, 64, &address_index);
+    if ((status) || (address_index != 0))
+        error_counter++;
+    address_wait_valid(&ip_0, 0);
+
+    server_data_send("after");
+    status = nx_tcp_socket_receive(&client_socket_2, &packet_ptr, NX_IP_PERIODIC_RATE);
+    if (status)
+        error_counter++;
+    else
+    {
+        length = 0;
+        nx_packet_data_retrieve(packet_ptr, buffer, &length);
+        if ((length != 5) || (memcmp(buffer, "after", 5) != 0))
+            error_counter++;
+        nx_packet_release(packet_ptr);
+    }
+
+    status = nx_tcp_socket_disconnect(&client_socket_2, NX_IP_PERIODIC_RATE);
+    if (status)
+        error_counter++;
+
     if (error_counter)
     {
         printf("ERROR!\n");
@@ -175,6 +284,44 @@ NXD_ADDRESS server_address;
     {
         printf("SUCCESS!\n");
         test_control_return(0);
+    }
+}
+
+
+static void    address_wait_valid(NX_IP *ip_ptr, UINT address_index)
+{
+
+UINT        i;
+
+    for (i = 0; (i < 10 * NX_IP_PERIODIC_RATE) &&
+                (ip_ptr -> nx_ipv6_address[address_index].nxd_ipv6_address_state != NX_IPV6_ADDR_STATE_VALID); i++)
+        tx_thread_sleep(1);
+
+    if (ip_ptr -> nx_ipv6_address[address_index].nxd_ipv6_address_state != NX_IPV6_ADDR_STATE_VALID)
+        error_counter++;
+}
+
+
+static void    server_data_send(CHAR *data)
+{
+
+UINT        status;
+NX_PACKET  *packet_ptr;
+
+    status = nx_packet_allocate(&pool_0, &packet_ptr, NX_TCP_PACKET, NX_WAIT_FOREVER);
+    if (status)
+    {
+        error_counter++;
+        return;
+    }
+
+    status = nx_packet_data_append(packet_ptr, data, strlen(data), &pool_0, NX_WAIT_FOREVER);
+    if (status == NX_SUCCESS)
+        status = nx_tcp_socket_send(&server_socket_2, packet_ptr, NX_IP_PERIODIC_RATE);
+    if (status)
+    {
+        error_counter++;
+        nx_packet_release(packet_ptr);
     }
 }
 
