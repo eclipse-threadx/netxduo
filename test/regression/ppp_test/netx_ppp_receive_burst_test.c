@@ -23,6 +23,7 @@ extern void test_control_return(UINT status);
 
 #define TEST_STACK_SIZE 2048
 #define TEST_FRAME_COUNT 18
+#define TEST_EXACT_BATCH_COUNT 16
 
 static TX_THREAD test_thread;
 static NX_PACKET_POOL test_pool;
@@ -134,6 +135,38 @@ UCHAR byte;
     status = nx_ppp_byte_receive(&test_ppp, 0x20);
     tx_thread_sleep(2);
     if ((status != NX_SUCCESS) ||
+        (test_ppp.nx_ppp_serial_buffer_byte_count != 0))
+    {
+        printf("ERROR!\n");
+        test_control_return(1);
+        return;
+    }
+
+    /* An exact batch must drain without scheduling a spurious receive event.  */
+    status = tx_thread_suspend(&test_ppp.nx_ppp_thread);
+    if (status != TX_SUCCESS)
+    {
+        printf("ERROR!\n");
+        test_control_return(1);
+        return;
+    }
+    for (frame_index = 0; frame_index < TEST_EXACT_BATCH_COUNT; frame_index++)
+    {
+        for (byte_index = 0; byte_index < sizeof(test_frame); byte_index++)
+        {
+            status = nx_ppp_byte_receive(&test_ppp, test_frame[byte_index]);
+            if (status != NX_SUCCESS)
+            {
+                printf("ERROR!\n");
+                test_control_return(1);
+                return;
+            }
+        }
+    }
+    status = tx_thread_resume(&test_ppp.nx_ppp_thread);
+    tx_thread_sleep(2);
+    if ((status != TX_SUCCESS) ||
+        (test_ppp.nx_ppp_total_frames_received != (TEST_FRAME_COUNT + TEST_EXACT_BATCH_COUNT)) ||
         (test_ppp.nx_ppp_serial_buffer_byte_count != 0))
     {
         printf("ERROR!\n");
