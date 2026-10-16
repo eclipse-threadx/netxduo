@@ -10,7 +10,6 @@
  **************************************************************************/
 // Portions of this file were generated with AI assistance.
 
-
 /**************************************************************************/
 /**************************************************************************/
 /**                                                                       */
@@ -992,6 +991,8 @@ static VOID _nxd_mqtt_release_receive_packet(NXD_MQTT_CLIENT *client_ptr, NX_PAC
     }
 
     client_ptr -> message_receive_queue_depth--;
+
+    (VOID) nx_packet_release(packet_ptr);
 }
 
 /**************************************************************************/
