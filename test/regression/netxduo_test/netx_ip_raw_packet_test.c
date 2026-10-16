@@ -282,7 +282,8 @@ ULONG       held_packets_available;
     if ((status != NX_IP_ADDRESS_ERROR) ||
         (pool_0.nx_packet_pool_available != held_packets_available))
     {
-        printf("ERROR!\n");
+        printf("ERROR! No-route status=%u available=%lu expected=%lu\n",
+               status, pool_0.nx_packet_pool_available, held_packets_available);
         test_control_return(1);
     }
 
@@ -310,52 +311,18 @@ ULONG       held_packets_available;
     if ((status != NX_IP_ADDRESS_ERROR) ||
         (pool_0.nx_packet_pool_available != held_packets_available))
     {
-        printf("ERROR!\n");
+        printf("ERROR! Forwarding miss status=%u available=%lu expected=%lu\n",
+               status, pool_0.nx_packet_pool_available, held_packets_available);
         test_control_return(1);
     }
     status = nx_packet_release(my_packet);
 
-#if NX_MAX_PHYSICAL_INTERFACES > 1
-    /* Forwarding may find another interface after the specified one fails. */
-    status += nx_ip_interface_attach(&ip_0, "Raw fallback", IP_ADDRESS(2, 2, 3, 4),
-                                      0xFFFFFF00UL, _nx_ram_network_driver_256);
-    if (status != NX_SUCCESS)
-    {
-        printf("ERROR!\n");
-        test_control_return(1);
-    }
-    status = nx_packet_allocate(&pool_0, &my_packet, NX_UDP_PACKET, NX_NO_WAIT);
-    if (status == NX_SUCCESS)
-        status = nx_packet_data_append(my_packet, "fallback", 8, &pool_0, NX_NO_WAIT);
-    if (status != NX_SUCCESS)
-    {
-        printf("ERROR!\n");
-        test_control_return(1);
-    }
-    unreachable.nxd_ip_address.v4 = IP_ADDRESS(2, 2, 3, 4);
-    status = nxd_ip_raw_packet_source_send(&ip_0, my_packet, &unreachable,
-                                           0, NX_IP_RAW >> 16, 64, NX_IP_NORMAL);
-    if (status != NX_SUCCESS)
-    {
-        printf("ERROR!\n");
-        test_control_return(1);
-    }
-    status = nx_ip_raw_packet_receive(&ip_0, &my_packet, NX_IP_PERIODIC_RATE);
-    if ((status != NX_SUCCESS) ||
-        (memcmp(my_packet -> nx_packet_prepend_ptr, "fallback", 8) != 0))
-    {
-        printf("ERROR!\n");
-        test_control_return(1);
-    }
-    status = nx_packet_release(my_packet);
-    status += nx_ip_interface_detach(&ip_0, 1);
-#endif
 
     status += nx_ip_forwarding_disable(&ip_0);
     status += nx_ip_raw_packet_disable(&ip_0);
     if (status != NX_SUCCESS)
     {
-        printf("ERROR!\n");
+        printf("ERROR! Forwarding cleanup status=%u\n", status);
         test_control_return(1);
     }
 
@@ -638,6 +605,63 @@ ULONG       held_packets_available;
         test_control_return(1);
     }       
 
+
+#if NX_MAX_PHYSICAL_INTERFACES > 1
+    /* Clear the earlier gateway so the specified primary interface has no
+       route, then verify forwarding finds the attached second interface. */
+    status = tx_mutex_get(&(ip_0.nx_ip_protection), TX_WAIT_FOREVER);
+    if (status == TX_SUCCESS)
+    {
+        ip_0.nx_ip_gateway_address = 0;
+        ip_0.nx_ip_gateway_interface = NX_NULL;
+        status = tx_mutex_put(&(ip_0.nx_ip_protection));
+    }
+    status += nx_ip_forwarding_enable(&ip_0);
+    if (status != NX_SUCCESS)
+    {
+        printf("ERROR! Fallback setup status=%u\n", status);
+        test_control_return(1);
+    }
+    /* Forwarding may find another interface after the specified one fails. */
+    status += nx_ip_interface_attach(&ip_0, "Raw fallback", IP_ADDRESS(2, 2, 3, 4),
+                                      0xFFFFFF00UL, _nx_ram_network_driver_256);
+    if (status != NX_SUCCESS)
+    {
+        printf("ERROR! Fallback attach status=%u\n", status);
+        test_control_return(1);
+    }
+    status = nx_packet_allocate(&pool_0, &my_packet, NX_UDP_PACKET, NX_NO_WAIT);
+    if (status == NX_SUCCESS)
+        status = nx_packet_data_append(my_packet, "fallback", 8, &pool_0, NX_NO_WAIT);
+    if (status != NX_SUCCESS)
+    {
+        printf("ERROR!\n");
+        test_control_return(1);
+    }
+    unreachable.nxd_ip_address.v4 = IP_ADDRESS(2, 2, 3, 4);
+    status = nxd_ip_raw_packet_source_send(&ip_0, my_packet, &unreachable,
+                                           0, NX_IP_RAW >> 16, 64, NX_IP_NORMAL);
+    if (status != NX_SUCCESS)
+    {
+        printf("ERROR! Fallback send status=%u\n", status);
+        test_control_return(1);
+    }
+    status = nx_ip_raw_packet_receive(&ip_0, &my_packet, NX_IP_PERIODIC_RATE);
+    if ((status != NX_SUCCESS) ||
+        (memcmp(my_packet -> nx_packet_prepend_ptr, "fallback", 8) != 0))
+    {
+        printf("ERROR! Fallback receive status=%u\n", status);
+        test_control_return(1);
+    }
+    status = nx_packet_release(my_packet);
+    status += nx_ip_interface_detach(&ip_0, 1);
+    status += nx_ip_forwarding_disable(&ip_0);
+    if (status != NX_SUCCESS)
+    {
+        printf("ERROR! Fallback cleanup status=%u\n", status);
+        test_control_return(1);
+    }
+#endif
 
     /* Disable the raw IP capability on both IP instances.  */
     status =  nx_ip_raw_packet_disable(&ip_0);
