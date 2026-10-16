@@ -9,6 +9,8 @@
  * SPDX-License-Identifier: MIT
  **************************************************************************/
 
+/* Portions of this file were generated with AI assistance. */
+
 
 /**************************************************************************/
 /**************************************************************************/
@@ -603,6 +605,7 @@ USHORT named_curve;
     i = tls_session -> nx_secure_tls_key_material.nx_secure_tls_ecc_key_data_selected;
     ecdhe_data = &(tls_session -> nx_secure_tls_key_material.nx_secure_tls_ecc_key_data[i]);
     named_curve = (USHORT)(ecdhe_data -> nx_secure_tls_ecdhe_named_curve);
+    named_curve = _nx_secure_tls_brainpool_group_to_wire(named_curve);
     if (tls_session -> nx_secure_tls_server_state == NX_SECURE_TLS_SERVER_STATE_SEND_HELLO_RETRY)
     {
 
@@ -824,5 +827,4 @@ USHORT ext;
     return(NX_SUCCESS);
 }
 #endif
-
 
