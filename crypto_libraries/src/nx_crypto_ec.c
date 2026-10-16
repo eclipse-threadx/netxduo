@@ -2575,8 +2575,9 @@ UINT                  buffer_size;
     /* C = 3 * X1^2 + a * Z1^4; use the shorter form for a = -3 curves. */
     NX_CRYPTO_EC_SQUARE_REDUCE(curve, &projective_point -> nx_crypto_ec_point_z,
                                &temp3, scratch);
-    if ((curve -> nx_crypto_ec_id >= NX_CRYPTO_EC_BRAINPOOLP256r1) &&
-        (curve -> nx_crypto_ec_id <= NX_CRYPTO_EC_BRAINPOOLP512r1))
+    if ((curve -> nx_crypto_ec_id == NX_CRYPTO_EC_BRAINPOOLP256r1) ||
+        (curve -> nx_crypto_ec_id == NX_CRYPTO_EC_BRAINPOOLP384r1) ||
+        (curve -> nx_crypto_ec_id == NX_CRYPTO_EC_BRAINPOOLP512r1))
     {
         NX_CRYPTO_EC_SQUARE_REDUCE(curve, &temp3, &temp4, scratch);
         NX_CRYPTO_EC_MULTIPLE_REDUCE(curve, &temp4, &curve -> nx_crypto_ec_a,
