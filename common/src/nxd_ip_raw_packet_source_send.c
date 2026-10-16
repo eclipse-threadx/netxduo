@@ -109,17 +109,23 @@ UINT  status = NX_SUCCESS;
     {
         packet_ptr -> nx_packet_address.nx_packet_interface_ptr = &(ip_ptr -> nx_ip_interface[address_index]);
 
-        /* Report an unroutable destination before _nx_ip_packet_send consumes
-           the packet.  Forwarding still gets its second route lookup there.  */
+        /* Check both the requested interface and, when forwarding is enabled,
+           the fallback interface before the send consumes the packet.  */
         status = _nx_ip_route_find(ip_ptr, destination_ip -> nxd_ip_address.v4,
                                    &packet_ptr -> nx_packet_address.nx_packet_interface_ptr,
                                    &next_hop_address);
-        if ((status != NX_SUCCESS) && (ip_ptr -> nx_ip_forward_packet_process == NX_NULL))
+        if ((status != NX_SUCCESS) && (ip_ptr -> nx_ip_forward_packet_process != NX_NULL))
+        {
+            packet_ptr -> nx_packet_address.nx_packet_interface_ptr = NX_NULL;
+            status = _nx_ip_route_find(ip_ptr, destination_ip -> nxd_ip_address.v4,
+                                       &packet_ptr -> nx_packet_address.nx_packet_interface_ptr,
+                                       &next_hop_address);
+        }
+        if (status != NX_SUCCESS)
         {
             tx_mutex_put(&(ip_ptr -> nx_ip_protection));
             return(status);
         }
-        status = NX_SUCCESS;
 
         /* If trace is enabled, insert this event into the trace buffer.  */
         NX_TRACE_IN_LINE_INSERT(NX_TRACE_IP_RAW_PACKET_SEND, ip_ptr, packet_ptr, destination_ip, 0, NX_TRACE_IP_EVENTS, 0, 0);
