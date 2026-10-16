@@ -40,3 +40,7 @@ c604b58299dd34d6af4fd2512055378275f362d1
 # 2026-09-15  Normalized the AI disclosure comment to one fixed line per file (#436)
 # 79 files
 e3d5566725301ffbd3b2f3ffa9498c9f0001e76f
+
+# 2026-10-02  Updated the version constants and port strings to 6.5.2.202603 (#468)
+# 68 files
+571677a21478d70b764e8694463cd98486b39579

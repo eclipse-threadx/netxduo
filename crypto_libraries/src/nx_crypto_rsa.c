@@ -215,6 +215,13 @@ NX_CRYPTO_RSA *ctx;
         return(NX_CRYPTO_PTR_ERROR);
     }
 
+    /* The scratch buffer and every output buffer downstream are sized for
+       NX_CRYPTO_MAX_RSA_MODULUS_SIZE, so a larger key cannot be worked with. */
+    if (key_size_in_bits > (NX_CRYPTO_KEY_SIZE)NX_CRYPTO_MAX_RSA_MODULUS_SIZE)
+    {
+        return(NX_CRYPTO_UNSUPPORTED_KEY_SIZE);
+    }
+
     ctx = (NX_CRYPTO_RSA *)crypto_metadata;
 
     ctx -> nx_crypto_rsa_modulus = key;

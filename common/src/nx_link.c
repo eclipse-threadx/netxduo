@@ -728,7 +728,15 @@ UINT nx_link_ethernet_header_parse(NX_PACKET *packet_ptr, ULONG *destination_msb
                                    ULONG *source_msb, ULONG *source_lsb, USHORT *ether_type, USHORT *vlan_tag,
                                    UCHAR *vlan_tag_valid, UINT *header_size)
 {
-UCHAR *data_ptr = packet_ptr -> nx_packet_prepend_ptr;
+UCHAR *data_ptr;
+
+    /* Check for invalid input pointers.  */
+    if (packet_ptr == NX_NULL)
+    {
+        return(NX_PTR_ERROR);
+    }
+
+    data_ptr = packet_ptr -> nx_packet_prepend_ptr;
 
     /* Get destination address.  */
     if (destination_msb && destination_lsb)
@@ -845,6 +853,18 @@ ULONG         header_length;
 ULONG        *ethernet_frame_ptr;
 NX_INTERFACE *interface_ptr;
 USHORT        vlan_tag;
+
+    /* Check for invalid input pointers.  */
+    if ((ip_ptr == NX_NULL) || (ip_ptr -> nx_ip_id != NX_IP_ID) || (packet_ptr == NX_NULL))
+    {
+        return(NX_PTR_ERROR);
+    }
+
+    /* Check for valid interface ID */
+    if (interface_index >= NX_MAX_IP_INTERFACES)
+    {
+        return(NX_INVALID_INTERFACE);
+    }
 
     interface_ptr = &(ip_ptr -> nx_ip_interface[interface_index]);
 
@@ -1298,6 +1318,18 @@ UINT nx_link_vlan_interface_create(NX_IP *ip_ptr, CHAR *interface_name, ULONG ip
 {
 UINT          i;
 NX_INTERFACE *interface_ptr = NX_NULL;
+
+    /* Check for invalid input pointers.  */
+    if ((ip_ptr == NX_NULL) || (ip_ptr -> nx_ip_id != NX_IP_ID) || (interface_index_ptr == NX_NULL))
+    {
+        return(NX_PTR_ERROR);
+    }
+
+    /* Check for valid interface ID */
+    if (parent_interface_index >= NX_MAX_PHYSICAL_INTERFACES)
+    {
+        return(NX_INVALID_INTERFACE);
+    }
 
     tx_mutex_get(&(ip_ptr -> nx_ip_protection), TX_WAIT_FOREVER);
 #ifdef NX_DISABLE_IPV4

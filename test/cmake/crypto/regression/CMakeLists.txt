@@ -56,7 +56,8 @@ endif()
 
 target_include_directories(test_utility PUBLIC ${SOURCE_DIR}/test)
 target_compile_definitions(test_utility PUBLIC BATCH_TEST CTEST)
-if("${CMAKE_BUILD_TYPE}" STREQUAL "fips_build_coverage")
+if((NOT MSVC) AND ("${CMAKE_BUILD_TYPE}" STREQUAL "fips_build_coverage"))
+  # The Linux FIPS build uses the separately built crypto library.
   target_link_libraries(test_utility PUBLIC crypto)
 endif()
 
@@ -69,3 +70,4 @@ foreach(test_case ${crypto_test_cases})
     COMMAND ${test_name}
     WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}/..)
 endforeach()
+# Portions of this file were generated with AI assistance.

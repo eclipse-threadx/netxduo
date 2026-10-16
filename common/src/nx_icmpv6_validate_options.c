@@ -75,9 +75,21 @@ UINT option_len;
     /* Parse all option headers from the ICMPv6 header. */
     /* GHSA-rf32-h832-hg8r:
        Verify that the length is at least 2 to cover nx_icmpv6_option_length and
-       nx_icmpv6_option_type. */
-    while (length > 2)
+       nx_icmpv6_option_type.
+       That bound stopped with one or two bytes still unexamined, and the test after
+       the loop only rejected a negative remainder, so an option area sized to leave
+       such a tail was reported valid. Every consumer then read an option header at
+       that tail. Every byte must be accounted for: the loop runs while any length
+       remains, a remainder too short to hold an option header is rejected inside it,
+       and the area has to divide exactly into whole options. */
+    while (length > 0)
     {
+        /* A remainder this short cannot hold an option header. */
+        if (length < 2)
+        {
+            return(NX_NOT_SUCCESSFUL);
+        }
+
         /* Verify that the option length is not zero. */
         if (option -> nx_icmpv6_option_length == 0)
         {
@@ -100,7 +112,7 @@ UINT option_len;
         option = (NX_ICMPV6_OPTION *)NX_UCHAR_POINTER_ADD(option, option_len);
     }
 
-    if (length < 0)
+    if (length != 0)
     {
 
         /* Invalid packet length. */

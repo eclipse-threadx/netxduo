@@ -1254,7 +1254,7 @@ UINT        status;
     }
 
     /* Store server ptr. */
-    http_server_ptr -> nx_web_http_server_tcpserver.nx_tcpserver_reserved = (ULONG)http_server_ptr;
+    http_server_ptr -> nx_web_http_server_tcpserver.nx_tcpserver_reserved = (ALIGN_TYPE)http_server_ptr;
 
     /* Save the Server name.  */
     http_server_ptr -> nx_web_http_server_name =  http_server_name;

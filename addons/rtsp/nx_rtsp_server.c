@@ -1231,6 +1231,11 @@ NX_PACKET_POOL *pool_ptr = rtsp_client_ptr -> nx_rtsp_client_server_ptr -> nx_rt
 
     if (nx_rtsp_server_response_description_table[i].nx_rtsp_response_code == NX_NULL)
     {
+
+        /* The status code is not one this server can describe. The caller keeps
+           ownership of the response packet it supplied, so this returns without
+           touching it; the internal caller below releases it rather than letting the
+           next request allocate over the only reference. */
         return(NX_RTSP_SERVER_INVALID_PARAMETER);
     }
 
@@ -2399,6 +2404,15 @@ NX_PACKET *rtsp_client_request_packet = rtsp_client_ptr -> nx_rtsp_client_reques
                                NX_TCP_PACKET, NX_RTSP_SERVER_PACKET_TIMEOUT) == NX_SUCCESS)
         {
             _nx_rtsp_server_error_response_send(rtsp_client_ptr, status);
+
+            /* The send path clears this pointer once it has released or sent the packet.
+               If any path ever leaves it set, release it here: the next request would
+               otherwise allocate over the only reference and strand the block. */
+            if (rtsp_client_ptr -> nx_rtsp_client_response_packet)
+            {
+                nx_packet_release(rtsp_client_ptr -> nx_rtsp_client_response_packet);
+                rtsp_client_ptr -> nx_rtsp_client_response_packet = NX_NULL;
+            }
         }
         else
         {
@@ -2754,7 +2768,11 @@ NXD_ADDRESS *receiver_ip_address;
             status = _nx_utility_string_to_uint((CHAR *)field_value_ptr, field_value_length, (UINT *)&(rtsp_client_request_ptr -> nx_rtsp_client_request_session_id));
             if (status)
             {
-                return(status);
+
+                /* Return an RTSP status code, as the other branches of this function do.
+                   A raw conversion error reaching the response path is not a code the
+                   server can describe. */
+                return(NX_RTSP_STATUS_CODE_BAD_REQUEST);
             }
         }
         else if (_nx_rtsp_server_memicmp(field_name_ptr, field_name_length, NX_RTSP_SERVER_STRING_WITH_SIZE("transport")) == NX_SUCCESS)

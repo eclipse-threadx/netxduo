@@ -145,6 +145,24 @@ struct NX_TCP_LISTEN_STRUCT *listen_ptr;
                               socket_ptr -> nx_tcp_socket_connect_ip.nxd_ip_address.v6);
             socket_ptr -> nx_tcp_socket_mss =
                 (ULONG)((interface_ptr -> nx_interface_ip_mtu_size - sizeof(NX_IPV6_HEADER)) - sizeof(NX_TCP_HEADER));
+
+            /* Record the source address for this connection. The ordinary
+               accept path takes it from the arriving SYN's
+               nx_packet_ipv6_address_ptr; there is no packet here, so it is
+               selected for the peer address instead. Without it
+               nx_tcp_socket_ipv6_addr stays NULL, and both
+               _nx_tcp_socket_send_internal and
+               _nx_tcp_socket_driver_packet_receive dereference it without a
+               check.  */
+            if (_nxd_ipv6_interface_find(ip_ptr, ip_address.nxd_ip_address.v6,
+                                         &(socket_ptr -> nx_tcp_socket_ipv6_addr),
+                                         interface_ptr) != NX_SUCCESS)
+            {
+
+                /* Release the IP internal mutex.  */
+                tx_mutex_put(&(ip_ptr -> nx_ip_protection));
+                return(NX_NO_INTERFACE_ADDRESS);
+            }
         }
 #endif /* FEATURE_NX_IPV6 */
 

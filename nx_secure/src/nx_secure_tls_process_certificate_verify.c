@@ -113,6 +113,7 @@ NX_SECURE_EC_PUBLIC_KEY              *ec_pubkey;
 #if (NX_SECURE_TLS_TLS_1_3_ENABLED)
 UINT                                  brainpool_expected_curve = 0u;
 #endif
+UCHAR                                *ecdsa_hash;
 #endif /* NX_SECURE_ENABLE_ECC_CIPHERSUITE */
 
     /*
@@ -781,6 +782,7 @@ UINT                                  brainpool_expected_curve = 0u;
     else if (client_certificate -> nx_secure_x509_public_algorithm == NX_SECURE_TLS_X509_TYPE_EC)
     {
         /* Verify the ECDSA signature. */
+        ecdsa_hash = handshake_hash;
 
 #if (NX_SECURE_TLS_TLS_1_2_ENABLED || NX_SECURE_TLS_TLS_1_3_ENABLED)
 #ifdef NX_SECURE_ENABLE_DTLS
@@ -838,8 +840,9 @@ UINT                                  brainpool_expected_curve = 0u;
             /* Pointer to the received signature that we need to check. */
             received_signature = &packet_buffer[2];
 
-            /* Hash size is the size of SHA-1 (20) + MD5 (16). */
-            data_size = 36;
+            /* ECDSA signs the SHA-1 handshake hash. */
+            ecdsa_hash = &handshake_hash[16];
+            data_size = 20;
         }
 #endif
 
@@ -922,7 +925,7 @@ UINT                                  brainpool_expected_curve = 0u;
                                                              (NX_CRYPTO_METHOD*)public_cipher_method,
                                                              (UCHAR *)ec_pubkey -> nx_secure_ec_public_key,
                                                              (NX_CRYPTO_KEY_SIZE)(ec_pubkey -> nx_secure_ec_public_key_length << 3),
-                                                             handshake_hash,
+                                                             ecdsa_hash,
                                                              data_size,
                                                              NX_NULL,
                                                              received_signature,

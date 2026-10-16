@@ -99,7 +99,21 @@ Content-type: text/parameters\r\n\
 barparam: barstuff\r\n\
 ";
 
+/* A Session header the server cannot convert to a number. Every other header branch
+   maps a parse failure to an RTSP status code; this one returned the raw conversion
+   error, which the response path could not describe, and the response packet was left
+   hooked to the client until the next request allocated over the pointer. */
+static UCHAR rtsp_setup_request_unparsable_session[] = "\
+SETUP rtsp://1.2.3.4:554/live.stream/trackID=0 RTSP/1.0\r\n\
+CSeq: 5\r\n\
+Session: notanumber\r\n\
+User-Agent: LibVLC/3.0.17.4 (LIVE555 Streaming Media v2016.11.28)\r\n\
+Transport: RTP/AVP/TCP;unicast;interleaved=0-1\r\n\r\n\
+";
+
 static UCHAR error_response_461[] = "RTSP/1.0 461 UNSUPPORTED TRANSPORT\r\nCSeq: 5\r\nServer: RTSP Server\r\n\r\n";
+
+static UCHAR error_response_400[] = "RTSP/1.0 400 BAD REQUEST\r\nCSeq: 5\r\nServer: RTSP Server\r\n\r\n";
 
 static UCHAR error_response_454[] = "RTSP/1.0 454 SESSION NOT FOUND\r\nCSeq: 5\r\nServer: RTSP Server\r\n\r\n";
 
@@ -112,6 +126,7 @@ rtsp_setup_request_multicast,
 rtsp_setup_request_unicast_error_id,
 rtsp_setup_request_unicast_no_port,
 rtsp_setup_request_set_parameter,
+rtsp_setup_request_unparsable_session,
 };
 
 static UINT rtsp_request_size[] = 
@@ -121,6 +136,7 @@ sizeof(rtsp_setup_request_multicast) - 1,
 sizeof(rtsp_setup_request_unicast_error_id) - 1,
 sizeof(rtsp_setup_request_unicast_no_port) - 1,
 sizeof(rtsp_setup_request_set_parameter) - 1,
+sizeof(rtsp_setup_request_unparsable_session) - 1,
 };
 
 static UCHAR *rtsp_response_list[] = 
@@ -130,6 +146,7 @@ error_response_461,
 error_response_454,
 error_response_461,
 error_response_458,
+error_response_400,
 };
 
 static UINT rtsp_response_size[] = 
@@ -139,6 +156,7 @@ sizeof(error_response_461) - 1,
 sizeof(error_response_454) - 1,
 sizeof(error_response_461) - 1,
 sizeof(error_response_458) - 1,
+sizeof(error_response_400) - 1,
 };
 
 static UINT rtsp_request_num = sizeof(rtsp_request_size) / sizeof(UINT);
