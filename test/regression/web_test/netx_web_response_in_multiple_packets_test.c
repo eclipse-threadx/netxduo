@@ -98,6 +98,65 @@ static VOID header_callback(NX_WEB_HTTP_CLIENT *client_ptr, CHAR *field_name, UI
 static VOID boundary_header_callback(NX_WEB_HTTP_CLIENT *client_ptr, CHAR *field_name, UINT field_name_length,
                                      CHAR *field_value, UINT field_value_length);
 static VOID test_header_boundaries(VOID);
+static VOID test_header_validation(VOID);
+
+/* Describe a response header and the parser result it must produce.  */
+typedef struct HEADER_CASE_STRUCT
+{
+    const CHAR *data;
+    UINT valid;
+    UINT content_length;
+    UINT chunked;
+} HEADER_CASE;
+
+static const HEADER_CASE header_cases[] =
+{
+    {"HTTP/1.1 200", NX_FALSE, 0, NX_FALSE},
+    {"HTTP/1.1 200 OK\n", NX_FALSE, 0, NX_FALSE},
+    {"HTTP/1.1 200 OK\r", NX_FALSE, 0, NX_FALSE},
+    {"HTTP/1.1 200 OK\rX", NX_FALSE, 0, NX_FALSE},
+    {"HTTP/1.1\r\n", NX_FALSE, 0, NX_FALSE},
+    {"HTTP/x.1 200 OK\r\n\r\n", NX_FALSE, 0, NX_FALSE},
+    {"HTTP//.1 200 OK\r\n\r\n", NX_FALSE, 0, NX_FALSE},
+    {"HTTP/:.1 200 OK\r\n\r\n", NX_FALSE, 0, NX_FALSE},
+    {"HTTP/1.x 200 OK\r\n\r\n", NX_FALSE, 0, NX_FALSE},
+    {"HTTP/1/. 200 OK\r\n\r\n", NX_FALSE, 0, NX_FALSE},
+    {"HTTP/1:. 200 OK\r\n\r\n", NX_FALSE, 0, NX_FALSE},
+    {"HTTP/0.0 200 OK\r\n\r\n", NX_FALSE, 0, NX_FALSE},
+    {"HTTP/1.1 200 OK\r\n", NX_FALSE, 0, NX_FALSE},
+    {"HTTP/1.1 200 OK\r\n\r", NX_FALSE, 0, NX_FALSE},
+    {"HTTP/1.1 200 OK\r\n\rX", NX_FALSE, 0, NX_FALSE},
+    {"HTTP/1.1 200 OK\r\nX", NX_FALSE, 0, NX_FALSE},
+    {"HTTP/1.1 200 OK\r\nX\r\n", NX_FALSE, 0, NX_FALSE},
+    {"HTTP/1.1 200 OK\r\nX\n: a\r\n\r\n", NX_FALSE, 0, NX_FALSE},
+    {"HTTP/1.1 200 OK\r\nX:", NX_FALSE, 0, NX_FALSE},
+    {"HTTP/1.1 200 OK\r\nX:    ", NX_FALSE, 0, NX_FALSE},
+    {"HTTP/1.1 200 OK\r\nX: a", NX_FALSE, 0, NX_FALSE},
+    {"HTTP/1.1 200 OK\r\nX: a\r", NX_FALSE, 0, NX_FALSE},
+    {"HTTP/1.1 200 OK\r\nX: a\n", NX_FALSE, 0, NX_FALSE},
+    {"HTTP/1.1 200 OK\r\nX: a\rX", NX_FALSE, 0, NX_FALSE},
+    {"HTTP/1.1 200 OK\r\nContent-Length: 42949672960\r\n\r\n", NX_TRUE, 0, NX_FALSE},
+    {"HTTP/1.1 200 OK\r\nContent-Lengtx: 5\r\n\r\n", NX_TRUE, 0, NX_FALSE},
+    {"HTTP/1.1 200 OK\r\nContent-Length: 1x\r\n\r\n", NX_TRUE, 0, NX_FALSE},
+    {"HTTP/1.1 200 OK\r\nContent-Length: x\r\n\r\n", NX_TRUE, 0, NX_FALSE},
+    {"HTTP/1.1 200 OK\r\nContent-Length:  5\r\n\r\n", NX_TRUE, 5, NX_FALSE},
+    {"HTTP/1.1 200 OK\r\nContent-Length: 5 6\r\n\r\n", NX_TRUE, 0, NX_FALSE},
+    {"HTTP/1.1 200 OK\r\nContent-Length:    \r\n\r\n", NX_TRUE, 0, NX_FALSE},
+    {"HTTP/1.1 200 OK\r\nContent-Length: 5 \r\n\r\n", NX_TRUE, 5, NX_FALSE},
+    {"HTTP/1.1 200 OK\r\nX-Empty: \r\n\r\n", NX_TRUE, 0, NX_FALSE},
+    {"HTTP/1.1 200 OK\r\nX-Some-Really-Long-Header: x\r\n\r\n", NX_TRUE, 0, NX_FALSE},
+    {"HTTP/1.1 200 OK\r\nTransfer-Encoding: chunked\r\n\r\n", NX_TRUE, 0, NX_TRUE},
+    {"HTTP/1.1 200 OK\r\nTransfer-Encoding: gzip\r\n\r\n", NX_TRUE, 0, NX_FALSE},
+    {"HTTP/1.1 200 OK\r\nTransfer-Encodinh: chunked\r\n\r\n", NX_TRUE, 0, NX_FALSE},
+    {"HTTP/1.1 200 OK\r\nTransfer-Encoding: chunkes\r\n\r\n", NX_TRUE, 0, NX_FALSE},
+    {"HTTP/1.1 200 OK\r\nTransfer-Encoding: ChunkedX\r\n\r\n", NX_TRUE, 0, NX_FALSE},
+    {"HTTP/1.1 200 OK\r\nConnection: keep-alive\r\n\r\n", NX_TRUE, 0, NX_FALSE},
+    {"HTTP/1.1 200 OK\r\nConnectiox: keep-alive\r\n\r\n", NX_TRUE, 0, NX_FALSE},
+    {"HTTP/1.1 200 OK\r\nConnection: keep-alivx\r\n\r\n", NX_TRUE, 0, NX_FALSE},
+    {"HTTP/1.1 200 OK\r\nConnection: closx\r\n\r\n", NX_TRUE, 0, NX_FALSE},
+    {"HTTP/1.1 200 OK\r\nConnection: upgrade\r\n\r\n", NX_TRUE, 0, NX_FALSE},
+    {"HTTP/1.1 200 OK\r\nConnection: close\r\n\r\n", NX_TRUE, 0, NX_FALSE}
+};
 
 static char pkt[] = {
 0x48, 0x54,                                     /* ......HT */
@@ -257,6 +316,109 @@ UINT                offset;
     }
 }
 
+/* Reject malformed response lines and headers without reading past a packet.  */
+static VOID test_header_validation(VOID)
+{
+NX_PACKET          *packet_ptr;
+NX_PACKET          *second_packet;
+NX_WEB_HTTP_CLIENT  client;
+UCHAR               response[NX_WEB_HTTP_MAX_HEADER_FIELD + 80];
+UINT                i;
+UINT                status;
+UINT                offset;
+UINT                length;
+ULONG               data_length;
+const CHAR         *prefix = "HTTP/1.1 200 OK\r\n";
+const CHAR         *suffix = ": a\r\n\r\n";
+
+    for (i = 0; i < (sizeof(header_cases) / sizeof(header_cases[0])); i++)
+    {
+        packet_ptr = NX_NULL;
+        data_length = (ULONG)strlen(header_cases[i].data);
+        if (data_length > sizeof(response))
+        {
+            error_counter++;
+            continue;
+        }
+        memcpy(response, header_cases[i].data, data_length);
+        status = nx_packet_allocate(&client_pool, &packet_ptr, NX_TCP_PACKET, NX_NO_WAIT);
+        if (status == NX_SUCCESS)
+        {
+            status = nx_packet_data_append(packet_ptr, response,
+                                           data_length, &client_pool, NX_NO_WAIT);
+        }
+        if (status != NX_SUCCESS)
+        {
+            error_counter++;
+        }
+        else
+        {
+            memset(&client, 0, sizeof(client));
+            client.nx_web_http_client_response_callback = header_callback;
+            length = _nx_web_http_client_content_length_get(&client, packet_ptr);
+            offset = _nx_web_http_client_process_header_fields(&client, packet_ptr);
+            if (((offset != 0) != (header_cases[i].valid != NX_FALSE)) ||
+                ((offset != 0) && (offset != data_length)) ||
+                (length != header_cases[i].content_length) ||
+                (client.nx_web_http_client_response_chunked != header_cases[i].chunked))
+            {
+                error_counter++;
+            }
+        }
+        if (packet_ptr != NX_NULL)
+        {
+            nx_packet_release(packet_ptr);
+        }
+    }
+
+    data_length = (ULONG)strlen(prefix);
+    memcpy(response, prefix, data_length);
+    memset(response + data_length, 'X', NX_WEB_HTTP_MAX_HEADER_FIELD + 1U);
+    data_length += NX_WEB_HTTP_MAX_HEADER_FIELD + 1U;
+    memcpy(response + data_length, suffix, strlen(suffix));
+    data_length += (ULONG)strlen(suffix);
+    packet_ptr = NX_NULL;
+    second_packet = NX_NULL;
+    status = nx_packet_allocate(&client_pool, &packet_ptr, NX_TCP_PACKET, NX_NO_WAIT);
+    if (status == NX_SUCCESS)
+    {
+        status = nx_packet_allocate(&client_pool, &second_packet, NX_TCP_PACKET, NX_NO_WAIT);
+    }
+    if (status == NX_SUCCESS)
+    {
+        status = nx_packet_data_append(packet_ptr, response, data_length / 2U, &client_pool, NX_NO_WAIT);
+    }
+    if (status == NX_SUCCESS)
+    {
+        status = nx_packet_data_append(second_packet, response + (data_length / 2U),
+                                       data_length - (data_length / 2U), &client_pool, NX_NO_WAIT);
+    }
+    if (status == NX_SUCCESS)
+    {
+        packet_ptr -> nx_packet_next = second_packet;
+        packet_ptr -> nx_packet_last = second_packet;
+        packet_ptr -> nx_packet_length += second_packet -> nx_packet_length;
+        memset(&client, 0, sizeof(client));
+        client.nx_web_http_client_response_callback = header_callback;
+        if (_nx_web_http_client_process_header_fields(&client, packet_ptr) != 0)
+        {
+            error_counter++;
+        }
+    }
+    else
+    {
+        error_counter++;
+    }
+    if (packet_ptr != NX_NULL)
+    {
+        nx_packet_release(packet_ptr);
+    }
+    if ((status != NX_SUCCESS) && (second_packet != NX_NULL))
+    {
+        nx_packet_release(second_packet);
+    }
+}
+
 #ifdef CTEST
 VOID test_application_define(void *first_unused_memory)
 #else
@@ -324,6 +486,7 @@ UINT    status;
         error_counter++;
 
     test_header_boundaries();
+    test_header_validation();
 
     /* Create an IP instance.  */
     status = nx_ip_create(&client_ip, "HTTP Client IP", HTTP_CLIENT_ADDRESS, 
