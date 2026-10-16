@@ -10,6 +10,7 @@ get_filename_component(SOURCE_DIR ${CMAKE_CURRENT_LIST_DIR}/../../../regression
 
 set(nx_secure_test_cases
     ${SOURCE_DIR}/nx_secure_test/nx_secure_tls_session_receive_coverage_test.c
+    ${SOURCE_DIR}/nx_secure_test/nx_secure_tls_1_3_post_handshake_packet_test.c
     ${SOURCE_DIR}/nx_secure_test/nx_secure_tls_send_record_coverage_test.c
     ${SOURCE_DIR}/nx_secure_test/nx_secure_tls_send_record_key_clear_test.c
     ${SOURCE_DIR}/nx_secure_test/nx_secure_tls_client_handshake_coverage_test.c
