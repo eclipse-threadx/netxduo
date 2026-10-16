@@ -262,9 +262,12 @@ UINT        compare_port;
 
     /* A send remains valid in CLOSE_WAIT.  Put this connected socket in that
        state to test the timeout cleanup independently of FIN timing.  */
-    status = nx_packet_release(my_packet);
-    if (status != NX_SUCCESS)
-        error_counter++;
+    if (status == NX_WINDOW_OVERFLOW)
+    {
+        status = nx_packet_release(my_packet);
+        if (status != NX_SUCCESS)
+            error_counter++;
+    }
 
     status = tx_mutex_get(&(ip_0.nx_ip_protection), TX_WAIT_FOREVER);
     if (status == TX_SUCCESS)
@@ -288,7 +291,11 @@ UINT        compare_port;
             if ((status != NX_WINDOW_OVERFLOW) ||
                 (client_socket.nx_tcp_socket_transmit_suspended_count != 0))
                 error_counter++;
-            nx_packet_release(my_packet);
+            if (status == NX_WINDOW_OVERFLOW)
+            {
+                if (nx_packet_release(my_packet) != NX_SUCCESS)
+                    error_counter++;
+            }
         }
         else
             error_counter++;
