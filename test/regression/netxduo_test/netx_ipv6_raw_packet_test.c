@@ -331,12 +331,12 @@ ULONG       source[4];
             status = nx_ip_raw_packet_receive(&ip_1, &my_packet, NX_IP_PERIODIC_RATE);
             if (status == NX_SUCCESS)
             {
+                /* IPv6 receive processing has already converted these words. */
                 ipv6_header = (NX_IPV6_HEADER *)my_packet -> nx_packet_ip_header;
                 source[0] = ipv6_header -> nx_ip_header_source_ip[0];
                 source[1] = ipv6_header -> nx_ip_header_source_ip[1];
                 source[2] = ipv6_header -> nx_ip_header_source_ip[2];
                 source[3] = ipv6_header -> nx_ip_header_source_ip[3];
-                NX_IPV6_ADDRESS_CHANGE_ENDIAN(source);
                 if ((source[0] != 0) || (source[1] != 0) ||
                     (source[2] != 0) || (source[3] != 1))
                 {
