@@ -354,6 +354,14 @@ set(netxduo_test_cases
     ${SOURCE_DIR}/netxduo_test/netx_tcpip_offload_tcp_branch_test.c
     ${SOURCE_DIR}/netxduo_test/netx_tcpip_offload_tcp_ipv6_branch_test.c
     ${SOURCE_DIR}/netxduo_test/netx_tcpip_offload_packet_filter_test.c
+    ${SOURCE_DIR}/netxduo_test/netx_tcp_extended_notify_close_test.c
+    ${SOURCE_DIR}/netxduo_test/netx_http_proxy_tcp_branch_test.c
+    ${SOURCE_DIR}/netxduo_test/netx_tcp_nat_port_verify_test.c
+    ${SOURCE_DIR}/netxduo_test/netx_tcp_peer_segment_test.c
+    ${SOURCE_DIR}/netxduo_test/netx_tcp_queue_depth_partial_ack_test.c
+    ${SOURCE_DIR}/netxduo_test/netx_tcp_vlan_priority_send_test.c
+    ${SOURCE_DIR}/netxduo_test/netx_tcp_peer_info_branch_test.c
+    ${SOURCE_DIR}/netxduo_test/netx_tcp_receive_no_thread_test.c
     ${SOURCE_DIR}/netxduo_test/netx_ipv6_address_delete_tcp_test.c
     ${SOURCE_DIR}/netxduo_test/netx_ipv6_disable_tcp_test.c
     ${SOURCE_DIR}/netxduo_test/netx_tcp_basic_processing_test.c
