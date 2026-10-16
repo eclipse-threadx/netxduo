@@ -105,6 +105,9 @@ typedef struct NX_TCP_SESSION_STRUCT
     NX_SECURE_TLS_SESSION   nx_tcp_session_tls_session;
 #endif
 
+    /* A response stream remains open while it is idle. */
+    UINT                    nx_tcp_session_streaming;
+
 } NX_TCP_SESSION;
 
 /* TCPSERVER structure */
