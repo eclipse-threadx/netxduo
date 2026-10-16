@@ -5696,7 +5696,8 @@ UINT _nxde_mqtt_client_receive_notify_set(NXD_MQTT_CLIENT *client_ptr,
 /*                                                                        */
 /*  CALLS                                                                 */
 /*                                                                        */
-/*    None                                                                */
+/*    tx_mutex_get                                                        */
+/*    tx_mutex_put                                                        */
 /*                                                                        */
 /*  CALLED BY                                                             */
 /*                                                                        */
@@ -5705,8 +5706,17 @@ UINT _nxde_mqtt_client_receive_notify_set(NXD_MQTT_CLIENT *client_ptr,
 /**************************************************************************/
 UINT _nxd_mqtt_client_disconnect_notify_set(NXD_MQTT_CLIENT *client_ptr, VOID (*disconnect_notify)(NXD_MQTT_CLIENT *))
 {
+UINT status;
+
+    status = tx_mutex_get(client_ptr -> nxd_mqtt_client_mutex_ptr, NX_WAIT_FOREVER);
+    if (status != TX_SUCCESS)
+    {
+        return(NXD_MQTT_MUTEX_FAILURE);
+    }
 
     client_ptr -> nxd_mqtt_disconnect_notify = disconnect_notify;
+
+    tx_mutex_put(client_ptr -> nxd_mqtt_client_mutex_ptr);
 
     return(NXD_MQTT_SUCCESS);
 }
