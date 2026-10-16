@@ -9,6 +9,8 @@
 /* SPDX-License-Identifier: MIT                                            */
 /***************************************************************************/
 
+/* Portions of this file were generated with AI assistance. */
+
 /* This NetX test concentrates on the code coverage for IP functions,
  * _nx_ip_deferred_link_status_process.c
  * _nx_ip_interface_detach.c
@@ -375,6 +377,7 @@ static void    thread_0_entry(ULONG thread_input)
 
 ULONG       thread_state;
 NX_PACKET  *my_packet[2];
+UINT        wait_attempts;
 
 #ifdef __PRODUCT_NETXDUO__ 
 NXD_ADDRESS dest_address;
@@ -719,6 +722,40 @@ NX_IPV6_HEADER   *ipv6_header_ptr;
                  pointer, 2048, 1);
     pointer =  pointer + 2048;
 
+    /* Ignore IGMP events until the IGMP queue processor is installed.  */
+    if (ip_0.nx_ip_igmp_queue_process != NX_NULL)
+    {
+        error_counter++;
+    }
+    tx_event_flags_set(&(ip_0.nx_ip_events), NX_IP_IGMP_EVENT, TX_OR);
+    tx_thread_sleep(1);
+    if (ip_0.nx_ip_thread.tx_thread_state == TX_COMPLETED)
+    {
+        error_counter++;
+    }
+
+    /* An interrupted event wait keeps the IP helper thread available.  */
+    for (wait_attempts = 0; wait_attempts < 10; wait_attempts++)
+    {
+        if (ip_0.nx_ip_thread.tx_thread_state == TX_EVENT_FLAG)
+        {
+            if (tx_thread_wait_abort(&(ip_0.nx_ip_thread)) == TX_SUCCESS)
+            {
+                break;
+            }
+        }
+        tx_thread_sleep(1);
+    }
+    if (wait_attempts == 10)
+    {
+        error_counter++;
+    }
+    tx_thread_sleep(1);
+    if (ip_0.nx_ip_thread.tx_thread_state == TX_COMPLETED)
+    {
+        error_counter++;
+    }
+
     /* Hit condition: 394 [ +  - ]: if (!ip_events)  */
     /* Enable TCP.  */
     nx_tcp_enable(&ip_0);
@@ -1050,6 +1087,17 @@ NX_IPV6_HEADER   *ipv6_header_ptr;
 #endif
 
 #endif
+
+    /* A deleted event group stops the IP helper thread.  */
+    if (tx_event_flags_delete(&(ip_0.nx_ip_events)) != TX_SUCCESS)
+    {
+        error_counter++;
+    }
+    tx_thread_sleep(1);
+    if (ip_0.nx_ip_thread.tx_thread_state != TX_COMPLETED)
+    {
+        error_counter++;
+    }
 
     /* Check status.  */
     if (error_counter) 
