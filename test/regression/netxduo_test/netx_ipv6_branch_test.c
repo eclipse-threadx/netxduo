@@ -9,6 +9,8 @@
 /* SPDX-License-Identifier: MIT                                            */
 /***************************************************************************/
 
+// Portions of this file were generated with AI assistance.
+
 /* This NetX test concentrates on the code coverage for IPv6 functions,
  * nx_tcp_connect_cleanup.c
  * nx_tcp_disconnect_cleanup.c
@@ -492,7 +494,7 @@ UINT        address_index;
     ipv6_address.nxd_ip_address.v6[0] = 0xFE800000;
     _nxd_ipv6_interface_find(&ip_0, ipv6_address.nxd_ip_address.v6, &my_packet[0] -> nx_packet_address.nx_packet_ipv6_address_ptr, NX_NULL);
     ip_0.nx_ip_interface[0].nxd_interface_ipv6_address_list_head -> nxd_ipv6_address_state = NX_IPV6_ADDR_STATE_DEPRECATED;
-    _nx_ipv6_header_add(&ip_0, &my_packet[0], NX_PROTOCOL_UDP, 10, 10, NX_NULL, NX_NULL, NX_NULL);
+    _nx_ipv6_header_add(&ip_0, &my_packet[0], NX_PROTOCOL_UDP, 10, 10, 0, NX_NULL, NX_NULL, NX_NULL);
     nx_packet_release(my_packet[0]);
     ip_0.nx_ip_interface[0].nxd_interface_ipv6_address_list_head -> nxd_ipv6_address_state = NX_IPV6_ADDR_STATE_VALID;
 
@@ -590,7 +592,7 @@ NX_IPV6_DESTINATION_ENTRY
         test_packet -> nx_packet_address.nx_packet_ipv6_address_ptr  = NX_NULL;
 
         /* Call function with NULL interface.  */
-        _nxd_ipv6_raw_packet_send_internal(&ip_0, test_packet, &destination_ip, 0);
+        _nxd_ipv6_raw_packet_send_internal(&ip_0, test_packet, &destination_ip, 0, 0);
     }
     else if (assert_count == 1)
     {
@@ -726,7 +728,7 @@ NX_IPV6_DESTINATION_ENTRY
         ipv6_address.nxd_ip_address.v6[0] = 0xFE800000;
         _nxd_ipv6_interface_find(&ip_0, ipv6_address.nxd_ip_address.v6, &test_packet -> nx_packet_address.nx_packet_ipv6_address_ptr, NX_NULL);
         test_packet -> nx_packet_prepend_ptr = test_packet -> nx_packet_data_start - 1;
-        _nx_ipv6_header_add(&ip_0, &test_packet, NX_PROTOCOL_ICMPV6, 10, 10, NX_NULL, NX_NULL, NX_NULL);
+        _nx_ipv6_header_add(&ip_0, &test_packet, NX_PROTOCOL_ICMPV6, 10, 10, 0, NX_NULL, NX_NULL, NX_NULL);
 
     }
     else if (assert_count == 9)
@@ -748,7 +750,7 @@ NX_IPV6_DESTINATION_ENTRY
         test_packet -> nx_packet_append_ptr = test_packet -> nx_packet_prepend_ptr + test_packet -> nx_packet_length;
         _nxd_ipv6_interface_find(&ip_0, ipv6_address.nxd_ip_address.v6, &test_packet -> nx_packet_address.nx_packet_ipv6_address_ptr, NX_NULL);
         ip_0.nx_ipv6_destination_table_size = NX_IPV6_DESTINATION_TABLE_SIZE;
-        _nx_ipv6_packet_send(&ip_0, test_packet, NX_PROTOCOL_UDP, test_packet -> nx_packet_length, ip_0.nx_ipv6_hop_limit, ip_0.nx_ipv6_address[0].nxd_ipv6_address, ipv6_address.nxd_ip_address.v6);
+        _nx_ipv6_packet_send(&ip_0, test_packet, NX_PROTOCOL_UDP, test_packet -> nx_packet_length, ip_0.nx_ipv6_hop_limit, 0, ip_0.nx_ipv6_address[0].nxd_ipv6_address, ipv6_address.nxd_ip_address.v6);
         ip_0.nx_ipv6_destination_table_size = 0;
 
         /* Test _nx_ipv6_packet_send with nx_ipv6_destination_table full for off link destination.  */
@@ -758,7 +760,7 @@ NX_IPV6_DESTINATION_ENTRY
         _nxd_ipv6_interface_find(&ip_0, ipv6_address.nxd_ip_address.v6, &test_packet -> nx_packet_address.nx_packet_ipv6_address_ptr, NX_NULL);
         ipv6_address.nxd_ip_address.v6[0] = 0x20010000;
         ip_0.nx_ipv6_destination_table_size = NX_IPV6_DESTINATION_TABLE_SIZE;
-        _nx_ipv6_packet_send(&ip_0, test_packet, NX_PROTOCOL_UDP, test_packet -> nx_packet_length, ip_0.nx_ipv6_hop_limit, ip_0.nx_ipv6_address[0].nxd_ipv6_address, ipv6_address.nxd_ip_address.v6);
+        _nx_ipv6_packet_send(&ip_0, test_packet, NX_PROTOCOL_UDP, test_packet -> nx_packet_length, ip_0.nx_ipv6_hop_limit, 0, ip_0.nx_ipv6_address[0].nxd_ipv6_address, ipv6_address.nxd_ip_address.v6);
         ip_0.nx_ipv6_destination_table_size = 0;
 
         /* Call _nx_ipv6_packet_send to add ND cache.  */
@@ -767,7 +769,7 @@ NX_IPV6_DESTINATION_ENTRY
         test_packet -> nx_packet_length = 60;
         test_packet -> nx_packet_append_ptr = test_packet -> nx_packet_prepend_ptr + test_packet -> nx_packet_length;
         _nxd_ipv6_interface_find(&ip_0, ipv6_address.nxd_ip_address.v6, &test_packet -> nx_packet_address.nx_packet_ipv6_address_ptr, NX_NULL);
-        _nx_ipv6_packet_send(&ip_0, test_packet, NX_PROTOCOL_UDP, test_packet -> nx_packet_length, ip_0.nx_ipv6_hop_limit, ip_0.nx_ipv6_address[0].nxd_ipv6_address, ipv6_address.nxd_ip_address.v6);
+        _nx_ipv6_packet_send(&ip_0, test_packet, NX_PROTOCOL_UDP, test_packet -> nx_packet_length, ip_0.nx_ipv6_hop_limit, 0, ip_0.nx_ipv6_address[0].nxd_ipv6_address, ipv6_address.nxd_ip_address.v6);
 
         /* Call _nx_ipv6_packet_send to add ND cache.  */
         nx_packet_allocate(&pool_0, &test_packet, NX_IPv6_UDP_PACKET, NX_NO_WAIT);
@@ -775,7 +777,7 @@ NX_IPV6_DESTINATION_ENTRY
         test_packet -> nx_packet_prepend_ptr = test_packet -> nx_packet_data_start + NX_IPv6_UDP_PACKET;
         test_packet -> nx_packet_append_ptr = test_packet -> nx_packet_prepend_ptr + test_packet -> nx_packet_length;
         _nxd_ipv6_interface_find(&ip_0, ipv6_address.nxd_ip_address.v6, &test_packet -> nx_packet_address.nx_packet_ipv6_address_ptr, NX_NULL);
-        _nx_ipv6_packet_send(&ip_0, test_packet, NX_PROTOCOL_UDP, test_packet -> nx_packet_length, ip_0.nx_ipv6_hop_limit, ip_0.nx_ipv6_address[0].nxd_ipv6_address, ipv6_address.nxd_ip_address.v6);
+        _nx_ipv6_packet_send(&ip_0, test_packet, NX_PROTOCOL_UDP, test_packet -> nx_packet_length, ip_0.nx_ipv6_hop_limit, 0, ip_0.nx_ipv6_address[0].nxd_ipv6_address, ipv6_address.nxd_ip_address.v6);
 
         /* Call _nx_ipv6_packet_send with null nx_nd_cache_packet_waiting_head.  */
         nx_packet_allocate(&pool_0, &test_packet, NX_IPv6_UDP_PACKET, NX_NO_WAIT);
@@ -785,7 +787,7 @@ NX_IPV6_DESTINATION_ENTRY
         _nxd_ipv6_interface_find(&ip_0, ipv6_address.nxd_ip_address.v6, &test_packet -> nx_packet_address.nx_packet_ipv6_address_ptr, NX_NULL);
         ip_0.nx_ipv6_nd_cache[2].nx_nd_cache_packet_waiting_head = NX_NULL;
         ip_0.nx_ipv6_nd_cache[2].nx_nd_cache_packet_waiting_queue_length = NX_ND_MAX_QUEUE_DEPTH + 1;
-        _nx_ipv6_packet_send(&ip_0, test_packet, NX_PROTOCOL_UDP, test_packet -> nx_packet_length, ip_0.nx_ipv6_hop_limit, ip_0.nx_ipv6_address[0].nxd_ipv6_address, ipv6_address.nxd_ip_address.v6);
+        _nx_ipv6_packet_send(&ip_0, test_packet, NX_PROTOCOL_UDP, test_packet -> nx_packet_length, ip_0.nx_ipv6_hop_limit, 0, ip_0.nx_ipv6_address[0].nxd_ipv6_address, ipv6_address.nxd_ip_address.v6);
 
 #ifdef NX_ENABLE_IPV6_PATH_MTU_DISCOVERY
         /* Call _nx_ipv6_packet_send with zero nx_ipv6_destination_entry_path_mtu.  */
@@ -796,7 +798,7 @@ NX_IPV6_DESTINATION_ENTRY
         _nxd_ipv6_interface_find(&ip_0, ipv6_address.nxd_ip_address.v6, &test_packet -> nx_packet_address.nx_packet_ipv6_address_ptr, NX_NULL);
         ip_0.nx_ipv6_nd_cache[2].nx_nd_cache_nd_status = ND_CACHE_STATE_REACHABLE;
         ip_0.nx_ipv6_destination_table[0].nx_ipv6_destination_entry_path_mtu = 0;
-        _nx_ipv6_packet_send(&ip_0, test_packet, NX_PROTOCOL_UDP, test_packet -> nx_packet_length, ip_0.nx_ipv6_hop_limit, ip_0.nx_ipv6_address[0].nxd_ipv6_address, ipv6_address.nxd_ip_address.v6);
+        _nx_ipv6_packet_send(&ip_0, test_packet, NX_PROTOCOL_UDP, test_packet -> nx_packet_length, ip_0.nx_ipv6_hop_limit, 0, ip_0.nx_ipv6_address[0].nxd_ipv6_address, ipv6_address.nxd_ip_address.v6);
 
         /* Call _nx_ipv6_packet_send with null nx_interface_link_driver_entry.  */
         ip_0.nx_ip_interface[0].nx_interface_link_driver_entry = NX_NULL;
@@ -806,7 +808,7 @@ NX_IPV6_DESTINATION_ENTRY
         test_packet -> nx_packet_append_ptr = test_packet -> nx_packet_prepend_ptr + test_packet -> nx_packet_length;
         _nxd_ipv6_interface_find(&ip_0, ipv6_address.nxd_ip_address.v6, &test_packet -> nx_packet_address.nx_packet_ipv6_address_ptr, NX_NULL);
         ip_0.nx_ipv6_destination_table[0].nx_ipv6_destination_entry_path_mtu = 256;
-        _nx_ipv6_packet_send(&ip_0, test_packet, NX_PROTOCOL_UDP, test_packet -> nx_packet_length, ip_0.nx_ipv6_hop_limit, ip_0.nx_ipv6_address[0].nxd_ipv6_address, ipv6_address.nxd_ip_address.v6);
+        _nx_ipv6_packet_send(&ip_0, test_packet, NX_PROTOCOL_UDP, test_packet -> nx_packet_length, ip_0.nx_ipv6_hop_limit, 0, ip_0.nx_ipv6_address[0].nxd_ipv6_address, ipv6_address.nxd_ip_address.v6);
 #endif
 
     }
@@ -832,7 +834,7 @@ NX_IPV6_DESTINATION_ENTRY
         ipv6_address2 = *test_packet -> nx_packet_address.nx_packet_ipv6_address_ptr;
         ipv6_address2.nxd_ipv6_address_attached = NX_NULL;
         test_packet -> nx_packet_address.nx_packet_ipv6_address_ptr = &ipv6_address2;
-        _nx_ipv6_packet_send(&ip_0, test_packet, NX_PROTOCOL_UDP, test_packet -> nx_packet_length, ip_0.nx_ipv6_hop_limit, ip_0.nx_ipv6_address[0].nxd_ipv6_address, ipv6_address.nxd_ip_address.v6);
+        _nx_ipv6_packet_send(&ip_0, test_packet, NX_PROTOCOL_UDP, test_packet -> nx_packet_length, ip_0.nx_ipv6_hop_limit, 0, ip_0.nx_ipv6_address[0].nxd_ipv6_address, ipv6_address.nxd_ip_address.v6);
 
     }
     else if (assert_count == 11)
@@ -860,7 +862,7 @@ NX_IPV6_DESTINATION_ENTRY
                                   test_packet -> nx_packet_address.nx_packet_ipv6_address_ptr);
         dest_entry_ptr -> nx_ipv6_destination_entry_nd_entry -> nx_nd_cache_nd_status = ND_CACHE_STATE_INVALID;
 
-        _nx_ipv6_packet_send(&ip_0, test_packet, NX_PROTOCOL_UDP, test_packet -> nx_packet_length, ip_0.nx_ipv6_hop_limit, ip_0.nx_ipv6_address[0].nxd_ipv6_address, ipv6_address.nxd_ip_address.v6);
+        _nx_ipv6_packet_send(&ip_0, test_packet, NX_PROTOCOL_UDP, test_packet -> nx_packet_length, ip_0.nx_ipv6_hop_limit, 0, ip_0.nx_ipv6_address[0].nxd_ipv6_address, ipv6_address.nxd_ip_address.v6);
     }
 
 }

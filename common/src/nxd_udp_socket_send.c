@@ -9,6 +9,8 @@
  * SPDX-License-Identifier: MIT
  **************************************************************************/
 
+// Portions of this file were generated with AI assistance.
+
 
 /**************************************************************************/
 /**************************************************************************/
@@ -129,6 +131,7 @@ UINT            packet_reset = NX_FALSE;
             if (_nx_ipv6_header_add(ip_ptr, &packet_ptr, NX_PROTOCOL_UDP,
                                     packet_ptr -> nx_packet_length,
                                     ip_ptr -> nx_ipv6_hop_limit,
+                                    0,
                                     ip_src_address -> nxd_ip_address.v6,
                                     ip_dst_address -> nxd_ip_address.v6, NX_NULL))
             {
@@ -612,7 +615,7 @@ UINT           compute_checksum = 1;
 
         /* Set the source IPv6 address */
         _nx_ipv6_packet_send(ip_ptr, packet_ptr, NX_PROTOCOL_UDP,
-                             packet_ptr -> nx_packet_length, ip_ptr -> nx_ipv6_hop_limit,
+                             packet_ptr -> nx_packet_length, ip_ptr -> nx_ipv6_hop_limit, 0,
                              ip_src_addr,
                              ip_dest_addr);
     }

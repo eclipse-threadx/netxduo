@@ -9,6 +9,8 @@
  * SPDX-License-Identifier: MIT
  **************************************************************************/
 
+// Portions of this file were generated with AI assistance.
+
 
 /**************************************************************************/
 /**************************************************************************/
@@ -368,7 +370,7 @@ UINT            compute_checksum = 1;
 
     /* Send the ICMP packet to the IP component.  */
     _nx_ipv6_packet_send(ip_ptr, request_ptr, NX_PROTOCOL_ICMPV6,
-                         request_ptr -> nx_packet_length, ip_ptr -> nx_ipv6_hop_limit,
+                         request_ptr -> nx_packet_length, ip_ptr -> nx_ipv6_hop_limit, 0,
                          ipv6_address -> nxd_ipv6_address,
                          ip_address -> nxd_ip_address.v6);
 
