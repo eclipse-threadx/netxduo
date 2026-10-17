@@ -295,6 +295,7 @@ set(netxduo_test_cases
     ${SOURCE_DIR}/netxduo_test/netx_igmp_basic_test.c
     ${SOURCE_DIR}/netxduo_test/netx_14_19_test.c
     ${SOURCE_DIR}/netxduo_test/netx_ipv6_address_delete_test.c
+    ${SOURCE_DIR}/netxduo_test/netx_ipv6_address_delete_tcp_test.c
     ${SOURCE_DIR}/netxduo_test/netx_2_20_test.c
     ${SOURCE_DIR}/netxduo_test/netx_arp_no_duplicate_entry_test.c
     ${SOURCE_DIR}/netxduo_test/netx_ip_raw_loopback_test.c
@@ -361,6 +362,7 @@ set(netxduo_test_cases
     ${SOURCE_DIR}/netxduo_test/netx_ip_nxe_api_test.c
     ${SOURCE_DIR}/netxduo_test/netx_tcp_socket_listen_test.c
     ${SOURCE_DIR}/netxduo_test/netx_ipv6_disable_test.c
+    ${SOURCE_DIR}/netxduo_test/netx_ipv6_disable_tcp_test.c
     ${SOURCE_DIR}/netxduo_test/netx_icmp_multiple_ping6_test1.c
     ${SOURCE_DIR}/netxduo_test/netx_ip_address_get_test.c
     ${SOURCE_DIR}/netxduo_test/netx_10_24_02_test.c
