@@ -9,6 +9,8 @@
 /* SPDX-License-Identifier: MIT                                            */
 /***************************************************************************/
 
+// Portions of this file were generated with AI assistance.
+
 /* This NetX test concentrates on the raw packet IPv6 send/receive operation.  */
 
 #include   "tx_api.h"
@@ -35,12 +37,38 @@ static NX_IP                   ip_1;
 /* Define the counters used in the test application...  */
 
 static ULONG                   error_counter;
+static ULONG                   raw_hop_limits[3];
+static UINT                    raw_packet_count;
 
 /* Define thread prototypes.  */
 
 static void    ntest_0_entry(ULONG thread_input);
 static void    ntest_1_entry(ULONG thread_input);
 extern void    _nx_ram_network_driver_1500(struct NX_IP_DRIVER_STRUCT *driver_req);
+static void    raw_packet_driver(struct NX_IP_DRIVER_STRUCT *driver_req);
+
+static void raw_packet_driver(struct NX_IP_DRIVER_STRUCT *driver_req)
+{
+NX_PACKET *packet_ptr;
+UCHAR     *header;
+
+    if (driver_req -> nx_ip_driver_command == NX_LINK_PACKET_SEND)
+    {
+        packet_ptr = driver_req -> nx_ip_driver_packet;
+        header = packet_ptr -> nx_packet_prepend_ptr;
+        if ((packet_ptr -> nx_packet_length >= 40) &&
+            ((header[0] >> 4) == 6) && (header[6] == (NX_IP_RAW >> 16)))
+        {
+            if (raw_packet_count < 3)
+            {
+                raw_hop_limits[raw_packet_count] = header[7];
+            }
+            raw_packet_count++;
+        }
+    }
+
+    _nx_ram_network_driver_1500(driver_req);
+}
 
 
 static NXD_ADDRESS  ipv6_addr_0;
@@ -91,7 +119,7 @@ UINT    status;
     if (status != NX_SUCCESS)
         error_counter++;
 
-    status = nx_ip_create(&ip_1, "NetX IP Instance 1", IP_ADDRESS(1, 2, 3, 10), 0xFFFFFF00UL, &pool_0, _nx_ram_network_driver_1500,
+    status = nx_ip_create(&ip_1, "NetX IP Instance 1", IP_ADDRESS(1, 2, 3, 10), 0xFFFFFF00UL, &pool_0, raw_packet_driver,
                     pointer, 2048, 1);
     pointer = pointer + 2048;
     if (status != NX_SUCCESS)
@@ -299,7 +327,7 @@ NXD_ADDRESS dest_addr;
         error_counter++;
 
     /* Send the raw IP packet.  */
-    status =  nxd_ip_raw_packet_send(&ip_1, my_packet, &ipv6_addr_0, NX_IP_RAW >> 16, 0x80, NX_IP_NORMAL);
+    status =  nxd_ip_raw_packet_send(&ip_1, my_packet, &ipv6_addr_0, NX_IP_RAW >> 16, 1, NX_IP_NORMAL);
 
     /* Check status.  */
     if (status != NX_SUCCESS)
@@ -347,7 +375,7 @@ NXD_ADDRESS dest_addr;
 
     
     /* Send the third raw IP packet.  */
-    status =  nxd_ip_raw_packet_send(&ip_1, my_packet, &ipv6_addr_0, NX_IP_RAW >> 16, 0x80, NX_IP_NORMAL);
+    status =  nxd_ip_raw_packet_send(&ip_1, my_packet, &ipv6_addr_0, NX_IP_RAW >> 16, 2, NX_IP_NORMAL);
 
     /* Check status.  */
     if (status != NX_SUCCESS)
@@ -366,13 +394,18 @@ NXD_ADDRESS dest_addr;
         error_counter++;
 
     /* Send the raw IP packet using API without error checking.  */
-    status =  _nxd_ip_raw_packet_send(&ip_1, my_packet, &ipv6_addr_0, NX_IP_RAW >> 16, 0x80, NX_IP_NORMAL);
+    status =  _nxd_ip_raw_packet_send(&ip_1, my_packet, &ipv6_addr_0, NX_IP_RAW >> 16, 0, NX_IP_NORMAL);
 
     /* Check status.  */
     if (status != NX_SUCCESS)
         error_counter++;
 
     tx_thread_sleep(3 * NX_IP_PERIODIC_RATE);
+
+    if ((raw_packet_count != 3) || (raw_hop_limits[0] != 1) ||
+        (raw_hop_limits[1] != 2) ||
+        (raw_hop_limits[2] != ip_1.nx_ipv6_hop_limit))
+        error_counter++;
 
     status =  nx_ip_raw_packet_disable(&ip_0);
 

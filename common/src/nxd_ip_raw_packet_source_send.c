@@ -9,6 +9,8 @@
  * SPDX-License-Identifier: MIT
  **************************************************************************/
 
+// Portions of this file were generated with AI assistance.
+
 
 /**************************************************************************/
 /**************************************************************************/
@@ -90,7 +92,9 @@ ULONG next_hop_address = NX_NULL;
 UINT  status = NX_SUCCESS;
 
 #ifdef NX_DISABLE_IPV4
+#ifndef FEATURE_NX_IPV6
     NX_PARAMETER_NOT_USED(ttl);
+#endif /* FEATURE_NX_IPV6 */
     NX_PARAMETER_NOT_USED(tos);
 #endif /* NX_DISABLE_IPV4 */
 
@@ -125,7 +129,7 @@ UINT  status = NX_SUCCESS;
     {
         packet_ptr -> nx_packet_address.nx_packet_ipv6_address_ptr = &(ip_ptr -> nx_ipv6_address[address_index]);
 
-        status =  _nxd_ipv6_raw_packet_send_internal(ip_ptr, packet_ptr, destination_ip, protocol);
+        status =  _nxd_ipv6_raw_packet_send_internal(ip_ptr, packet_ptr, destination_ip, protocol, ttl);
     }
 #endif /* FEATURE_NX_IPV6 */
 
