@@ -1,5 +1,6 @@
 /***************************************************************************
  * Copyright (c) 2024 Microsoft Corporation 
+ * Copyright (c) 2026 Eclipse ThreadX contributors
  * 
  * This program and the accompanying materials are made available under the
  * terms of the MIT License which is available at
@@ -7,6 +8,8 @@
  * 
  * SPDX-License-Identifier: MIT
  **************************************************************************/
+
+// Portions of this file were generated with AI assistance.
 
 /* This NetX test concentrates on the code coverage for IP functions,
  * _nx_ip_deferred_link_status_process.c
@@ -475,6 +478,11 @@ NX_IPV6_HEADER   *ipv6_header_ptr;
 #ifdef FEATURE_NX_IPV6 
     /* Hit condition of if (ip_version == NX_IP_VERSION_V4 && ip_ptr -> nx_ipv4_packet_receive) and if (ip_version == NX_IP_VERSION_V6 && ip_ptr -> nx_ipv6_packet_receive) in _nx_ip_packet_receive().  */
     nx_packet_allocate(&pool_0, &my_packet[0], 0, NX_NO_WAIT);
+
+    /* The packet must be as long as an IPv4 header, or _nx_ip_packet_receive
+       drops it before the version check this part is here to reach. */
+    my_packet[0] -> nx_packet_length = 20;
+    my_packet[0] -> nx_packet_append_ptr = my_packet[0] -> nx_packet_prepend_ptr + 20;
     *(my_packet[0] -> nx_packet_prepend_ptr) = NX_IP_VERSION_V4 << 4;
     ip_0.nx_ipv4_packet_receive = NX_NULL;
     _nx_ip_packet_receive(&ip_0, my_packet[0]);
