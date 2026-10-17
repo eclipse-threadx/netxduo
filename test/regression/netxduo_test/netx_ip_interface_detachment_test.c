@@ -1,5 +1,6 @@
 /***************************************************************************
  * Copyright (c) 2024 Microsoft Corporation 
+ * Copyright (c) 2026 Eclipse ThreadX contributors
  * 
  * This program and the accompanying materials are made available under the
  * terms of the MIT License which is available at
@@ -7,6 +8,8 @@
  * 
  * SPDX-License-Identifier: MIT
  **************************************************************************/
+
+// Portions of this file were generated with AI assistance.
 
 
 
@@ -293,13 +296,53 @@ static void    ntest_1_entry(ULONG thread_input)
 {
 
 UINT    status;
+#ifdef NX_ENABLE_IP_STATIC_ROUTING
+UINT    route;
+#endif
 
     tx_mutex_get(&mutex_0, TX_WAIT_FOREVER);
+
+#ifdef NX_ENABLE_IP_STATIC_ROUTING
+    /* Fill the route table before detaching.  Its original route uses the
+       second interface; keep one route through the primary interface, then
+       add adjacent second-interface routes.  This exercises both the last
+       table entry and routes shifted into the slot being examined. */
+    status = nx_ip_static_route_add(&ip_1, IP_ADDRESS(10, 1, 0, 0),
+                                    0xFFFFFF00UL, IP_ADDRESS(1, 2, 3, 6));
+    if (status != NX_SUCCESS)
+    {
+        error_counter++;
+    }
+    for (route = 2; route < NX_IP_ROUTING_TABLE_SIZE; route++)
+    {
+        status = nx_ip_static_route_add(&ip_1, IP_ADDRESS(10, route, 0, 0),
+                                        0xFFFFFF00UL, IP_ADDRESS(4, 3, 2, 10));
+        if (status != NX_SUCCESS)
+        {
+            error_counter++;
+        }
+    }
+    if (ip_1.nx_ip_routing_table_entry_count != NX_IP_ROUTING_TABLE_SIZE)
+    {
+        error_counter++;
+    }
+#endif
 
     /* Detach the 2nd interface(4.3.2.11) from IP instance1. */
     status = nx_ip_interface_detach(&ip_1, 1);
     if(status)
         error_counter++;
+
+#ifdef NX_ENABLE_IP_STATIC_ROUTING
+    /* Every route through the detached interface must be gone.  The route
+       through the primary interface must survive in the compacted slot. */
+    if ((ip_1.nx_ip_routing_table_entry_count != 1) ||
+        (ip_1.nx_ip_routing_table[0].nx_ip_routing_dest_ip != IP_ADDRESS(10, 1, 0, 0)) ||
+        (ip_1.nx_ip_routing_table[0].nx_ip_routing_entry_ip_interface != &ip_1.nx_ip_interface[0]))
+    {
+        error_counter++;
+    }
+#endif
 
     tx_mutex_put(&mutex_0);
     tx_thread_sleep(1);

@@ -151,7 +151,9 @@ NX_IPV6_DEFAULT_ROUTER_ENTRY *rt_entry;
 #ifndef NX_DISABLE_IPV4
 #ifdef NX_ENABLE_IP_STATIC_ROUTING
     /* Remove router iterms associated with the interface that will be detached from route table. */
-    for (i = 0; i < ip_ptr -> nx_ip_routing_table_entry_count; i++)
+    /* Stop at the last entry and recheck the slot after a removal, because
+       the next route has shifted into it. */
+    for (i = 0; i < ip_ptr -> nx_ip_routing_table_entry_count; )
     {
 
         /* Is this router iterm related to the interface to be detached. */
@@ -160,7 +162,7 @@ NX_IPV6_DEFAULT_ROUTER_ENTRY *rt_entry;
 
             /* Yes, we need to remove this iterm. */
             /* If the entry is not the last one, we need to shift the table to fill the hole. */
-            for (j = i; j < ip_ptr -> nx_ip_routing_table_entry_count; j++)
+            for (j = i; (j + 1) < ip_ptr -> nx_ip_routing_table_entry_count; j++)
             {
                 ip_ptr -> nx_ip_routing_table[j].nx_ip_routing_dest_ip            =
                     ip_ptr -> nx_ip_routing_table[j + 1].nx_ip_routing_dest_ip;
@@ -172,12 +174,16 @@ NX_IPV6_DEFAULT_ROUTER_ENTRY *rt_entry;
                     ip_ptr -> nx_ip_routing_table[j + 1].nx_ip_routing_entry_ip_interface;
             }
 
-            ip_ptr -> nx_ip_routing_table[j - 1].nx_ip_routing_dest_ip            = 0;
-            ip_ptr -> nx_ip_routing_table[j - 1].nx_ip_routing_net_mask           = 0;
-            ip_ptr -> nx_ip_routing_table[j - 1].nx_ip_routing_next_hop_address   = 0;
-            ip_ptr -> nx_ip_routing_table[j - 1].nx_ip_routing_entry_ip_interface = NX_NULL;
+            ip_ptr -> nx_ip_routing_table[j].nx_ip_routing_dest_ip            = 0;
+            ip_ptr -> nx_ip_routing_table[j].nx_ip_routing_net_mask           = 0;
+            ip_ptr -> nx_ip_routing_table[j].nx_ip_routing_next_hop_address   = 0;
+            ip_ptr -> nx_ip_routing_table[j].nx_ip_routing_entry_ip_interface = NX_NULL;
 
             ip_ptr -> nx_ip_routing_table_entry_count--;
+        }
+        else
+        {
+            i++;
         }
     }
 #endif /* NX_ENABLE_IP_STATIC_ROUTING  */
