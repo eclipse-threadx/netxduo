@@ -427,6 +427,7 @@ set(netxduo_test_cases
     ${SOURCE_DIR}/netxduo_test/netx_tcp_overlapping_packet_test_4.c
     ${SOURCE_DIR}/netxduo_test/netx_nd_cache_nxe_api_test.c
     ${SOURCE_DIR}/netxduo_test/netx_ipv6_interface_detachment_router_test.c
+    ${SOURCE_DIR}/netxduo_test/netx_ipv6_interface_detachment_address_index_test.c
     ${SOURCE_DIR}/netxduo_test/netx_tcp_client_bind_cleanup_test.c
     ${SOURCE_DIR}/netxduo_test/netx_tcp_new_reno_algorithm_test2.c
     ${SOURCE_DIR}/netxduo_test/netx_tcp_out_of_order_packet_test.c
