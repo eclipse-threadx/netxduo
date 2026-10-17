@@ -1322,11 +1322,16 @@ NX_PACKET   *tmp_ptr;
 /* Move the response head to the first body byte and release header packets.  */
 static NX_PACKET *_nx_web_http_client_response_header_trim(NX_PACKET *packet_ptr, UINT offset)
 {
+#ifndef NX_DISABLE_PACKET_CHAIN
 NX_PACKET *next_packet_ptr;
 NX_PACKET *last_packet_ptr = packet_ptr -> nx_packet_last;
+#endif /* NX_DISABLE_PACKET_CHAIN */
 ULONG      remaining_length = packet_ptr -> nx_packet_length - offset;
+#ifndef NX_DISABLE_PACKET_CHAIN
 ULONG      fragment_length;
+#endif /* NX_DISABLE_PACKET_CHAIN */
 
+#ifndef NX_DISABLE_PACKET_CHAIN
     fragment_length = (ULONG)(packet_ptr -> nx_packet_append_ptr - packet_ptr -> nx_packet_prepend_ptr);
     while ((offset >= fragment_length) && (packet_ptr -> nx_packet_next != NX_NULL))
     {
@@ -1337,10 +1342,13 @@ ULONG      fragment_length;
         packet_ptr = next_packet_ptr;
         fragment_length = (ULONG)(packet_ptr -> nx_packet_append_ptr - packet_ptr -> nx_packet_prepend_ptr);
     }
+#endif /* NX_DISABLE_PACKET_CHAIN */
 
     packet_ptr -> nx_packet_prepend_ptr += offset;
     packet_ptr -> nx_packet_length = remaining_length;
+#ifndef NX_DISABLE_PACKET_CHAIN
     packet_ptr -> nx_packet_last = last_packet_ptr;
+#endif /* NX_DISABLE_PACKET_CHAIN */
     return(packet_ptr);
 }
 
@@ -1377,7 +1385,11 @@ ULONG      copy_length;
             memcpy(buffer + copied, current_packet_ptr -> nx_packet_prepend_ptr, copy_length);
             copied += copy_length;
         }
+#ifndef NX_DISABLE_PACKET_CHAIN
         current_packet_ptr = current_packet_ptr -> nx_packet_next;
+#else
+        current_packet_ptr = NX_NULL;
+#endif /* NX_DISABLE_PACKET_CHAIN */
     }
 
     if (copied != 12U)
@@ -5740,7 +5752,11 @@ static UINT _nx_web_http_client_header_byte_get(NX_WEB_HTTP_CLIENT_HEADER_CURSOR
     while ((cursor -> packet_ptr != NX_NULL) &&
            (cursor -> data_ptr == cursor -> packet_ptr -> nx_packet_append_ptr))
     {
+#ifndef NX_DISABLE_PACKET_CHAIN
         cursor -> packet_ptr = cursor -> packet_ptr -> nx_packet_next;
+#else
+        cursor -> packet_ptr = NX_NULL;
+#endif /* NX_DISABLE_PACKET_CHAIN */
         if (cursor -> packet_ptr != NX_NULL)
         {
             cursor -> data_ptr = cursor -> packet_ptr -> nx_packet_prepend_ptr;
