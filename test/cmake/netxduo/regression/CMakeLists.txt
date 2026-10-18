@@ -370,6 +370,8 @@ set(netxduo_test_cases
     ${SOURCE_DIR}/netxduo_test/netx_ip_single_family_test.c
     ${SOURCE_DIR}/netxduo_test/netx_ip_static_route_mask_test.c
     ${SOURCE_DIR}/netxduo_test/netx_ip_address_notify_branch_test.c
+    ${SOURCE_DIR}/netxduo_test/netx_ip_nat_hook_test.c
+    ${SOURCE_DIR}/netxduo_test/netx_ip_raw_filter_all_stack_test.c
     ${SOURCE_DIR}/netxduo_test/netx_tcp_basic_processing_test.c
     ${SOURCE_DIR}/netxduo_test/netx_3_21_test.c
     ${SOURCE_DIR}/netxduo_test/netx_arp_basic_test.c
