@@ -88,17 +88,6 @@ NXD_IPV6_ADDRESS *address_ptr;
 
     /* Indicate the DAD process is disabled. */
     ipv6_address -> nxd_ipv6_address_DupAddrDetectTransmit = 0;
-#ifdef NX_ENABLE_IPV6_ADDRESS_CHANGE_NOTIFY
-    if (ip_ptr -> nx_ipv6_address_change_notify)
-    {
-        ipv6_addr_index = (ULONG)ipv6_address -> nxd_ipv6_address_index;
-        interface_index = (ULONG)ipv6_address -> nxd_ipv6_address_attached -> nx_interface_index;
-        ip_ptr -> nx_ipv6_address_change_notify(ip_ptr, NX_IPV6_ADDRESS_DAD_FAILURE, interface_index, ipv6_addr_index, &ipv6_address -> nxd_ipv6_address[0]);
-    }
-#else
-    NX_PARAMETER_NOT_USED(ip_ptr);
-#endif /* NX_ENABLE_IPV6_ADDRESS_CHANGE_NOTIFY */
-
     /* Remove address from interface. */
     if (ipv6_address == ipv6_address -> nxd_ipv6_address_attached -> nxd_interface_ipv6_address_list_head)
     {
@@ -117,6 +106,20 @@ NXD_IPV6_ADDRESS *address_ptr;
             }
         }
     }
+
+    /* Notify the application only now that the address is off the interface's
+       list: the callback runs on the IP thread and may send, and a send must
+       not find an invalid address at the head of that list. */
+#ifdef NX_ENABLE_IPV6_ADDRESS_CHANGE_NOTIFY
+    if (ip_ptr -> nx_ipv6_address_change_notify)
+    {
+        ipv6_addr_index = (ULONG)ipv6_address -> nxd_ipv6_address_index;
+        interface_index = (ULONG)ipv6_address -> nxd_ipv6_address_attached -> nx_interface_index;
+        ip_ptr -> nx_ipv6_address_change_notify(ip_ptr, NX_IPV6_ADDRESS_DAD_FAILURE, interface_index, ipv6_addr_index, &ipv6_address -> nxd_ipv6_address[0]);
+    }
+#else
+    NX_PARAMETER_NOT_USED(ip_ptr);
+#endif /* NX_ENABLE_IPV6_ADDRESS_CHANGE_NOTIFY */
 }
 
 #endif  /* NX_DISABLE_IPV6_DAD */
