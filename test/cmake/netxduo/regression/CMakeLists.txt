@@ -367,6 +367,7 @@ set(netxduo_test_cases
     ${SOURCE_DIR}/netxduo_test/netx_link_branch_test.c
     ${SOURCE_DIR}/netxduo_test/netx_ip_receive_no_thread_test.c
     ${SOURCE_DIR}/netxduo_test/netx_ip_receive_interrupt_send_test.c
+    ${SOURCE_DIR}/netxduo_test/netx_ip_single_family_test.c
     ${SOURCE_DIR}/netxduo_test/netx_tcp_basic_processing_test.c
     ${SOURCE_DIR}/netxduo_test/netx_3_21_test.c
     ${SOURCE_DIR}/netxduo_test/netx_arp_basic_test.c
