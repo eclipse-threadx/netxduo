@@ -477,10 +477,15 @@ NX_IPV6_HEADER   *ipv6_header_ptr;
 
 #ifdef FEATURE_NX_IPV6 
     /* Hit condition of if (ip_version == NX_IP_VERSION_V4 && ip_ptr -> nx_ipv4_packet_receive) and if (ip_version == NX_IP_VERSION_V6 && ip_ptr -> nx_ipv6_packet_receive) in _nx_ip_packet_receive().  */
+    /* A packet shorter than an IPv4 header is dropped before its version is
+       read. */
+    nx_packet_allocate(&pool_0, &my_packet[1], 0, NX_NO_WAIT);
+    _nx_ip_packet_receive(&ip_0, my_packet[1]);
+
     nx_packet_allocate(&pool_0, &my_packet[0], 0, NX_NO_WAIT);
 
-    /* The packet must be as long as an IPv4 header, or _nx_ip_packet_receive
-       drops it before the version check this part is here to reach. */
+    /* This one must be as long as an IPv4 header, or _nx_ip_packet_receive
+       drops it the same way before the version check it is here to reach. */
     my_packet[0] -> nx_packet_length = 20;
     my_packet[0] -> nx_packet_append_ptr = my_packet[0] -> nx_packet_prepend_ptr + 20;
     *(my_packet[0] -> nx_packet_prepend_ptr) = NX_IP_VERSION_V4 << 4;
