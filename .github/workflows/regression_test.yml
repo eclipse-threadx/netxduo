@@ -263,8 +263,8 @@ jobs:
     # intermittent tests failed in each. They rise as gaps are closed.
     - name: Merge the certified coverage
       env:
-        NX_COVERAGE_MIN_LINE: "98.94"
-        NX_COVERAGE_MIN_BRANCH: "97.83"
+        NX_COVERAGE_MIN_LINE: "99.00"
+        NX_COVERAGE_MIN_BRANCH: "97.86"
       run: |
         set -o pipefail
         TRACEFILE_DIR=$GITHUB_WORKSPACE/tracefiles \
