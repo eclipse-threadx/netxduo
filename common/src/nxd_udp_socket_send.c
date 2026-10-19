@@ -422,6 +422,12 @@ UINT           compute_checksum = 1;
                 return(status);
             }
         }
+        else if (packet_ptr -> nx_packet_address.nx_packet_ipv6_address_ptr -> nxd_ipv6_address_state != NX_IPV6_ADDR_STATE_VALID)
+        {
+
+            /* The packet carries the address it was received on, which is no longer valid.  */
+            return(NX_NO_INTERFACE_ADDRESS);
+        }
 
         /* Fill in the IP src/dest address */
         ip_dest_addr = &ip_address -> nxd_ip_address.v6[0];
