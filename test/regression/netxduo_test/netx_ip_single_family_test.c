@@ -24,7 +24,11 @@
 
    With IPv4 built out it also asks the services that remain for what they
    answer about IPv6: the largest payload that fits an IPv6 address's link,
-   and an interface's information. */
+   and an interface's information. It then deletes a neighbour cache entry it
+   has set, and extracts the source of an IPv6 UDP datagram it has received.
+
+   With IPv6 built out the neighbour cache services and the router
+   advertisement flag callback refuse as well. */
 
 #include   "tx_api.h"
 #include   "nx_api.h"
@@ -36,6 +40,8 @@ extern void    test_control_return(UINT status);
 
 #ifndef NX_DISABLE_IPV4
 #include   "nx_ipv6.h"
+#include   "nx_nd_cache.h"
+#include   "nx_icmpv6.h"
 #else
 #include   "nx_ipv4.h"
 #endif /* NX_DISABLE_IPV4 */
@@ -46,12 +52,17 @@ static TX_THREAD               thread_0;
 
 static NX_PACKET_POOL          pool_0;
 static NX_IP                   ip_0;
+#ifdef NX_DISABLE_IPV4
+static NX_UDP_SOCKET           socket_0;
+#endif /* NX_DISABLE_IPV4 */
 
 static ULONG                   error_counter;
 
 static void    thread_0_entry(ULONG thread_input);
 #ifdef NX_DISABLE_IPV4
 static VOID    address_change_notify(NX_IP *ip_ptr, VOID *additional_info);
+#else
+static VOID    ra_flag_callback(NX_IP *ip_ptr, UINT ra_flag);
 #endif /* NX_DISABLE_IPV4 */
 
 extern void    _nx_ram_network_driver_1500(struct NX_IP_DRIVER_STRUCT *driver_req);
@@ -105,6 +116,9 @@ CHAR        *interface_name;
 ULONG        mtu_size;
 ULONG        physical_msw;
 ULONG        physical_lsw;
+UINT         port;
+NX_PACKET   *receive_ptr;
+CHAR         mac[6];
 #else
 NXD_ADDRESS  address;
 ULONG        prefix_length;
@@ -113,6 +127,10 @@ ULONG        configuration_method;
 UINT         interface_index;
 UINT         address_index;
 UINT         entries;
+ULONG        dest_ip[4];
+ULONG        physical_msw;
+ULONG        physical_lsw;
+CHAR         mac[6];
 #endif /* NX_DISABLE_IPV4 */
 
     NX_PARAMETER_NOT_USED(thread_input);
@@ -180,6 +198,47 @@ UINT         entries;
         (physical_lsw != ip_0.nx_ip_interface[0].nx_interface_physical_address_lsw))
         error_counter++;
 
+    /* 3. A neighbour cache entry set, then deleted. */
+    mac[0] = 0x00;
+    mac[1] = 0x11;
+    mac[2] = 0x22;
+    mac[3] = 0x33;
+    mac[4] = 0x44;
+    mac[5] = 0x56;
+    if (nxd_nd_cache_entry_set(&ip_0, address.nxd_ip_address.v6, 0, mac) != NX_SUCCESS)
+        error_counter++;
+    if (nxd_nd_cache_entry_delete(&ip_0, address.nxd_ip_address.v6) != NX_SUCCESS)
+        error_counter++;
+
+    /* 4. An IPv6 UDP datagram sent to the IP's own address and received: its
+          source is that address and the sending port. */
+    status =  nx_udp_enable(&ip_0);
+    status += nx_udp_socket_create(&ip_0, &socket_0, "Socket 0", NX_IP_NORMAL, NX_FRAGMENT_OKAY, 0x80, 5);
+    status += nx_udp_socket_bind(&socket_0, 0x88, NX_NO_WAIT);
+    if (status)
+        error_counter++;
+
+    address.nxd_ip_address.v6[3] = 4;
+    status = nx_packet_allocate(&pool_0, &receive_ptr, NX_IPv6_UDP_PACKET, NX_WAIT_FOREVER);
+    status += nx_packet_data_append(receive_ptr, "ABCDEFGHIJ", 10, &pool_0, NX_NO_WAIT);
+    status += nxd_udp_socket_send(&socket_0, receive_ptr, &address, 0x88);
+    if (status)
+        error_counter++;
+
+    status = nx_udp_socket_receive(&socket_0, &receive_ptr, NX_IP_PERIODIC_RATE);
+    if (status)
+        error_counter++;
+    else
+    {
+        address.nxd_ip_address.v6[3] = 0;
+        status = nxd_udp_packet_info_extract(receive_ptr, &address, NX_NULL, &port, NX_NULL);
+        if ((status != NX_SUCCESS) || (address.nxd_ip_version != NX_IP_VERSION_V6) ||
+            (address.nxd_ip_address.v6[0] != 0x20010000) || (address.nxd_ip_address.v6[3] != 4) ||
+            (port != 0x88))
+            error_counter++;
+        nx_packet_release(receive_ptr);
+    }
+
 #else
 
     /* 1. Every IPv6 service refuses. Without IPv6 an NXD_ADDRESS has no
@@ -209,6 +268,24 @@ UINT         entries;
     if (_nxd_ipv6_default_router_number_of_entries_get(&ip_0, 0, &entries) != NX_NOT_SUPPORTED)
         error_counter++;
 
+    /* 2. So does every neighbour cache service, and the router
+          advertisement flag callback. */
+    memset(dest_ip, 0, sizeof(dest_ip));
+    memset(mac, 0, sizeof(mac));
+    if (_nxd_nd_cache_entry_set(&ip_0, dest_ip, 0, mac) != NX_NOT_SUPPORTED)
+        error_counter++;
+    if (_nxd_nd_cache_entry_delete(&ip_0, dest_ip) != NX_NOT_SUPPORTED)
+        error_counter++;
+    if (_nxd_nd_cache_hardware_address_find(&ip_0, &address, &physical_msw, &physical_lsw,
+                                            &interface_index) != NX_NOT_SUPPORTED)
+        error_counter++;
+    if (_nxd_nd_cache_ip_address_find(&ip_0, &address, 0x0011, 0x22334456, &interface_index) != NX_NOT_SUPPORTED)
+        error_counter++;
+    if (_nxd_nd_cache_invalidate(&ip_0) != NX_NOT_SUPPORTED)
+        error_counter++;
+    if (_nxd_icmpv6_ra_flag_callback_set(&ip_0, ra_flag_callback) != NX_NOT_SUPPORTED)
+        error_counter++;
+
 #endif /* NX_DISABLE_IPV4 */
 
     nx_packet_release(packet_ptr);
@@ -230,6 +307,12 @@ static VOID    address_change_notify(NX_IP *ip_ptr, VOID *additional_info)
 {
     NX_PARAMETER_NOT_USED(ip_ptr);
     NX_PARAMETER_NOT_USED(additional_info);
+}
+#else
+static VOID    ra_flag_callback(NX_IP *ip_ptr, UINT ra_flag)
+{
+    NX_PARAMETER_NOT_USED(ip_ptr);
+    NX_PARAMETER_NOT_USED(ra_flag);
 }
 #endif /* NX_DISABLE_IPV4 */
 
