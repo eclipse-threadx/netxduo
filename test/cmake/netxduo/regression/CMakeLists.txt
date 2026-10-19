@@ -378,6 +378,7 @@ set(netxduo_test_cases
     ${SOURCE_DIR}/netxduo_test/netx_ipv6_multicast_rs_interface_test.c
     ${SOURCE_DIR}/netxduo_test/netx_ipv6_dad_failure_notify_send_test.c
     ${SOURCE_DIR}/netxduo_test/netx_udp_ipv6_reply_invalid_address_test.c
+    ${SOURCE_DIR}/netxduo_test/netx_tcpip_offload_udp_branch_test.c
     ${SOURCE_DIR}/netxduo_test/netx_tcp_basic_processing_test.c
     ${SOURCE_DIR}/netxduo_test/netx_3_21_test.c
     ${SOURCE_DIR}/netxduo_test/netx_arp_basic_test.c
