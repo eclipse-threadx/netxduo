@@ -364,6 +364,7 @@ set(netxduo_test_cases
     ${SOURCE_DIR}/netxduo_test/netx_ipv6_disable_test.c
     ${SOURCE_DIR}/netxduo_test/netx_ipv6_disable_tcp_test.c
     ${SOURCE_DIR}/netxduo_test/netx_ipv6_dad_failure_notify_send_test.c
+    ${SOURCE_DIR}/netxduo_test/netx_udp_ipv6_reply_invalid_address_test.c
     ${SOURCE_DIR}/netxduo_test/netx_icmp_multiple_ping6_test1.c
     ${SOURCE_DIR}/netxduo_test/netx_ip_address_get_test.c
     ${SOURCE_DIR}/netxduo_test/netx_10_24_02_test.c
