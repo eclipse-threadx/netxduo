@@ -22,10 +22,11 @@
    application built with NX_DISABLE_ERROR_CHECKING calls the services
    directly, and that is what this test does.
 
-   With IPv4 built out it also asks the services that remain for what they
-   answer about IPv6: the largest payload that fits an IPv6 address's link,
-   and an interface's information. It then deletes a neighbour cache entry it
-   has set, and extracts the source of an IPv6 UDP datagram it has received.
+   With IPv4 built out the ARP and RARP services refuse too. The test also
+   asks the services that remain for what they answer about IPv6: the largest
+   payload that fits an IPv6 address's link, and an interface's information.
+   It then deletes a neighbour cache entry it has set, and extracts the source
+   of an IPv6 UDP datagram it has received.
 
    With IPv6 built out the neighbour cache services and the router
    advertisement flag callback refuse as well. */
@@ -44,6 +45,8 @@ extern void    test_control_return(UINT status);
 #include   "nx_icmpv6.h"
 #else
 #include   "nx_ipv4.h"
+#include   "nx_arp.h"
+#include   "nx_rarp.h"
 #endif /* NX_DISABLE_IPV4 */
 
 #define     DEMO_STACK_SIZE         2048
@@ -61,6 +64,7 @@ static ULONG                   error_counter;
 static void    thread_0_entry(ULONG thread_input);
 #ifdef NX_DISABLE_IPV4
 static VOID    address_change_notify(NX_IP *ip_ptr, VOID *additional_info);
+static VOID    arp_response_handler(NX_IP *ip_ptr, NX_PACKET *packet_ptr);
 #else
 static VOID    ra_flag_callback(NX_IP *ip_ptr, UINT ra_flag);
 #endif /* NX_DISABLE_IPV4 */
@@ -119,6 +123,8 @@ ULONG        physical_lsw;
 UINT         port;
 NX_PACKET   *receive_ptr;
 CHAR         mac[6];
+ULONG        arp_cache[64];
+ULONG        counters[8];
 #else
 NXD_ADDRESS  address;
 ULONG        prefix_length;
@@ -169,6 +175,37 @@ CHAR         mac[6];
     if (_nx_ipv4_multicast_interface_join(&ip_0, IP_ADDRESS(224, 0, 0, 200), 0) != NX_NOT_SUPPORTED)
         error_counter++;
     if (_nx_ipv4_multicast_interface_leave(&ip_0, IP_ADDRESS(224, 0, 0, 200), 0) != NX_NOT_SUPPORTED)
+        error_counter++;
+
+    /* So does every ARP and RARP service. */
+    if (_nx_arp_enable(&ip_0, arp_cache, sizeof(arp_cache)) != NX_NOT_SUPPORTED)
+        error_counter++;
+    if (_nx_arp_dynamic_entry_set(&ip_0, IP_ADDRESS(1, 2, 3, 5), 0x0011, 0x22334456) != NX_NOT_SUPPORTED)
+        error_counter++;
+    if (_nx_arp_static_entry_create(&ip_0, IP_ADDRESS(1, 2, 3, 6), 0x0011, 0x22334457) != NX_NOT_SUPPORTED)
+        error_counter++;
+    if (_nx_arp_hardware_address_find(&ip_0, IP_ADDRESS(1, 2, 3, 5), &physical_msw, &physical_lsw) != NX_NOT_SUPPORTED)
+        error_counter++;
+    if (_nx_arp_ip_address_find(&ip_0, &ip_address, 0x0011, 0x22334456) != NX_NOT_SUPPORTED)
+        error_counter++;
+    if (_nx_arp_info_get(&ip_0, &counters[0], &counters[1], &counters[2], &counters[3], &counters[4],
+                         &counters[5], &counters[6], &counters[7]) != NX_NOT_SUPPORTED)
+        error_counter++;
+    if (_nx_arp_gratuitous_send(&ip_0, arp_response_handler) != NX_NOT_SUPPORTED)
+        error_counter++;
+    if (_nx_arp_entry_delete(&ip_0, IP_ADDRESS(1, 2, 3, 5)) != NX_NOT_SUPPORTED)
+        error_counter++;
+    if (_nx_arp_static_entry_delete(&ip_0, IP_ADDRESS(1, 2, 3, 6), 0x0011, 0x22334457) != NX_NOT_SUPPORTED)
+        error_counter++;
+    if (_nx_arp_static_entries_delete(&ip_0) != NX_NOT_SUPPORTED)
+        error_counter++;
+    if (_nx_arp_dynamic_entries_invalidate(&ip_0) != NX_NOT_SUPPORTED)
+        error_counter++;
+    if (_nx_rarp_enable(&ip_0) != NX_NOT_SUPPORTED)
+        error_counter++;
+    if (_nx_rarp_info_get(&ip_0, &counters[0], &counters[1], &counters[2]) != NX_NOT_SUPPORTED)
+        error_counter++;
+    if (_nx_rarp_disable(&ip_0) != NX_NOT_SUPPORTED)
         error_counter++;
 
     /* 2. What the remaining services say about IPv6: the largest UDP
@@ -307,6 +344,12 @@ static VOID    address_change_notify(NX_IP *ip_ptr, VOID *additional_info)
 {
     NX_PARAMETER_NOT_USED(ip_ptr);
     NX_PARAMETER_NOT_USED(additional_info);
+}
+
+static VOID    arp_response_handler(NX_IP *ip_ptr, NX_PACKET *packet_ptr)
+{
+    NX_PARAMETER_NOT_USED(ip_ptr);
+    NX_PARAMETER_NOT_USED(packet_ptr);
 }
 #else
 static VOID    ra_flag_callback(NX_IP *ip_ptr, UINT ra_flag)
