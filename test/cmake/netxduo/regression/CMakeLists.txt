@@ -386,6 +386,7 @@ set(netxduo_test_cases
     ${SOURCE_DIR}/netxduo_test/netx_ip_forward_no_header_room_test.c
     ${SOURCE_DIR}/netxduo_test/netx_tcpip_offload_udp_receive_branch_test.c
     ${SOURCE_DIR}/netxduo_test/netx_icmp_receive_interrupt_test.c
+    ${SOURCE_DIR}/netxduo_test/netx_icmpv6_ns_chain_option_test.c
     ${SOURCE_DIR}/netxduo_test/netx_tcp_basic_processing_test.c
     ${SOURCE_DIR}/netxduo_test/netx_3_21_test.c
     ${SOURCE_DIR}/netxduo_test/netx_arp_basic_test.c
