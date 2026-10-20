@@ -392,6 +392,7 @@ set(netxduo_test_cases
     ${SOURCE_DIR}/netxduo_test/netx_icmpv6_queued_packet_mtu_test.c
     ${SOURCE_DIR}/netxduo_test/netx_icmpv6_ra_autoconfig_notify_test.c
     ${SOURCE_DIR}/netxduo_test/netx_trace_event_buffer_test.c
+    ${SOURCE_DIR}/netxduo_test/netx_http_proxy_client_edge_test.c
     ${SOURCE_DIR}/netxduo_test/netx_tcp_basic_processing_test.c
     ${SOURCE_DIR}/netxduo_test/netx_3_21_test.c
     ${SOURCE_DIR}/netxduo_test/netx_arp_basic_test.c
