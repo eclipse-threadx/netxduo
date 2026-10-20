@@ -22,12 +22,12 @@
    application built with NX_DISABLE_ERROR_CHECKING calls the services
    directly, and that is what this test does.
 
-   With IPv4 built out the ARP and RARP services refuse too. The test also
-   asks the services that remain for what they answer about IPv6: the largest
-   payload that fits an IPv6 address's link, and an interface's information.
-   It then deletes a neighbour cache entry it has set, and extracts the source
-   of an IPv6 UDP datagram it has received; the IPv4 UDP services refuse to
-   extract it or to send it on.
+   With IPv4 built out the ARP, RARP, ICMP and IGMP services refuse too. The
+   test also asks the services that remain for what they answer about IPv6:
+   the largest payload that fits an IPv6 address's link, and an interface's
+   information. It then deletes a neighbour cache entry it has set, and
+   extracts the source of an IPv6 UDP datagram it has received; the IPv4 UDP
+   services refuse to extract it or to send it on.
 
    With IPv6 built out the neighbour cache services and the router
    advertisement flag callback refuse as well. */
@@ -72,6 +72,23 @@ static VOID    ra_flag_callback(NX_IP *ip_ptr, UINT ra_flag);
 #endif /* NX_DISABLE_IPV4 */
 
 extern void    _nx_ram_network_driver_1500(struct NX_IP_DRIVER_STRUCT *driver_req);
+
+#ifdef NX_DISABLE_IPV4
+/* nx_icmpv4.h and nx_igmp.h declare the ICMP and IGMP services only with
+   IPv4 built in; the services themselves stay in the library. */
+UINT    _nx_icmp_enable(NX_IP *ip_ptr);
+UINT    _nx_icmp_ping(NX_IP *ip_ptr, ULONG ip_address, CHAR *data_ptr, ULONG data_size,
+                      NX_PACKET **response_ptr, ULONG wait_option);
+UINT    _nx_igmp_enable(NX_IP *ip_ptr);
+UINT    _nx_igmp_info_get(NX_IP *ip_ptr, ULONG *igmp_reports_sent, ULONG *igmp_queries_received,
+                          ULONG *igmp_checksum_errors, ULONG *current_groups_joined);
+UINT    _nx_igmp_loopback_disable(NX_IP *ip_ptr);
+UINT    _nx_igmp_loopback_enable(NX_IP *ip_ptr);
+UINT    _nx_igmp_multicast_interface_join(NX_IP *ip_ptr, ULONG group_address, UINT interface_index);
+UINT    _nx_igmp_multicast_interface_leave(NX_IP *ip_ptr, ULONG group_address, UINT interface_index);
+UINT    _nx_igmp_multicast_join(NX_IP *ip_ptr, ULONG group_address);
+UINT    _nx_igmp_multicast_leave(NX_IP *ip_ptr, ULONG group_address);
+#endif /* NX_DISABLE_IPV4 */
 
 #ifdef CTEST
 VOID test_application_define(void *first_unused_memory)
@@ -208,6 +225,26 @@ CHAR         mac[6];
     if (_nx_rarp_info_get(&ip_0, &counters[0], &counters[1], &counters[2]) != NX_NOT_SUPPORTED)
         error_counter++;
     if (_nx_rarp_disable(&ip_0) != NX_NOT_SUPPORTED)
+        error_counter++;
+    if (_nx_icmp_enable(&ip_0) != NX_NOT_SUPPORTED)
+        error_counter++;
+    if (_nx_icmp_ping(&ip_0, IP_ADDRESS(1, 2, 3, 5), "abcd", 4, &receive_ptr, NX_NO_WAIT) != NX_NOT_SUPPORTED)
+        error_counter++;
+    if (_nx_igmp_enable(&ip_0) != NX_NOT_SUPPORTED)
+        error_counter++;
+    if (_nx_igmp_info_get(&ip_0, &counters[0], &counters[1], &counters[2], &counters[3]) != NX_NOT_SUPPORTED)
+        error_counter++;
+    if (_nx_igmp_loopback_enable(&ip_0) != NX_NOT_SUPPORTED)
+        error_counter++;
+    if (_nx_igmp_loopback_disable(&ip_0) != NX_NOT_SUPPORTED)
+        error_counter++;
+    if (_nx_igmp_multicast_join(&ip_0, IP_ADDRESS(224, 0, 0, 200)) != NX_NOT_SUPPORTED)
+        error_counter++;
+    if (_nx_igmp_multicast_interface_join(&ip_0, IP_ADDRESS(224, 0, 0, 201), 0) != NX_NOT_SUPPORTED)
+        error_counter++;
+    if (_nx_igmp_multicast_interface_leave(&ip_0, IP_ADDRESS(224, 0, 0, 201), 0) != NX_NOT_SUPPORTED)
+        error_counter++;
+    if (_nx_igmp_multicast_leave(&ip_0, IP_ADDRESS(224, 0, 0, 200)) != NX_NOT_SUPPORTED)
         error_counter++;
 
     /* 2. What the remaining services say about IPv6: the largest UDP
