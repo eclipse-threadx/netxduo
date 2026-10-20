@@ -26,7 +26,8 @@
    asks the services that remain for what they answer about IPv6: the largest
    payload that fits an IPv6 address's link, and an interface's information.
    It then deletes a neighbour cache entry it has set, and extracts the source
-   of an IPv6 UDP datagram it has received.
+   of an IPv6 UDP datagram it has received; the IPv4 UDP services refuse to
+   extract it or to send it on.
 
    With IPv6 built out the neighbour cache services and the router
    advertisement flag callback refuse as well. */
@@ -47,6 +48,7 @@ extern void    test_control_return(UINT status);
 #include   "nx_ipv4.h"
 #include   "nx_arp.h"
 #include   "nx_rarp.h"
+#include   "nx_udp.h"
 #endif /* NX_DISABLE_IPV4 */
 
 #define     DEMO_STACK_SIZE         2048
@@ -272,6 +274,15 @@ CHAR         mac[6];
         if ((status != NX_SUCCESS) || (address.nxd_ip_version != NX_IP_VERSION_V6) ||
             (address.nxd_ip_address.v6[0] != 0x20010000) || (address.nxd_ip_address.v6[3] != 4) ||
             (port != 0x88))
+            error_counter++;
+
+        /* The IPv4 UDP services refuse the same datagram, and the send leaves
+           the packet with its caller. */
+        if (_nx_udp_packet_info_extract(receive_ptr, &ip_address, NX_NULL, &port, NX_NULL) != NX_NOT_SUPPORTED)
+            error_counter++;
+        if (_nx_udp_source_extract(receive_ptr, &ip_address, &port) != NX_NOT_SUPPORTED)
+            error_counter++;
+        if (_nx_udp_socket_send(&socket_0, receive_ptr, IP_ADDRESS(1, 2, 3, 5), 0x88) != NX_NOT_SUPPORTED)
             error_counter++;
         nx_packet_release(receive_ptr);
     }
