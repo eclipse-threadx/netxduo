@@ -407,13 +407,15 @@ if(MSVC)
   add_subdirectory(${FILEX_SOURCE_DIR} filex_build)
 endif()
 
+if(CMAKE_BUILD_TYPE STREQUAL "v4_no_chain_build" OR
+   CMAKE_BUILD_TYPE STREQUAL "v6_no_chain_build")
+  set(NXD_DISABLE_PACKET_CHAIN ON)
+endif()
+
 add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/../../.. ${PRODUCT})
 add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/regression regression)
 if(NOT MSVC AND NOT "$ENV{ENABLE_64}")
   add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/samples samples)
-  if(PRODUCT STREQUAL netxduo)
-    include(additionals.cmake)
-  endif()
 endif()
 
 # Coverage instrumentation (GCC/Clang only — not supported by MSVC)
