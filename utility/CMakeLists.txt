@@ -1,7 +1,7 @@
 # Each protocol handler is listed below. If you want
 # to disable some / all of these, comment out the block(s) in question
 
-if(NXD_ENABLE_FILE_SERVERS)
+if(NXD_ENABLE_FILE_SERVERS AND NXD_ENABLE_ADDONS)
     target_sources(${PROJECT_NAME}
         PRIVATE
         # {{BEGIN_TARGET_SOURCES}}

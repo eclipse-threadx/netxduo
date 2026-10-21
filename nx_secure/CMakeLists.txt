@@ -1,3 +1,4 @@
+if(NXD_ENABLE_NX_SECURE AND NOT NXD_NO_PACKET_CHAIN)
 target_sources(${PROJECT_NAME}
     PRIVATE
     # {{BEGIN_TARGET_SOURCES}}
@@ -309,6 +310,7 @@ target_sources(${PROJECT_NAME}
 
     # {{END_TARGET_SOURCES}}
 )
+endif()
 
 target_include_directories(${PROJECT_NAME} 
     PUBLIC 
