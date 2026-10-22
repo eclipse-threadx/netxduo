@@ -351,6 +351,7 @@ set(netxduo_test_cases
     ${SOURCE_DIR}/netxduo_test/netx_tcpip_offload_tcp_ipv6_test.c
     ${SOURCE_DIR}/netxduo_test/netx_tcpip_offload_udp_test.c
     ${SOURCE_DIR}/netxduo_test/netx_tcpip_offload_udp_tentative_test.c
+    ${SOURCE_DIR}/netxduo_test/netx_tcpip_offload_dtls_test.c
     ${SOURCE_DIR}/netxduo_test/netx_gated_caller_check_test.c
     ${SOURCE_DIR}/netxduo_test/netx_gated_nxe_api_test.c
     ${SOURCE_DIR}/netxduo_test/netx_tcpip_offload_tcp_branch_test.c

@@ -360,9 +360,10 @@ static UINT nx_tcpip_offload_handler(NX_IP *ip_ptr, NX_INTERFACE *interface_ptr,
                                      NXD_ADDRESS *local_ip, NXD_ADDRESS *remote_ip,
                                      UINT local_port, UINT *remote_port, UINT wait_option)
 {
-INT   self;
-INT   peer;
-UINT  status;
+INT        self;
+INT        peer;
+UINT       status;
+NX_PACKET *sent_ptr;
 
     NX_PARAMETER_NOT_USED(wait_option);
 
@@ -651,6 +652,25 @@ UINT  status;
                is what UDP does, and the send still succeeds. */
             _nx_packet_transmit_release(packet_ptr);
             break;
+        }
+
+        /* A packet its sender keeps queued to send again -- DTLS keeps its
+           handshake records so -- stays the sender's. The peer is given a
+           copy, as hardware would take one, and the original is released as
+           a sent packet is, which leaves it on the sender's queue. */
+        if (packet_ptr -> nx_packet_union_next.nx_packet_tcp_queue_next != (NX_PACKET *)NX_PACKET_ALLOCATED)
+        {
+            sent_ptr = packet_ptr;
+            status = nx_packet_copy(sent_ptr, &packet_ptr, sent_ptr -> nx_packet_pool_owner, NX_NO_WAIT);
+            _nx_packet_transmit_release(sent_ptr);
+            if (status)
+            {
+
+                /* No packet for the copy: the datagram is lost, which UDP
+                   allows, and the send still succeeds. */
+                status = NX_SUCCESS;
+                break;
+            }
         }
 
         /* _nx_udp_socket_driver_packet_receive is told where the datagram
