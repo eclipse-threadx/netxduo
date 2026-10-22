@@ -49,6 +49,12 @@ set(BUILD_CONFIGURATIONS
     v6_dhcp_tahi_build
     v6_bsd_raw_build
     v6_full_secure_build
+    v4_ack_every_2_build
+    v4_nat_deferred_assembly_build
+    v6_no_dad_address_notify_build
+    v6_no_rx_size_check_build
+    v6_dtls_offload_build
+    v6_trace_build
     optimize_build)
 set(CMAKE_CONFIGURATION_TYPES
     ${BUILD_CONFIGURATIONS}
@@ -94,6 +100,7 @@ set(NO_CHECK -DTX_DISABLE_ERROR_CHECKING -DNX_DISABLE_ERROR_CHECKING)
 set(NO_RESET_DISCONNECT -DNX_DISABLE_RESET_DISCONNECT)
 set(NO_AUTO_ARP_ENTRY -DNX_DISABLE_ARP_AUTO_ENTRY)
 set(IMME_ACK -DNX_TCP_ACK_EVERY_N_PACKETS=1)
+set(ACK_EVERY_2 -DNX_TCP_ACK_EVERY_N_PACKETS=2)
 set(NO_LOOPBACK -DNX_DISABLE_LOOPBACK_INTERFACE)
 set(NO_RX_SIZE_CHECK -DNX_DISABLE_RX_SIZE_CHECKING)
 set(NO_IGMPV2 -DNX_DISABLE_IGMPV2)
@@ -183,6 +190,7 @@ set(HTTP_DIGEST -DNX_HTTP_DIGEST_ENABLE)
 set(DHCP_RESTORE -DNX_DHCP_CLIENT_RESTORE_STATE)
 set(DNS_CACHE -DNX_DNS_CACHE_ENABLE)
 set(TCPIP_OFFLOAD -DNX_ENABLE_TCPIP_OFFLOAD ${LINK_CAP})
+set(DTLS -DNX_SECURE_ENABLE -DNX_SECURE_ENABLE_DTLS -DNX_SECURE_ENABLE_PSK_CIPHERSUITES)
 set(ARP -DNX_ARP_DEFEND_BY_REPLY)
 set(HTTP_PROXY -DNX_ENABLE_HTTP_PROXY)
 set(RAND_ID -DNX_ENABLE_IP_ID_RANDOMIZATION)
@@ -325,6 +333,20 @@ set(v6_no_rs_build ${IPV6} ${STATELESS_AC} ${NO_RS})
 set(v6_dhcp_tahi_build ${IPV6} ${ADDRESS_CHANGE_NOTIFY} ${DHCPV6_TAHI} ${TAHI}
                        ${IPV6_PMTU_DISCOVERY})
 set(v6_bsd_raw_build ${IPV6} ${BSD_RAW} ${MULTI_INTERFACE} ${RAW_ALL_STACK})
+
+# Each of these compiles a combination of options that no other configuration
+# has, and under which some code in common/src is reachable that is not
+# reachable in any of the others: acknowledging every second segment, NAT
+# with fragments assembled by the IP thread, the address-change notification
+# without duplicate address detection, router advertisements and redirects
+# without receive size checking, DTLS over a TCP/IP offload interface, and
+# event trace with both address families.
+set(v4_ack_every_2_build ${IPV4} ${ACK_EVERY_2})
+set(v4_nat_deferred_assembly_build ${IPV4} ${NAT} ${MULTI_INTERFACE})
+set(v6_no_dad_address_notify_build ${IPV6} ${NO_DAD} ${ADDRESS_CHANGE_NOTIFY})
+set(v6_no_rx_size_check_build ${IPV6} ${NO_RX_SIZE_CHECK})
+set(v6_dtls_offload_build ${IPV6} ${TCPIP_OFFLOAD} ${MULTI_INTERFACE} ${DTLS})
+set(v6_trace_build ${IPV6} ${TRACE} ${MULTI_INTERFACE})
 set(default_build_coverage -DNX_TAHI_ENABLE -DNX_MAX_PHYSICAL_INTERFACES=4 -DNX_ENABLE_IPV6_PATH_MTU_DISCOVERY)
 set(optimize_build ${default_build_coverage} -O3)
 set(dhcp_default_build_coverage ${default_build_coverage} -DNX_DHCP_CLIENT_USER_CREATE_PACKET_POOL -DNX_DISABLE_ASSERT)
