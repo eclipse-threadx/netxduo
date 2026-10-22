@@ -377,6 +377,7 @@ set(netxduo_test_cases
     ${SOURCE_DIR}/netxduo_test/netx_ip_packet_shape_test.c
     ${SOURCE_DIR}/netxduo_test/netx_ip_checksum_capability_test.c
     ${SOURCE_DIR}/netxduo_test/netx_ip_raw_loopback_extension_test.c
+    ${SOURCE_DIR}/netxduo_test/netx_ip_assert_test.c
     ${SOURCE_DIR}/netxduo_test/netx_tcpip_offload_attach_test.c
     ${SOURCE_DIR}/netxduo_test/netx_ipv6_multicast_rs_interface_test.c
     ${SOURCE_DIR}/netxduo_test/netx_ipv6_dad_failure_notify_send_test.c
