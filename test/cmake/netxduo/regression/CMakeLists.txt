@@ -52,6 +52,7 @@ if("-DNX_BSD_ENABLE" IN_LIST ${CMAKE_BUILD_TYPE})
       ${SOURCE_DIR}/bsd_test/netx_bsd_getaddrinfo_test.c
       ${SOURCE_DIR}/bsd_test/netx_bsd_tcp_getsockname_without_bind_test.c
       ${SOURCE_DIR}/bsd_test/netx_bsd_tcp_rcvbuf_test.c
+      ${SOURCE_DIR}/bsd_test/netx_bsd_tcp_rcvbuf_retransmit_test.c
       ${SOURCE_DIR}/bsd_test/netx_bsd_tcp_fionread_test.c)
   if("-DNX_BSD_RAW_SUPPORT" IN_LIST ${CMAKE_BUILD_TYPE})
     list(
