@@ -35,7 +35,7 @@
 
 extern void    test_control_return(UINT status);
 
-#if defined(NX_ENABLE_TCPIP_OFFLOAD) && !defined(NX_DISABLE_IPV4)
+#if defined(NX_ENABLE_TCPIP_OFFLOAD) && !defined(NX_DISABLE_IPV4) && (NX_MAX_PHYSICAL_INTERFACES > 1)
 
 #define     DEMO_STACK_SIZE         2048
 

@@ -1,5 +1,6 @@
 /***************************************************************************
  * Copyright (c) 2024 Microsoft Corporation 
+ * Copyright (c) 2026 Eclipse ThreadX contributors
  * 
  * This program and the accompanying materials are made available under the
  * terms of the MIT License which is available at
@@ -7,6 +8,8 @@
  * 
  * SPDX-License-Identifier: MIT
  **************************************************************************/
+
+// Portions of this file were generated with AI assistance.
 
 /* This test case validates nxd_ipv6_address_set. */
 
@@ -205,10 +208,15 @@ NXD_ADDRESS ipv6_addr;
     /* Disable IPv6 */
     status = nxd_ipv6_disable(&ip_0);
 
-    /* notify counter should be 4, ipv6_address_set (ip_0, ip_1), DAD (ip_0, ip_1) calls. */
-    if((status != NX_SUCCESS) 
+    /* notify counter should be 4, ipv6_address_set (ip_0, ip_1), DAD (ip_0, ip_1) calls.
+       Without DAD only the two ipv6_address_set calls notify. */
+    if((status != NX_SUCCESS)
 #ifdef NX_ENABLE_IPV6_ADDRESS_CHANGE_NOTIFY
+#ifndef NX_DISABLE_IPV6_DAD
         || (notify_counter != 4)
+#else
+        || (notify_counter != 2)
+#endif /* NX_DISABLE_IPV6_DAD */
 #endif
       )
     {

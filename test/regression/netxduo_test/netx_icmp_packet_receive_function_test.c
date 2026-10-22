@@ -1,5 +1,6 @@
 /***************************************************************************
  * Copyright (c) 2024 Microsoft Corporation 
+ * Copyright (c) 2026 Eclipse ThreadX contributors
  * 
  * This program and the accompanying materials are made available under the
  * terms of the MIT License which is available at
@@ -7,6 +8,8 @@
  * 
  * SPDX-License-Identifier: MIT
  **************************************************************************/
+
+// Portions of this file were generated with AI assistance.
 
 /* This NetX test case test _nx_icmp_packet_receive and _nx_icmp_queue_process function with non standard operation .  */
 
@@ -17,6 +20,14 @@ extern void    test_control_return(UINT status);
 #if !defined(NX_DISABLE_ICMPV4_RX_CHECKSUM) && !defined(NX_ENABLE_ICMP_ADDRESS_CHECK) && !defined(NX_DISABLE_IPV4)
 #include    "nx_icmp.h"
 #include    "nx_ip.h" 
+
+/* Without the receive size check, the packet shorter than an ICMP header is
+   not refused for its length, and its checksum is then found wrong.  */
+#ifdef NX_DISABLE_RX_SIZE_CHECKING
+#define     EXPECTED_CHECKSUM_ERRORS    2
+#else
+#define     EXPECTED_CHECKSUM_ERRORS    1
+#endif /* NX_DISABLE_RX_SIZE_CHECKING */
 
 #define     DEMO_STACK_SIZE    2048
 #define     TEST_INTERFACE     1
@@ -178,7 +189,7 @@ ULONG       icmp_unhandled_messages;
 #endif /* NX_DISABLE_ICMP_INFO */
 
         /* Check the ICMP information for IP instance1.  */                                                                                                                      
-        if ((ip_1.nx_ip_icmp_total_messages_received != 5) || (ip_1.nx_ip_icmp_invalid_packets != 3) || (ip_1.nx_ip_pings_received != 1) || (ip_1.nx_ip_pings_responded_to != 1) || (ip_1.nx_ip_icmp_checksum_errors != 1) || (ip_1.nx_ip_icmp_unhandled_messages != 1))
+        if ((ip_1.nx_ip_icmp_total_messages_received != 5) || (ip_1.nx_ip_icmp_invalid_packets != 3) || (ip_1.nx_ip_pings_received != 1) || (ip_1.nx_ip_pings_responded_to != 1) || (ip_1.nx_ip_icmp_checksum_errors != EXPECTED_CHECKSUM_ERRORS) || (ip_1.nx_ip_icmp_unhandled_messages != 1))
         {
             printf("ERROR!\n");
             test_control_return(1);
