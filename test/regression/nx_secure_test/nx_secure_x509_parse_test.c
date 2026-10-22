@@ -6398,6 +6398,10 @@ TEST(NX_SECURE_X509, X509_version_1_test)
 NX_SECURE_X509_CERT certificate;
 NX_SECURE_X509_DISTINGUISHED_NAME expected_name;
 UINT status;
+#ifndef NX_SECURE_X509_DISABLE_KEY_USAGE_CHECK
+USHORT key_usage_bitfield = 0;
+#endif
+UINT bytes_processed;
 
     memset(&certificate, 0, sizeof(certificate));
 
@@ -6447,6 +6451,39 @@ UINT status;
     EXPECT_EQ(NX_SECURE_TLS_X509_TYPE_RSA_MD5, certificate.nx_secure_x509_signature_algorithm);
 
     EXPECT_EQ(NX_SECURE_X509_VERSION_1, certificate.nx_secure_x509_version);
+
+    EXPECT_TRUE(certificate.nx_secure_x509_extensions_data == NX_CRYPTO_NULL);
+    EXPECT_EQ(0, certificate.nx_secure_x509_extensions_data_length);
+    EXPECT_TRUE(certificate.nx_secure_x509_issuer_identifier == NX_CRYPTO_NULL);
+    EXPECT_EQ(0, certificate.nx_secure_x509_issuer_identifier_length);
+    EXPECT_TRUE(certificate.nx_secure_x509_subject_identifier == NX_CRYPTO_NULL);
+    EXPECT_EQ(0, certificate.nx_secure_x509_subject_identifier_length);
+
+#ifndef NX_SECURE_X509_DISABLE_KEY_USAGE_CHECK
+    status = _nx_secure_x509_key_usage_extension_parse(&certificate, &key_usage_bitfield);
+    EXPECT_EQ(NX_SECURE_X509_EXTENSION_NOT_FOUND, status);
+#endif
+
+    /* Test that _nx_secure_x509_certificate_parse clears stale optional fields when re-parsing. */
+    certificate.nx_secure_x509_extensions_data = (const UCHAR *)"stale_extension";
+    certificate.nx_secure_x509_extensions_data_length = 0x1234;
+    certificate.nx_secure_x509_issuer_identifier = (const UCHAR *)"stale_issuer";
+    certificate.nx_secure_x509_issuer_identifier_length = 0x5678;
+    certificate.nx_secure_x509_subject_identifier = (const UCHAR *)"stale_subject";
+    certificate.nx_secure_x509_subject_identifier_length = 0x9ABC;
+
+    status = _nx_secure_x509_certificate_parse(x509_version_1_ca_cert_der, x509_version_1_ca_cert_der_len, &bytes_processed, &certificate);
+    EXPECT_EQ(0, status);
+    EXPECT_TRUE(certificate.nx_secure_x509_extensions_data == NX_CRYPTO_NULL);
+    EXPECT_EQ(0, certificate.nx_secure_x509_extensions_data_length);
+    EXPECT_TRUE(certificate.nx_secure_x509_issuer_identifier == NX_CRYPTO_NULL);
+    EXPECT_EQ(0, certificate.nx_secure_x509_issuer_identifier_length);
+    EXPECT_TRUE(certificate.nx_secure_x509_subject_identifier == NX_CRYPTO_NULL);
+    EXPECT_EQ(0, certificate.nx_secure_x509_subject_identifier_length);
+#ifndef NX_SECURE_X509_DISABLE_KEY_USAGE_CHECK
+    status = _nx_secure_x509_key_usage_extension_parse(&certificate, &key_usage_bitfield);
+    EXPECT_EQ(NX_SECURE_X509_EXTENSION_NOT_FOUND, status);
+#endif
 }
 
 TEST(NX_SECURE_X509, RSA_parse_test)
