@@ -82,12 +82,6 @@ UINT              ipv6_addr_index;
 #endif /* NX_ENABLE_IPV6_ADDRESS_CHANGE_NOTIFY */
 NXD_IPV6_ADDRESS *address_ptr;
 
-    /* Set the interface to an invalid state. */
-    ipv6_address -> nxd_ipv6_address_state = NX_IPV6_ADDR_STATE_UNKNOWN;
-    ipv6_address -> nxd_ipv6_address_valid = NX_FALSE;
-
-    /* Indicate the DAD process is disabled. */
-    ipv6_address -> nxd_ipv6_address_DupAddrDetectTransmit = 0;
     /* Remove address from interface. */
     if (ipv6_address == ipv6_address -> nxd_ipv6_address_attached -> nxd_interface_ipv6_address_list_head)
     {
@@ -103,9 +97,20 @@ NXD_IPV6_ADDRESS *address_ptr;
             if (address_ptr -> nxd_ipv6_address_next == ipv6_address)
             {
                 address_ptr -> nxd_ipv6_address_next = ipv6_address -> nxd_ipv6_address_next;
+                break;
             }
         }
     }
+
+    /* Clear next pointer. */
+    ipv6_address -> nxd_ipv6_address_next = NX_NULL;
+
+    /* Set the interface to an invalid state. */
+    ipv6_address -> nxd_ipv6_address_state = NX_IPV6_ADDR_STATE_UNKNOWN;
+    ipv6_address -> nxd_ipv6_address_valid = NX_FALSE;
+
+    /* Indicate the DAD process is disabled. */
+    ipv6_address -> nxd_ipv6_address_DupAddrDetectTransmit = 0;
 
     /* Notify the application only now that the address is off the interface's
        list: the callback runs on the IP thread and may send, and a send must
