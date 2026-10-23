@@ -70,9 +70,7 @@ UINT  _nx_ip_fragment_disable(NX_IP *ip_ptr)
 #ifndef NX_DISABLE_FRAGMENTATION
 TX_INTERRUPT_SAVE_AREA
 
-#ifndef NX_FRAGMENT_IMMEDIATE_ASSEMBLY
 NX_PACKET *new_fragment_head;
-#endif /* NX_FRAGMENT_IMMEDIATE_ASSEMBLY */
 NX_PACKET *assemble_head;
 NX_PACKET *next_packet;
 NX_PACKET *release_packet;
@@ -97,11 +95,7 @@ NX_PACKET *release_packet;
     ip_ptr -> nx_ip_fragment_timeout_check =  NX_NULL;
 
     /* Pickup the fragment list pointer.  */
-#ifndef NX_FRAGMENT_IMMEDIATE_ASSEMBLY
     new_fragment_head = ip_ptr -> nx_ip_received_fragment_head;
-#else
-    NX_ASSERT(ip_ptr -> nx_ip_received_fragment_head == NX_NULL);
-#endif /* NX_FRAGMENT_IMMEDIATE_ASSEMBLY */
     assemble_head =     ip_ptr -> nx_ip_fragment_assembly_head;
 
     /* Clear the IP structure lists.  */
@@ -116,7 +110,6 @@ NX_PACKET *release_packet;
     /* Release mutex protection.  */
     tx_mutex_put(&(ip_ptr -> nx_ip_protection));
 
-#ifndef NX_FRAGMENT_IMMEDIATE_ASSEMBLY
     /* Now walk through the receive and assembly lists to free the packets.  */
     next_packet =  new_fragment_head;
     while (next_packet)
@@ -131,7 +124,6 @@ NX_PACKET *release_packet;
         /* Release the current packet.  */
         _nx_packet_release(release_packet);
     }
-#endif /* NX_FRAGMENT_IMMEDIATE_ASSEMBLY */
 
     /* Now walk through the assemble list and release all packets.  */
     while (assemble_head)

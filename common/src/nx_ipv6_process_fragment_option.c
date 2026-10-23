@@ -78,6 +78,9 @@ UINT _nx_ipv6_process_fragment_option(NX_IP *ip_ptr, NX_PACKET *packet_ptr)
 
 TX_INTERRUPT_SAVE_AREA
 NX_IPV6_HEADER_FRAGMENT_OPTION *fragment_option;
+#ifdef NX_FRAGMENT_IMMEDIATE_ASSEMBLY
+VOID           (*ip_fragment_assembly)(struct NX_IP_STRUCT *);
+#endif
 
 
 
@@ -205,7 +208,11 @@ NX_IPV6_HEADER_FRAGMENT_OPTION *fragment_option;
     tx_event_flags_set(&(ip_ptr -> nx_ip_events), NX_IP_UNFRAG_EVENT, TX_OR);
 #else
     /* Process the IP fragment reassemble.  */
-    (ip_ptr -> nx_ip_fragment_assembly)(ip_ptr);
+    ip_fragment_assembly = ip_ptr -> nx_ip_fragment_assembly;
+    if (ip_fragment_assembly)
+    {
+        (ip_fragment_assembly)(ip_ptr);
+    }
 #endif /* NX_FRAGMENT_IMMEDIATE_ASSEMBLY */
 
     return(NX_SUCCESS);
