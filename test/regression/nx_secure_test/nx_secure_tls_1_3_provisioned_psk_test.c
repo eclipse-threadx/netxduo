@@ -9,7 +9,9 @@
 /* SPDX-License-Identifier: MIT                                            */
 /***************************************************************************/
 
-/* This test concentrates on TLS ECC ciphersuites negotiation.  */
+/* Portions of this file were generated with AI assistance. */
+
+/* This test negotiates TLS 1.3 key exchange with a Brainpool group. */
 
 #include   "nx_api.h"
 #include   "nx_secure_tls_api.h"
@@ -79,10 +81,21 @@ static UCHAR                    response_buffer[BUFFER_SIZE];
 static UCHAR                    tls_packet_buffer[2][4000];
 
 extern NX_SECURE_TLS_CIPHERSUITE_INFO _nx_crypto_ciphersuite_lookup_table_ecc[];
-extern const USHORT nx_crypto_ecc_supported_groups[];
-extern const NX_CRYPTO_METHOD *nx_crypto_ecc_curves[];
-extern const UINT nx_crypto_ecc_supported_groups_size;
+extern NX_CRYPTO_METHOD crypto_method_ec_brainpoolp256;
+extern NX_CRYPTO_METHOD crypto_method_ec_secp256;
 extern const NX_SECURE_TLS_CRYPTO nx_crypto_tls_ciphers_ecc;
+
+static const USHORT brainpool_groups[] =
+{
+    (USHORT)NX_CRYPTO_EC_BRAINPOOLP256r1,
+    (USHORT)NX_CRYPTO_EC_SECP256R1
+};
+
+static const NX_CRYPTO_METHOD *brainpool_curves[] =
+{
+    &crypto_method_ec_brainpoolp256,
+    &crypto_method_ec_secp256
+};
 
 static CERTIFICATE test_certs[] =
 {
@@ -178,9 +191,9 @@ UINT status;
     status = nx_secure_tls_client_psk_set(tls_session_ptr, tls_psk, sizeof(tls_psk), "Client_identity", 15, "12345678", 8);
     do_something_if_fail(NX_SECURE_TLS_SUCCESS == status);
     
-    status = nx_secure_tls_ecc_initialize(tls_session_ptr, nx_crypto_ecc_supported_groups,
-                                          nx_crypto_ecc_supported_groups_size,
-                                          nx_crypto_ecc_curves);
+    status = nx_secure_tls_ecc_initialize(tls_session_ptr, brainpool_groups,
+                                          sizeof(brainpool_groups) / sizeof(brainpool_groups[0]),
+                                          brainpool_curves);
     do_something_if_fail(NX_SECURE_TLS_SUCCESS == status);
 
     memset(&client_remote_cert, 0, sizeof(client_remote_cert));
@@ -217,9 +230,9 @@ UINT status;
     status = nx_secure_tls_psk_add(tls_session_ptr, tls_psk, sizeof(tls_psk), "Client_identity", 15, "12345678", 8);
     do_something_if_fail(NX_SECURE_TLS_SUCCESS == status);
 
-    status = nx_secure_tls_ecc_initialize(tls_session_ptr, nx_crypto_ecc_supported_groups,
-                                          nx_crypto_ecc_supported_groups_size,
-                                          nx_crypto_ecc_curves);
+    status = nx_secure_tls_ecc_initialize(tls_session_ptr, brainpool_groups,
+                                          sizeof(brainpool_groups) / sizeof(brainpool_groups[0]),
+                                          brainpool_curves);
     do_something_if_fail(NX_SECURE_TLS_SUCCESS == status);
 
     memset(&server_local_certificate, 0, sizeof(server_local_certificate));
@@ -268,6 +281,9 @@ NX_PACKET *packet_ptr;
     status = nx_secure_tls_session_start(&tls_server_session_0, &server_socket_0,
                                           NX_WAIT_FOREVER);
     do_something_if_fail(NX_SECURE_TLS_SUCCESS == status);
+    do_something_if_fail((USHORT)NX_CRYPTO_EC_BRAINPOOLP256r1 ==
+        tls_server_session_0.nx_secure_tls_key_material.nx_secure_tls_ecc_key_data[
+            tls_server_session_0.nx_secure_tls_key_material.nx_secure_tls_ecc_key_data_selected].nx_secure_tls_ecdhe_named_curve);
 
     nx_secure_tls_session_end(&tls_server_session_0, NX_IP_PERIODIC_RATE);
     nx_secure_tls_session_delete(&tls_server_session_0);
@@ -329,6 +345,9 @@ NXD_ADDRESS server_address;
     /* Start TLS session. */
     status = nx_secure_tls_session_start(&tls_client_session_0, &client_socket_0, NX_WAIT_FOREVER);
     do_something_if_fail(NX_SECURE_TLS_SUCCESS == status);
+    do_something_if_fail((USHORT)NX_CRYPTO_EC_BRAINPOOLP256r1 ==
+        tls_client_session_0.nx_secure_tls_key_material.nx_secure_tls_ecc_key_data[
+            tls_client_session_0.nx_secure_tls_key_material.nx_secure_tls_ecc_key_data_selected].nx_secure_tls_ecdhe_named_curve);
 
     if (!status)
     {

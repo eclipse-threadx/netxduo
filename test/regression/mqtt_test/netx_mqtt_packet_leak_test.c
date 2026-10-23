@@ -9,6 +9,8 @@
 /* SPDX-License-Identifier: MIT                                            */
 /***************************************************************************/
 
+/* Portions of this file were generated with AI assistance. */
+
 /* This test case tests the packet leak issue when MQTT client received invalid packet. */
 
 #include   "tx_api.h"
@@ -232,6 +234,7 @@ static void    ntest_0_entry(ULONG thread_input)
 UINT       status;
 NXD_ADDRESS server_address;
 UINT        i;
+NX_PACKET  *received_packet;
 
     /* Print out test information banner.  */
     printf("NetX Test:   MQTT Packet Leak Test ....................................");
@@ -289,9 +292,33 @@ UINT        i;
         if (status)
             SET_ERROR_COUNTER(&error_counter, __FILE__, __LINE__);
 
+        /* Leave a received packet in the queue for disconnect to release. */
+        status = nx_packet_allocate(&pool_0, &received_packet, NX_TCP_PACKET, NX_NO_WAIT);
+        if (status)
+            SET_ERROR_COUNTER(&error_counter, __FILE__, __LINE__);
+        else
+        {
+            (VOID) tx_mutex_get(client_ptr -> nxd_mqtt_client_mutex_ptr, TX_WAIT_FOREVER);
+            client_ptr -> message_receive_queue_head = received_packet;
+            client_ptr -> message_receive_queue_tail = received_packet;
+            client_ptr -> message_receive_queue_depth = 1;
+            (VOID) tx_mutex_put(client_ptr -> nxd_mqtt_client_mutex_ptr);
+        }
+
         nxd_mqtt_client_disconnect(client_ptr);
 
         tx_semaphore_put(&semaphore_client_stop);
+    }
+
+    /* Leave another received packet in the queue for delete to release. */
+    status = nx_packet_allocate(&pool_0, &received_packet, NX_TCP_PACKET, NX_NO_WAIT);
+    if (status)
+        SET_ERROR_COUNTER(&error_counter, __FILE__, __LINE__);
+    else
+    {
+        client_ptr -> message_receive_queue_head = received_packet;
+        client_ptr -> message_receive_queue_tail = received_packet;
+        client_ptr -> message_receive_queue_depth = 1;
     }
 
     nxd_mqtt_client_delete(client_ptr);

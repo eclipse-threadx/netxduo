@@ -8,6 +8,7 @@
 /*                                                                         */
 /* SPDX-License-Identifier: MIT                                            */
 /***************************************************************************/
+// Portions of this file were generated with AI assistance.
 
 /* This NetX test concentrates on the packet debug information.  */
 
@@ -17,7 +18,7 @@
 #include   "nx_ram_network_driver_test_1500.h"
 extern VOID    test_control_return(UINT status);
 
-#if defined(NX_ENABLE_PACKET_DEBUG_INFO) && defined(__PRODUCT_NETXDUO__) && (__NETXDUO_MINOR_VERSION__ > 8) && !defined(NX_DISABLE_IPV4)
+#if defined(NX_ENABLE_PACKET_DEBUG_INFO) && defined(__PRODUCT_NETXDUO__) && !defined(NX_DISABLE_IPV4)
 #define     DEMO_STACK_SIZE         2048
 
 #define     TEST_SIZE               1536

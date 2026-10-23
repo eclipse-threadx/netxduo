@@ -117,6 +117,7 @@ set(dhcp_test_cases
     ${SOURCE_DIR}/dhcp_test/netx_dhcp_client_secondary_interface_test.c
     ${SOURCE_DIR}/dhcp_test/netx_dhcp_client_interface_order_test.c
     ${SOURCE_DIR}/dhcp_test/netx_dhcp_client_ip_mutex_test.c
+    ${SOURCE_DIR}/dhcp_test/netx_dhcp_final_probe_wait_test.c
     ${SOURCE_DIR}/dhcp_test/netx_dhcp_client_server_source_port_test.c
     ${SOURCE_DIR}/dhcp_test/netx_dhcp_client_ntp_option_test.c
     ${SOURCE_DIR}/dhcp_test/netx_dhcp_client_parameter_request_test.c
@@ -294,6 +295,7 @@ set(netxduo_test_cases
     ${SOURCE_DIR}/netxduo_test/netx_igmp_basic_test.c
     ${SOURCE_DIR}/netxduo_test/netx_14_19_test.c
     ${SOURCE_DIR}/netxduo_test/netx_ipv6_address_delete_test.c
+    ${SOURCE_DIR}/netxduo_test/netx_ipv6_address_delete_tcp_test.c
     ${SOURCE_DIR}/netxduo_test/netx_2_20_test.c
     ${SOURCE_DIR}/netxduo_test/netx_arp_no_duplicate_entry_test.c
     ${SOURCE_DIR}/netxduo_test/netx_ip_raw_loopback_test.c
@@ -334,6 +336,10 @@ set(netxduo_test_cases
     ${SOURCE_DIR}/netxduo_test/netx_3_23_test.c
     ${SOURCE_DIR}/netxduo_test/netx_icmpv6_invalid_ra_dest_test.c
     ${SOURCE_DIR}/netxduo_test/netx_tcp_retransmit_test.c
+    ${SOURCE_DIR}/netxduo_test/netx_link_vlan_api_test.c
+    ${SOURCE_DIR}/netxduo_test/netx_tcpip_offload_tcp_test.c
+    ${SOURCE_DIR}/netxduo_test/netx_tcpip_offload_tcp_ipv6_test.c
+    ${SOURCE_DIR}/netxduo_test/netx_tcpip_offload_udp_test.c
     ${SOURCE_DIR}/netxduo_test/netx_tcp_basic_processing_test.c
     ${SOURCE_DIR}/netxduo_test/netx_3_21_test.c
     ${SOURCE_DIR}/netxduo_test/netx_arp_basic_test.c
@@ -356,6 +362,9 @@ set(netxduo_test_cases
     ${SOURCE_DIR}/netxduo_test/netx_ip_nxe_api_test.c
     ${SOURCE_DIR}/netxduo_test/netx_tcp_socket_listen_test.c
     ${SOURCE_DIR}/netxduo_test/netx_ipv6_disable_test.c
+    ${SOURCE_DIR}/netxduo_test/netx_ipv6_disable_tcp_test.c
+    ${SOURCE_DIR}/netxduo_test/netx_ipv6_dad_failure_notify_send_test.c
+    ${SOURCE_DIR}/netxduo_test/netx_udp_ipv6_reply_invalid_address_test.c
     ${SOURCE_DIR}/netxduo_test/netx_icmp_multiple_ping6_test1.c
     ${SOURCE_DIR}/netxduo_test/netx_ip_address_get_test.c
     ${SOURCE_DIR}/netxduo_test/netx_10_24_02_test.c
@@ -836,6 +845,7 @@ set(pop3_test_cases
     ${SOURCE_DIR}/pop3_test/netx_pop3_abnormal_packet_test.c)
 
 set(ppp_test_cases
+    ${SOURCE_DIR}/ppp_test/netx_ppp_receive_burst_test.c
     ${SOURCE_DIR}/ppp_test/netx_ppp_PAP_bad_password_test.c
     ${SOURCE_DIR}/ppp_test/netx_ppp_check_boundary_test.c
     ${SOURCE_DIR}/ppp_test/netx_ppp_IPCP_timeout.c
@@ -1211,6 +1221,7 @@ endif()
 
 set(test_utility_files
     ${SOURCE_DIR}/test/nx_ram_network_driver_test_1500.c
+    ${SOURCE_DIR}/test/nx_tcpip_offload_driver.c
     ${SOURCE_DIR}/test/netxtestcontrol.c
     # DHCP utilities
     ${SOURCE_DIR}/dhcp_test/netx_dhcp_clone_function.c

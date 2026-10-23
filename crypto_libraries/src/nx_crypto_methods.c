@@ -9,6 +9,8 @@
  * SPDX-License-Identifier: MIT
  **************************************************************************/
 
+/* Portions of this file were generated with AI assistance. */
+
 
 /**************************************************************************/
 /**************************************************************************/
@@ -503,6 +505,27 @@ NX_CRYPTO_METHOD crypto_method_ec_secp521 =
     NX_CRYPTO_NULL,                           /* Initialization routine.                */
     NX_CRYPTO_NULL,                           /* Cleanup routine, not used.             */
     _nx_crypto_method_ec_secp521r1_operation, /* Operation                              */
+};
+
+/* Declare the Brainpool P256r1 curve method. */
+NX_CRYPTO_METHOD crypto_method_ec_brainpoolp256 =
+{
+    NX_CRYPTO_EC_BRAINPOOLP256r1, 256, 0, 0, 0, 0,
+    NX_CRYPTO_NULL, NX_CRYPTO_NULL, _nx_crypto_method_ec_brainpool_operation
+};
+
+/* Declare the Brainpool P384r1 curve method. */
+NX_CRYPTO_METHOD crypto_method_ec_brainpoolp384 =
+{
+    NX_CRYPTO_EC_BRAINPOOLP384r1, 384, 0, 0, 0, 0,
+    NX_CRYPTO_NULL, NX_CRYPTO_NULL, _nx_crypto_method_ec_brainpool_operation
+};
+
+/* Declare the Brainpool P512r1 curve method. */
+NX_CRYPTO_METHOD crypto_method_ec_brainpoolp512 =
+{
+    NX_CRYPTO_EC_BRAINPOOLP512r1, 512, 0, 0, 0, 0,
+    NX_CRYPTO_NULL, NX_CRYPTO_NULL, _nx_crypto_method_ec_brainpool_operation
 };
 
 #ifdef NX_CRYPTO_ENABLE_CURVE25519_448

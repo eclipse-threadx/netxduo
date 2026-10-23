@@ -9,6 +9,8 @@
  * SPDX-License-Identifier: MIT
  **************************************************************************/
 
+/* Portions of this file were generated with AI assistance. */
+
 
 /**************************************************************************/
 /**************************************************************************/
@@ -367,6 +369,9 @@ extern   "C" {
 #define NX_SECURE_TLS_X509_EC_SECP256R1                           0x00060017
 #define NX_SECURE_TLS_X509_EC_SECP384R1                           0x00060018
 #define NX_SECURE_TLS_X509_EC_SECP521R1                           0x00060019
+#define NX_SECURE_TLS_X509_EC_BRAINPOOLP256R1                     0x0006001A
+#define NX_SECURE_TLS_X509_EC_BRAINPOOLP384R1                     0x0006001B
+#define NX_SECURE_TLS_X509_EC_BRAINPOOLP512R1                     0x0006001C
 
 /* Bitfield mappings for Distinguished name comparison. When using nx_secure_x509_distinguished_name_compare,
    these values are used for the "compare_fields" parameter - bitwise OR these values together to compare
@@ -1045,4 +1050,3 @@ UINT nx_secure_x509_key_usage_extension_parse(NX_SECURE_X509_CERT *certificate, 
 #endif
 
 #endif /* SRC_NX_SECURE_X509_H_ */
-

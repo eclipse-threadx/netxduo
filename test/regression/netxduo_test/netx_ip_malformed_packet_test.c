@@ -131,6 +131,29 @@ NX_PACKET  *packet_ptr;
         _nx_ip_packet_deferred_receive(&ip_0, packet_ptr);
     }
 
+    /* GHSA-c9pq-93jp-w649: a UDP datagram shorter than a UDP header, received on an
+       interface that has no address yet. That path exists so a DHCP reply can be taken
+       before the interface is configured, and it is the only one that reads the UDP
+       header without the dispatcher having checked the length first. Inject it with the
+       address cleared, then restore it.  */
+    status = nx_packet_allocate(&pool_0, &packet_ptr, NX_PHYSICAL_HEADER, NX_WAIT_FOREVER);
+
+    /* Check status */
+    if(status)
+        error_counter++;
+
+    memcpy(packet_ptr -> nx_packet_prepend_ptr, &pkt3800[14], sizeof(pkt3800) - 14);
+    packet_ptr -> nx_packet_length = sizeof(pkt3800) - 14;
+    packet_ptr -> nx_packet_append_ptr = packet_ptr -> nx_packet_prepend_ptr + packet_ptr -> nx_packet_length;
+
+    ip_0.nx_ip_interface[0].nx_interface_ip_address = 0;
+    _nx_ip_packet_deferred_receive(&ip_0, packet_ptr);
+
+    /* Sleep one second to let all packets consumed by IP thread. */
+    tx_thread_sleep(NX_IP_PERIODIC_RATE); 
+
+    ip_0.nx_ip_interface[0].nx_interface_ip_address = IP_ADDRESS(192, 168, 0, 170);
+
     /* Sleep one second to let all packets consumed by IP thread. */
     tx_thread_sleep(NX_IP_PERIODIC_RATE); 
 

@@ -99,6 +99,9 @@ UINT            compute_checksum = 1;
 #ifdef NX_NAT_ENABLE
 UINT            packet_consumed;
 #endif
+#ifdef NX_FRAGMENT_IMMEDIATE_ASSEMBLY
+VOID          (*ip_fragment_assembly)(struct NX_IP_STRUCT *);
+#endif
 
 #ifdef NX_DISABLE_IP_RX_CHECKSUM
     compute_checksum = 0;
@@ -484,7 +487,11 @@ UINT            packet_consumed;
                     tx_event_flags_set(&(ip_ptr -> nx_ip_events), NX_IP_UNFRAG_EVENT, TX_OR);
 #else
                     /* Process the IP fragment reassemble.  */
-                    (ip_ptr -> nx_ip_fragment_assembly)(ip_ptr);
+                    ip_fragment_assembly = ip_ptr -> nx_ip_fragment_assembly;
+                    if (ip_fragment_assembly)
+                    {
+                        (ip_fragment_assembly)(ip_ptr);
+                    }
 #endif /* NX_FRAGMENT_IMMEDIATE_ASSEMBLY */
                 }
                 else
@@ -625,7 +632,11 @@ UINT            packet_consumed;
                 tx_event_flags_set(&(ip_ptr -> nx_ip_events), NX_IP_UNFRAG_EVENT, TX_OR);
 #else
                 /* Process the IP fragment reassemble.  */
-                (ip_ptr -> nx_ip_fragment_assembly)(ip_ptr);
+                ip_fragment_assembly = ip_ptr -> nx_ip_fragment_assembly;
+                if (ip_fragment_assembly)
+                {
+                    (ip_fragment_assembly)(ip_ptr);
+                }
 #endif /* NX_FRAGMENT_IMMEDIATE_ASSEMBLY */
             }
             else
