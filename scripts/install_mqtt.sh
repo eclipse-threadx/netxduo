@@ -10,11 +10,15 @@
 # SPDX-License-Identifier: MIT
 ##############################################################################
 
+# Portions of this file were generated with AI assistance.
+
+set -euo pipefail
+
+. "$(dirname "$(realpath "$0")")/ci_common.sh"
 
 sudo dpkg --add-architecture i386
-
-sudo apt update
-sudo apt install -y \
+ci_apt_update
+ci_apt_install \
     gcc-14 \
     g++-14 \
     gcc-14-multilib \
