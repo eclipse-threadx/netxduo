@@ -10,7 +10,11 @@
 # SPDX-License-Identifier: MIT
 ##############################################################################
 
+# Portions of this file were generated with AI assistance.
+
 set -euo pipefail
+
+. "$(dirname "$(realpath "$0")")/ci_common.sh"
 
 # Install the host tools used by the CMake regression suites on Ubuntu 24.04.
 # Every suite here builds for the host. The Cortex-M toolchain files under
@@ -21,23 +25,30 @@ readonly GCOVR_VERSION="8.6"
 readonly GCOVR_PREFIX="/opt/netxduo/gcovr-${GCOVR_VERSION}"
 
 sudo dpkg --add-architecture i386
-sudo apt-get update
-sudo apt-get install -y \
-    gcc-14 \
-    g++-14 \
-    gcc-14-multilib \
-    g++-14-multilib \
-    git \
-    cmake \
-    ninja-build \
-    python3-venv \
-    unifdef \
-    p7zip-full \
-    tofrodos \
-    dos2unix \
-    gawk \
-    libssl-dev:i386 \
+ci_apt_update
+
+# CMake comes from apt only when none is on PATH: a runner image's own CMake
+# would shadow the package.
+packages=(
+    gcc-14
+    g++-14
+    gcc-14-multilib
+    g++-14-multilib
+    git
+    ninja-build
+    python3-venv
+    unifdef
+    p7zip-full
+    tofrodos
+    dos2unix
+    gawk
+    libssl-dev:i386
     libcmocka-dev:i386
+)
+if ! command -v cmake > /dev/null; then
+    packages+=(cmake)
+fi
+ci_apt_install "${packages[@]}"
 
 sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-14 140
 sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-14 140
@@ -45,8 +56,10 @@ sudo update-alternatives --install /usr/bin/gcov gcov /usr/bin/gcov-14 140
 
 # gcovr 8.x is required for GCC 14's coverage data and JSON gcov format.
 sudo python3 -m venv "${GCOVR_PREFIX}"
-sudo "${GCOVR_PREFIX}/bin/python" -m pip install \
+ci_retry sudo "${CI_TIMEOUT[@]}" "${GCOVR_PREFIX}/bin/python" -m pip install \
     --disable-pip-version-check \
     --no-cache-dir \
+    --retries 3 \
+    --timeout 30 \
     "gcovr==${GCOVR_VERSION}"
 sudo ln -sfn "${GCOVR_PREFIX}/bin/gcovr" /usr/local/bin/gcovr

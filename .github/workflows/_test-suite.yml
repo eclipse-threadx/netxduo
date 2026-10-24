@@ -44,6 +44,11 @@ on:
         required: false
         default: 10
         type: number
+      apt_cache:
+        description: Keep the packages apt downloads in the Actions cache
+        required: false
+        default: true
+        type: boolean
       test_timeout_minutes:
         description: Maximum test-step duration
         required: false
@@ -89,6 +94,48 @@ jobs:
               ./scripts/run_cmake_suite.sh "${SUITE}" build "${requested_profiles[@]}"
           ./scripts/tests/profile_wrappers_test.sh
 
+      # The key is the runner image and the install scripts, and a miss restores
+      # the closest older cache. apt checks each cached .deb against the signed
+      # index, so a restored file cannot change what is installed.
+      - name: Prepare the apt cache key
+        id: apt_key
+        if: ${{ inputs.apt_cache }}
+        env:
+          INSTALLER: ${{ inputs.installer }}
+        run: |
+          set -euo pipefail
+          scripts=(./scripts/install.sh)
+          if [[ -n "${INSTALLER}" && "${INSTALLER}" != "./scripts/install.sh" ]]; then
+              scripts+=("${INSTALLER}")
+          fi
+          echo "dir=${RUNNER_TEMP}/apt-archives" >> "${GITHUB_OUTPUT}"
+          echo "image=${ImageOS:-unknown}-${ImageVersion:-unknown}" >> "${GITHUB_OUTPUT}"
+          echo "scripts=$(cat "${scripts[@]}" | sha256sum | cut -c1-16)" >> "${GITHUB_OUTPUT}"
+
+      - name: Restore the apt cache
+        id: apt_restore
+        if: ${{ inputs.apt_cache }}
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ${{ steps.apt_key.outputs.dir }}
+          key: apt-${{ steps.apt_key.outputs.image }}-${{ steps.apt_key.outputs.scripts }}
+          restore-keys: |
+            apt-${{ steps.apt_key.outputs.image }}-
+            apt-
+
+      # apt downloads as the unprivileged _apt user, which must own partial/.
+      - name: Point apt at the cache
+        if: ${{ inputs.apt_cache }}
+        env:
+          APT_DIR: ${{ steps.apt_key.outputs.dir }}
+        run: |
+          set -euo pipefail
+          sudo mkdir -p "${APT_DIR}/partial"
+          sudo chown _apt:root "${APT_DIR}/partial"
+          printf 'Dir::Cache::Archives "%s/";\nAPT::Keep-Downloaded-Packages "true";\nBinary::apt::APT::Keep-Downloaded-Packages "true";\n' "${APT_DIR}" \
+              | sudo tee /etc/apt/apt.conf.d/99-ci-archive-cache > /dev/null
+          echo "apt cache: $(find "${APT_DIR}" -maxdepth 1 -name '*.deb' | wc -l) packages restored"
+
       - name: Install dependencies
         timeout-minutes: ${{ inputs.install_timeout_minutes }}
         env:
@@ -99,6 +146,28 @@ jobs:
           if [[ -n "${INSTALLER}" && "${INSTALLER}" != "./scripts/install.sh" ]]; then
               "${INSTALLER}"
           fi
+
+      # Saved straight after the install, so a run whose tests fail still keeps
+      # it. autoclean drops packages the indexes no longer list; the root-only
+      # lock and partial/ are removed so the unprivileged cache action can read
+      # the rest.
+      - name: Save the apt cache
+        if: ${{ inputs.apt_cache && steps.apt_restore.outputs.cache-hit != 'true' }}
+        env:
+          APT_DIR: ${{ steps.apt_key.outputs.dir }}
+        run: |
+          set -euo pipefail
+          sudo apt-get autoclean -qq
+          sudo rm -rf "${APT_DIR}/partial" "${APT_DIR}/lock"
+          sudo chmod -R a+rX "${APT_DIR}"
+          echo "apt cache: $(find "${APT_DIR}" -maxdepth 1 -name '*.deb' | wc -l) packages, $(du -sh "${APT_DIR}" | cut -f1)"
+
+      - name: Upload the apt cache
+        if: ${{ inputs.apt_cache && steps.apt_restore.outputs.cache-hit != 'true' }}
+        uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ${{ steps.apt_key.outputs.dir }}
+          key: apt-${{ steps.apt_key.outputs.image }}-${{ steps.apt_key.outputs.scripts }}
 
       - name: Report tool versions
         run: |
