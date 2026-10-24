@@ -49,8 +49,6 @@ static NX_WEB_HTTP_CLIENT_STATUS_MAP _nx_web_http_client_status_maps[] =
     {"200",    NX_SUCCESS},
     {"100",    NX_WEB_HTTP_STATUS_CODE_CONTINUE},
     {"101",    NX_WEB_HTTP_STATUS_CODE_SWITCHING_PROTOCOLS},
-    {"102",    NX_WEB_HTTP_STATUS_CODE_PROCESSING},
-    {"103",    NX_WEB_HTTP_STATUS_CODE_EARLY_HINTS},
     {"201",    NX_WEB_HTTP_STATUS_CODE_CREATED},
     {"202",    NX_WEB_HTTP_STATUS_CODE_ACCEPTED},
     {"203",    NX_WEB_HTTP_STATUS_CODE_NON_AUTH_INFO},
@@ -1498,7 +1496,7 @@ UINT        status_code = NX_SUCCESS;
         /* Setup pointer to server response.  */
         buffer_ptr =  (CHAR *) response_packet_ptr -> nx_packet_prepend_ptr;
 
-        /* Determine which status code is reveived.  */
+        /* Determine which status code is received.  */
         for (i = 0; i < _nx_web_http_client_status_maps_size; i++)
         {
             if ((buffer_ptr[9] == _nx_web_http_client_status_maps[i].nx_web_http_client_status_string[0]) &&
