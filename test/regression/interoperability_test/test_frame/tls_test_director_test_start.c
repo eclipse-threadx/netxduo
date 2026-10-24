@@ -9,7 +9,14 @@
 /* SPDX-License-Identifier: MIT                                            */
 /***************************************************************************/
 
+// Portions of this file were generated with AI assistance.
+
 #include "tls_test_frame.h"
+#include <time.h>
+
+/* Grace period for a test instance to exit on SIGTERM before it is killed. */
+#define TLS_TEST_DIRECTOR_TERMINATE_POLL_NS                 100000000L
+#define TLS_TEST_DIRECTOR_TERMINATE_POLL_COUNT              50U
 
 static void signal_handler_wait_all( int signum)
 {
@@ -30,6 +37,45 @@ static void signal_handler_kill_process_group( int signum)
 
     /* Send received signal to every process in current process group. */
     kill( 0, signum);
+}
+
+/* Terminate the process group of a test instance and record its exit status. */
+/* SIGKILL follows the grace period, because an instance running the ThreadX Linux port can wedge after SIGTERM and never exit. */
+static INT tls_test_director_terminate_instance( TLS_TEST_INSTANCE* instance_ptr)
+{
+struct timespec poll_interval = { 0, TLS_TEST_DIRECTOR_TERMINATE_POLL_NS};
+pid_t pid = instance_ptr -> tls_test_instance_current_pid;
+pid_t wait_pid;
+INT exit_status = 0;
+UINT poll_count;
+
+    /* An instance already reaped needs no termination. */
+    if ( 0 == ( instance_ptr -> tls_test_instance_status & TLS_TEST_INSTANCE_STATUS_RUNNING))
+    {
+        return TLS_TEST_SUCCESS;
+    }
+
+    show_error_message_if_fail( -1 != kill( -pid, SIGTERM));
+
+    for ( poll_count = 0U; poll_count < TLS_TEST_DIRECTOR_TERMINATE_POLL_COUNT; poll_count++)
+    {
+        wait_pid = waitpid( pid, &exit_status, WNOHANG);
+        if ( pid == wait_pid)
+        {
+            return tls_test_instance_set_exit_status( instance_ptr, exit_status);
+        }
+        if ( ( -1 == wait_pid) && ( EINTR != errno))
+        {
+            return TLS_TEST_SYSTEM_CALL_FAILED;
+        }
+        (VOID)nanosleep( &poll_interval, NULL);
+    }
+
+    show_error_message_if_fail( -1 != kill( -pid, SIGKILL));
+    while ( ( -1 == ( wait_pid = waitpid( pid, &exit_status, 0))) && ( EINTR == errno));
+    return_value_if_fail( pid == wait_pid, TLS_TEST_SYSTEM_CALL_FAILED);
+
+    return tls_test_instance_set_exit_status( instance_ptr, exit_status);
 }
 
 /* Run test programs. */
@@ -66,19 +112,7 @@ int err = 0;
             /* Cleanup all running test process if fail to fork a new process for the new instance. */
             for ( iter_term = director_ptr -> tls_test_first_instance_ptr; iter_term != iter; tls_test_instance_find_next( iter_term, &iter_term))
             {
-                /* Kill the process group of the test instance. */
-                status = kill( - iter_term -> tls_test_instance_current_pid, SIGTERM);
-                show_error_message_if_fail( -1 != status);
-                if ( -1 == status)
-                    continue;
-
-                /* Get exit status of test instances. */
-                status = waitpid( iter_term -> tls_test_instance_current_pid, &exit_status, 0);
-                show_error_message_if_fail( -1 != status);
-                if ( -1 == status)
-                    continue;
-
-                status = tls_test_instance_set_exit_status( iter_term, exit_status);
+                status = tls_test_director_terminate_instance( iter_term);
                 return_value_if_fail( TLS_TEST_SUCCESS == status, status);
 
             } /* for iter_term */
@@ -153,21 +187,8 @@ int err = 0;
             {
                 if (iter != iter_term)
                 {
-                    /* Kill the process group of the test instance. */
-                    status = kill(-iter_term -> tls_test_instance_current_pid, SIGTERM);
-                    show_error_message_if_fail(-1 != status);
-                    if (-1 != status)
-                    {
-
-                        /* Get exit status of test instances. */
-                        status = waitpid(iter_term -> tls_test_instance_current_pid, &exit_status, 0);
-                        show_error_message_if_fail(-1 != status);
-                        if (-1 != status)
-                        {
-                            status = tls_test_instance_set_exit_status(iter_term, exit_status);
-                            return_value_if_fail(TLS_TEST_SUCCESS == status, status);
-                        }
-                    }
+                    status = tls_test_director_terminate_instance(iter_term);
+                    return_value_if_fail(TLS_TEST_SUCCESS == status, status);
                 }
                 tls_test_instance_find_next( iter_term, &iter_term);
             }

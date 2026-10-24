@@ -2,16 +2,16 @@ Certificate:
     Data:
         Version: 3 (0x2)
         Serial Number: 11 (0xb)
-    Signature Algorithm: ecdsa-with-SHA256
-        Issuer: C=CN, ST=SH, O=EL, OU=EL, CN=ECIntm
+        Signature Algorithm: ecdsa-with-SHA256
+        Issuer: C = CN, ST = SH, O = EL, OU = EL, CN = ECIntm
         Validity
-            Not Before: Jun  8 01:55:11 2018 GMT
-            Not After : Jun  8 01:55:11 2019 GMT
-        Subject: C=CN, ST=SH, O=EL, OU=EL, CN=ECRevoked2
+            Not Before: Aug 13 19:56:59 2026 GMT
+            Not After : Aug 13 19:56:59 2046 GMT
+        Subject: C = CN, ST = SH, O = EL, OU = EL, CN = ECRevoked2
         Subject Public Key Info:
             Public Key Algorithm: id-ecPublicKey
                 Public-Key: (256 bit)
-                pub: 
+                pub:
                     04:1f:4a:62:3f:e5:c7:98:df:cb:63:57:08:7c:e3:
                     7d:2f:68:a9:70:94:4d:f7:d4:79:bf:53:b2:98:3b:
                     96:22:c2:9a:fd:7c:77:10:13:20:d7:4c:33:c5:47:
@@ -20,32 +20,33 @@ Certificate:
                 ASN1 OID: prime256v1
                 NIST CURVE: P-256
         X509v3 extensions:
-            X509v3 Authority Key Identifier: 
-                DirName:/C=CN/ST=SH/L=SH/O=EL/OU=EL/CN=ECCA4
-                serial:0A
-
-            X509v3 Basic Constraints: 
+            X509v3 Basic Constraints:
                 CA:FALSE
-            X509v3 Key Usage: 
+            X509v3 Key Usage:
                 Digital Signature, Non Repudiation, Key Encipherment, Data Encipherment, Key Agreement
-            X509v3 Extended Key Usage: 
+            X509v3 Extended Key Usage:
                 TLS Web Server Authentication, TLS Web Client Authentication, Code Signing, E-mail Protection, Time Stamping
+            X509v3 Subject Key Identifier:
+                6A:22:72:4A:40:7D:2B:D2:F5:AD:D9:F7:D7:28:DA:E6:33:43:99:10
+            X509v3 Authority Key Identifier:
+                DA:20:61:34:B2:72:53:EF:FD:C5:BE:1F:F9:E7:E2:6E:4A:53:B1:D6
     Signature Algorithm: ecdsa-with-SHA256
-         30:44:02:20:31:be:74:d3:dd:4f:3d:fe:c6:40:9e:20:ce:07:
-         5b:c6:18:f1:13:60:f5:00:c9:0c:b3:37:98:59:ec:f3:09:e3:
-         02:20:4e:61:65:97:08:7f:ee:c4:1d:86:31:95:bc:6e:44:fe:
-         02:70:35:aa:70:28:a3:3f:8b:d8:a5:4b:1c:eb:de:fa
+    Signature Value:
+        30:45:02:20:7f:4b:29:1a:65:ec:ac:3d:5e:50:73:cd:d8:b1:
+        32:3c:5e:c5:4d:09:f5:8f:96:9a:65:a7:2e:e9:4d:1f:32:22:
+        02:21:00:d2:6a:28:11:85:94:15:31:11:60:26:67:b6:f4:5e:
+        34:31:42:0e:d6:bf:d5:79:97:91:9d:5e:b3:60:29:c6:48
 -----BEGIN CERTIFICATE-----
-MIICOjCCAeGgAwIBAgIBCzAKBggqhkjOPQQDAjBFMQswCQYDVQQGEwJDTjELMAkG
+MIICFjCCAbygAwIBAgIBCzAKBggqhkjOPQQDAjBFMQswCQYDVQQGEwJDTjELMAkG
 A1UECAwCU0gxCzAJBgNVBAoMAkVMMQswCQYDVQQLDAJFTDEPMA0GA1UEAwwGRUNJ
-bnRtMB4XDTE4MDYwODAxNTUxMVoXDTE5MDYwODAxNTUxMVowSTELMAkGA1UEBhMC
+bnRtMB4XDTI2MDgxMzE5NTY1OVoXDTQ2MDgxMzE5NTY1OVowSTELMAkGA1UEBhMC
 Q04xCzAJBgNVBAgMAlNIMQswCQYDVQQKDAJFTDELMAkGA1UECwwCRUwxEzARBgNV
 BAMMCkVDUmV2b2tlZDIwWTATBgcqhkjOPQIBBggqhkjOPQMBBwNCAAQfSmI/5ceY
 38tjVwh8430vaKlwlE331Hm/U7KYO5Yiwpr9fHcQEyDXTDPFR83I4Op3XvL779v1
-6/ztkXIgxvDEo4G9MIG6MGMGA1UdIwRcMFqhVaRTMFExCzAJBgNVBAYTAkNOMQsw
-CQYDVQQIDAJTSDELMAkGA1UEBwwCU0gxCzAJBgNVBAoMAkVMMQswCQYDVQQLDAJF
-TDEOMAwGA1UEAwwFRUNDQTSCAQowCQYDVR0TBAIwADALBgNVHQ8EBAMCA/gwOwYD
-VR0lBDQwMgYIKwYBBQUHAwEGCCsGAQUFBwMCBggrBgEFBQcDAwYIKwYBBQUHAwQG
-CCsGAQUFBwMIMAoGCCqGSM49BAMCA0cAMEQCIDG+dNPdTz3+xkCeIM4HW8YY8RNg
-9QDJDLM3mFns8wnjAiBOYWWXCH/uxB2GMZW8bkT+AnA1qnAooz+L2KVLHOve+g==
+6/ztkXIgxvDEo4GYMIGVMAkGA1UdEwQCMAAwCwYDVR0PBAQDAgP4MDsGA1UdJQQ0
+MDIGCCsGAQUFBwMBBggrBgEFBQcDAgYIKwYBBQUHAwMGCCsGAQUFBwMEBggrBgEF
+BQcDCDAdBgNVHQ4EFgQUaiJySkB9K9L1rdn31yja5jNDmRAwHwYDVR0jBBgwFoAU
+2iBhNLJyU+/9xb4f+efibkpTsdYwCgYIKoZIzj0EAwIDSAAwRQIgf0spGmXsrD1e
+UHPN2LEyPF7FTQn1j5aaZacu6U0fMiICIQDSaigRhZQVMRFgJme29F40MUIO1r/V
+eZeRnV6zYCnGSA==
 -----END CERTIFICATE-----

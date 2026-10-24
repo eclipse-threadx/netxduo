@@ -87,6 +87,7 @@ UINT                 endpoint_length;
 UINT                 bytes_processed;
 #if (NX_SECURE_TLS_TLS_1_3_ENABLED)
 UINT                 extensions_length;
+UINT                 context_length;
 #endif
 UCHAR               *cert_buffer;
 ULONG                cert_buf_size;
@@ -139,13 +140,38 @@ ULONG                cert_buf_size;
            the beginning of the handshake record. If the first byte is non-zero
            it means the following bytes (length given as the value of that byte)
            should be the context. */
-        packet_buffer++;
-        message_length--;
-      
+
+        /* RFC 8446, section 4.4.2: certificate_request_context is a one-byte
+           length followed by that many bytes. Require the length byte to be
+           present before reading it: message_length is unsigned, so decrementing
+           a zero-length message wrapped it to its maximum and left every bounds
+           check below unable to fail. */
+        if (message_length < 1)
+        {
+            return(NX_SECURE_TLS_INCORRECT_MESSAGE_LENGTH);
+        }
+
+        context_length = (UINT)packet_buffer[0];
+
+        /* Require the context itself to be present as well. The length byte was
+           previously skipped on its own, which left the parser misaligned by the
+           size of the context whenever one was actually supplied. */
+        if (message_length < (1u + context_length))
+        {
+            return(NX_SECURE_TLS_INCORRECT_MESSAGE_LENGTH);
+        }
+
+        packet_buffer += 1u + context_length;
+        message_length -= 1u + context_length;
     }
 #endif
-      
-     
+
+    /* The certificate list length that follows is three bytes. */
+    if (message_length < 3u)
+    {
+        return(NX_SECURE_TLS_INCORRECT_MESSAGE_LENGTH);
+    }
+
     /* Extract the certificate(s) from the incoming data, starting with. */
     total_length = (UINT)((packet_buffer[0] << 16) + (packet_buffer[1] << 8) + packet_buffer[2]);
     length = length + 3;
@@ -244,14 +270,44 @@ ULONG                cert_buf_size;
         /* Check for TLS 1.3 extensions following each certificate. */
         if(tls_session->nx_secure_tls_1_3)
         {
+            /* The two-byte extensions length has to be inside the message before
+               it can be read. */
+            if ((length + 2u) > message_length)
+            {
+                return(NX_SECURE_TLS_INCORRECT_MESSAGE_LENGTH);
+            }
+
             extensions_length = (UINT)((packet_buffer[length] << 8) + packet_buffer[length + 1]);
 
             /* Add extensions length bytes. */
             length += 2;
-            
+
+            /* This entry occupies three length bytes, the certificate, the two
+               extensions length bytes and the extensions themselves, and all of
+               that has to fit in what is left of the certificate list. Without
+               this check the subtraction below wraps, because total_length is
+               unsigned: every later bounds test then compares a three-byte field
+               against a value near its maximum and cannot fail, and the loop
+               continues with a cursor advanced by a length nothing has bounded.
+
+               The subtraction of the certificate itself is safe: the check
+               against total_length earlier in this loop has already established
+               that 3 + cert_length fits. */
+            if ((2u + extensions_length) > (total_length - (3u + cert_length)))
+            {
+                return(NX_SECURE_TLS_INCORRECT_MESSAGE_LENGTH);
+            }
+
+            /* The extensions have to be inside the message as well, since the
+               cursor is about to move past them. */
+            if ((length + extensions_length) > message_length)
+            {
+                return(NX_SECURE_TLS_INCORRECT_MESSAGE_LENGTH);
+            }
+
             /* Add extensions length to offset. */
             length += extensions_length;
-            
+
             /* Adjust the total length with our extension data. */
             total_length -= (2 + extensions_length);
         }

@@ -17,6 +17,17 @@ cd $(dirname $0)
 root_path=$(cd ../../../nx_secure/src; pwd)
 mkdir -p coverage_report/$1
 extra_args=""
+# Always excluded: retained for a future TLS 1.3 session-resumption
+# implementation but currently uncalled. See the header block of
+# nx_secure_tls_send_newsessionticket.c and PR #403 for the reason.
+common_exclude_list="nx_secure_tls_send_newsessionticket.c"
+for e in $common_exclude_list
+do
+    for f in $(ls $root_path/$e);
+    do
+        extra_args+="-e $f "
+    done
+done
 if [ "$1" == "default_build_coverage" ];
 then
     exclude_list="nx*_secure_dtls_*.c \

@@ -1,3 +1,4 @@
+#!/bin/bash
 ##############################################################################
 # Copyright (c) 2024 Microsoft Corporation
 # Copyright (c) 2026 Eclipse ThreadX contributors
@@ -8,8 +9,6 @@
 #
 # SPDX-License-Identifier: MIT
 ##############################################################################
-
-eclipse-threadx#!/bin/bash
 
 cd $(dirname $0)
 

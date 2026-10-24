@@ -11,4 +11,4 @@
 ##############################################################################
 
 
-$(dirname `realpath $0`)/../test/cmake/nx_secure_interoperability/run.sh build all
+"$(dirname "$(realpath "$0")")/run_cmake_suite.sh" nx_secure_interoperability build "$@"

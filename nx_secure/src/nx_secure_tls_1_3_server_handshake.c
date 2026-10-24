@@ -559,20 +559,11 @@ NX_SECURE_TLS_SERVER_STATE            old_server_state;
 
             /* Post-Auth server messages (if any) are sent here. */
 
-            /* For session resumption, send a NewSessionTicket message to allow for resumption PSK to be generated. */
-            status = _nx_secure_tls_allocate_handshake_packet(tls_session, packet_pool, &send_packet, wait_option);
-            if (status != NX_SUCCESS)
-            {
-                break;
-            }
-
-            /* Populate the packet with our NewSessionTicket Message. */
-            status = _nx_secure_tls_send_newsessionticket(tls_session, send_packet);
-            status = _nx_secure_tls_send_handshake_record(tls_session, send_packet, NX_SECURE_TLS_NEW_SESSION_TICKET, wait_option);
-            if(status != NX_SUCCESS)
-            {
-                break;
-            }
+            /* No NewSessionTicket is sent: session resumption is not
+             * implemented on this server, and the message is optional per
+             * RFC 8446 Section 4.6.1. The corresponding rejection path
+             * lives in _nx_secure_tls_process_clienthello_psk_extension,
+             * which is where resumption support would also need to land. */
 
             /* If we get here, the Client Finished was processed without errors and the handshake is complete. */
             tls_session -> nx_secure_tls_server_state = NX_SECURE_TLS_SERVER_STATE_HANDSHAKE_FINISHED;

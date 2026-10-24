@@ -12,7 +12,7 @@ NetX Duo as part of Eclipse ThreadX has been integrated to the semiconductor's S
 
 We also provide [getting started guide](https://github.com/eclipse-threadx/getting-started) and [samples](https://github.com/eclipse-threadx/samples) using hero development boards from semiconductors you can build and test with.
 
-See [Overview of Eclipse ThreadX NetX Duo](https://github.com/eclipse-threadx/rtos-docs/blob/main/rtos-docs/netx-duo/overview-netx-duo.md) for the high-level overview.
+See [Overview of Eclipse ThreadX NetX Duo](https://threadx.io/releases/6.5.1/netx-duo/main/overview-netx-duo.html) for the high-level overview.
 
 ## Repository Structure and Usage
 
@@ -85,7 +85,7 @@ The master branch has the most recent code with all new features and bug fixes. 
 
 ## Protocols and connectivity
 
-Protocols and connectivity support are provided as addon modules within NetX Duo in `addons` folder. Some key modules are: [**azure_iot**](https://github.com/eclipse-threadx/netxduo/tree/master/addons/azure_iot), [**dhcp**](https://github.com/eclipse-threadx/rtos-docs/blob/main/rtos-docs/netx-duo/netx-duo-dhcp-client/chapter1.md), [**dns**](https://github.com/eclipse-threadx/rtos-docs/blob/main/rtos-docs/netx-duo/netx-duo-dns/chapter1.md), [**ftp**](https://github.com/eclipse-threadx/rtos-docs/blob/main/rtos-docs/netx-duo/netx-duo-ftp/chapter1.md), [**http**](https://github.com/eclipse-threadx/rtos-docs/blob/main/rtos-docs/netx-duo/netx-duo-http/Chapter1.md), [**mqtt**](https://github.com/eclipse-threadx/rtos-docs/blob/main/rtos-docs/netx-duo/netx-duo-mqtt/chapter1.md), [**pop3**](https://github.com/eclipse-threadx/rtos-docs/blob/main/rtos-docs/netx-duo/netx-duo-pop3-client/chapter1.md), [**ppp**](https://github.com/eclipse-threadx/rtos-docs/blob/main/rtos-docs/netx-duo/netx-duo-ppp/chapter1.md), [**rtp**](https://github.com/eclipse-threadx/rtos-docs/blob/main/rtos-docs/netx-duo/netx-duo-rtp/chapter1.md), [**rtsp**](https://github.com/eclipse-threadx/rtos-docs/blob/main/rtos-docs/netx-duo/netx-duo-rtsp/chapter1.md), [**sntp**](https://github.com/eclipse-threadx/rtos-docs/blob/main/rtos-docs/netx-duo/netx-duo-sntp-client/chapter1.md), and [**web**](https://github.com/eclipse-threadx/rtos-docs/blob/main/rtos-docs/netx-duo/netx-duo-telnet/chapter1.md). For a full list of NetX Duo addons, you can find in the same [Eclipse ThreadX NetX Duo documentation](https://github.com/eclipse-threadx/rtos-docs/blob/main/rtos-docs/netx-duo/overview-netx-duo.md).
+Protocols and connectivity support are provided as addon modules within NetX Duo in `addons` folder. Some key modules are: [**azure_iot**](https://github.com/eclipse-threadx/netxduo/tree/master/addons/azure_iot), [**dhcp**](https://threadx.io/releases/6.5.1/netx-duo/main/netx-duo-dhcp-client/chapter1.html), [**dns**](https://threadx.io/releases/6.5.1/netx-duo/main/netx-duo-dns/chapter1.html), [**ftp**](https://threadx.io/releases/6.5.1/netx-duo/main/netx-duo-ftp/chapter1.html), [**http**](https://threadx.io/releases/6.5.1/netx-duo/main/netx-duo-http/Chapter1.html), [**mqtt**](https://threadx.io/releases/6.5.1/netx-duo/main/netx-duo-mqtt/chapter1.html), [**pop3**](https://threadx.io/releases/6.5.1/netx-duo/main/netx-duo-pop3-client/chapter1.html), [**ppp**](https://threadx.io/releases/6.5.1/netx-duo/main/netx-duo-ppp/chapter1.html), [**rtp**](https://threadx.io/releases/6.5.1/netx-duo/main/netx-duo-rtp/chapter1.html), [**rtsp**](https://threadx.io/releases/6.5.1/netx-duo/main/netx-duo-rtsp/chapter1.html), [**sntp**](https://threadx.io/releases/6.5.1/netx-duo/main/netx-duo-sntp-client/chapter1.html), and [**web**](https://threadx.io/releases/6.5.1/netx-duo/main/netx-duo-web-http/chapter1.html). For a full list of NetX Duo addons, you can find in the same [Eclipse ThreadX NetX Duo documentation](https://threadx.io/releases/6.5.1/netx-duo/main/overview-netx-duo.html).
 
 ### Samples
 
@@ -141,7 +141,7 @@ License terms for using Eclipse ThreadX are defined in the LICENSE.txt file of t
 
 The following are references to additional Eclipse ThreadX resources:
 
-- **Product introduction**: https://github.com/eclipse-threadx/rtos-docs
+- **Product introduction**: https://threadx.io/releases/latest
 - **Product issues and bugs, or feature requests**: https://github.com/eclipse-threadx/netxduo/issues
 - **TraceX Installer**: https://aka.ms/azrtos-tracex-installer
 

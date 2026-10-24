@@ -1,3 +1,5 @@
+# Portions of this file were generated with AI assistance.
+
 cmake_minimum_required(VERSION 3.13 FATAL_ERROR)
 cmake_policy(SET CMP0057 NEW)
 
@@ -48,8 +50,8 @@ set(tls_1_2_protocol_version_negotiation_test_file_list
     ${SOURCE_DIR}/nx_secure_echo_server_entry.c
     ${SOURCE_DIR}/tls_1_2_openssl_echo_client_entry.c)
 
-list(APPEND nx_secure_test_cases openssl_1_1_protocol_version_negotiation_test)
-set(openssl_1_1_protocol_version_negotiation_test_file_list
+list(APPEND nx_secure_test_cases openssl_3_5_protocol_version_negotiation_test)
+set(openssl_3_5_protocol_version_negotiation_test_file_list
     ${SOURCE_DIR}/tls_ecc_negotiation_test.c
     ${SOURCE_DIR}/nx_secure_ecc_echo_server_entry.c
     ${SOURCE_DIR}/tls_openssl_1_1_prime256v1_echo_client_entry.c)
@@ -329,6 +331,7 @@ set(test_utility_files
   ${UTILITY_SOURCE_DIR}/tls_test_get_external_test_process_output.c
   ${UTILITY_SOURCE_DIR}/tls_test_launch_external_test_process.c
   ${UTILITY_SOURCE_DIR}/tls_test_launch_external_test_process_in_background.c
+  ${UTILITY_SOURCE_DIR}/tls_test_launch_external_test_server.c
   ${UTILITY_SOURCE_DIR}/tls_test_director_clean_all.c
   ${UTILITY_SOURCE_DIR}/tls_test_director_cleanup_registered_instances.c
   ${UTILITY_SOURCE_DIR}/tls_test_director_create.c
@@ -368,6 +371,18 @@ include(network_config.cmake)
 set(PCAP_SOURCE
   ${CMAKE_CURRENT_LIST_DIR}/../../../regression/interoperability_test/nx_pcap_network_driver.c
 )
+set(legacy_server_connect_builds
+    dtls_build_coverage
+    ecjpake_build
+    no_ecc_build_coverage
+    no_renegotiation_build
+    sesip_build_coverage)
+set(tls_1_2_default_builds
+    curve25519_448_build
+    sesip_build_coverage
+    tls_1_3_client_disable_build
+    tls_1_3_enable_build_coverage
+    tls_1_3_server_disable_build)
 foreach(test_case ${nx_secure_test_cases})
   add_executable(${test_case} ${${test_case}_file_list} ${PCAP_SOURCE})
   network_config(${test_case})
@@ -377,17 +392,47 @@ foreach(test_case ${nx_secure_test_cases})
     COMMAND
       bash -c
       "export PATH=${SOURCE_DIR}/test_scripts/:$PATH;
+       pid=;
+       cleanup() { [ -z \"$pid\" ] || kill -TERM \"$pid\" >/dev/null 2>&1; ip link del ${${test_case}_interface} >/dev/null 2>&1; };
+       trap cleanup EXIT;
+       trap 'exit 130' INT;
+       trap 'exit 143' TERM;
        ip link del ${${test_case}_interface}>/dev/null 2>&1;
        ip link add ${${test_case}_interface} type veth peer name ${${test_case}_remote_interface} || exit 1;
-       ifconfig ${${test_case}_interface} up || { ip link del ${${test_case}_interface}; exit 1; };
-       ifconfig ${${test_case}_remote_interface} ${${test_case}_remote_ip} up netmask ${TEST_NETMASK} || { ip link del ${${test_case}_interface};exit 1; };
-       ethtool --offload ${${test_case}_remote_interface} tx off || { ip link del ${${test_case}_interface}; exit 1; };
+       ip link set dev ${${test_case}_interface} up || exit 1;
+       ip address add ${${test_case}_remote_ip}/${TEST_PREFIX_LENGTH} broadcast + dev ${${test_case}_remote_interface} || exit 1;
+       ip link set dev ${${test_case}_remote_interface} up || exit 1;
+       ethtool --offload ${${test_case}_remote_interface} tx off || exit 1;
        tcpdump -i ${${test_case}_remote_interface} -s 0 -w ${CMAKE_CURRENT_BINARY_DIR}/${test_case}.pcap&
        pid=$!
+       sleep 1;
        ${CMAKE_CURRENT_BINARY_DIR}/${test_case};
        exit_code=$?
        sleep 1;
-       kill -TERM $pid
+       kill -TERM $pid;
        [[ $exit_code = 0 ]] || [[ $exit_code = 233 ]] || { echo Exit code: $exit_code; exit $exit_code; };"
     WORKING_DIRECTORY ${SOURCE_DIR})
+  # Prevent a recovered interoperability hang from consuming the suite timeout.
+  set_tests_properties(${CMAKE_BUILD_TYPE}::${test_case} PROPERTIES TIMEOUT 180)
+  set(test_environment)
+  if(CMAKE_BUILD_TYPE IN_LIST legacy_server_connect_builds)
+    # NetX DTLS and builds without RFC 5746 need OpenSSL's explicit opt-in.
+    list(APPEND test_environment "NETXDUO_OPENSSL_LEGACY_SERVER_CONNECT=1")
+  endif()
+  if(CMAKE_BUILD_TYPE IN_LIST tls_1_2_default_builds)
+    # Keep legacy test cases on TLS 1.2 when the build also enables TLS 1.3.
+    list(APPEND test_environment "NETXDUO_OPENSSL_TLS_1_2_DEFAULT=1")
+  endif()
+  if(test_environment)
+    set_property(TEST ${CMAKE_BUILD_TYPE}::${test_case}
+                 APPEND PROPERTY ENVIRONMENT ${test_environment})
+  endif()
 endforeach()
+
+add_test(
+  NAME ${CMAKE_BUILD_TYPE}::test_certificate_validity
+  COMMAND bash ${SOURCE_DIR}/../verify_test_certificates.sh)
+
+add_test(
+  NAME ${CMAKE_BUILD_TYPE}::test_openssl_wrapper
+  COMMAND bash ${SOURCE_DIR}/test_scripts/test_openssl_wrapper.sh)

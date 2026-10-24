@@ -88,6 +88,9 @@ typedef struct _TLS_TEST_EXTERNAL_TEST_PROCESS
     INT     tls_test_external_test_process_id;
 } TLS_TEST_EXTERNAL_TEST_PROCESS;
 
+#define TLS_TEST_EXTERNAL_SERVER_TCP                      0U
+#define TLS_TEST_EXTERNAL_SERVER_UDP                      1U
+
 /* Test instance methods. */
 INT tls_test_instance_append( TLS_TEST_INSTANCE* instance_ptr, TLS_TEST_INSTANCE* next_instance_ptr);
 INT tls_test_instance_create( TLS_TEST_INSTANCE** instance_ptr_ptr, CHAR* instance_name, InstanceTestEntryFunc test_entry, UINT delay, UINT timeout, UINT shared_buffer_size, VOID* reserved);
@@ -123,6 +126,7 @@ INT tls_test_semaphore_destroy( TLS_TEST_SEMAPHORE* semaphore_ptr);
 INT tls_test_get_external_test_process_output( INT* exit_status_ptr, CHAR* argv[], VOID* output_buffer, ULONG* length_ptr);
 INT tls_test_launch_external_test_process( INT* exit_status_ptr, CHAR* argv[]);
 INT tls_test_launch_external_test_process_in_background( TLS_TEST_EXTERNAL_TEST_PROCESS* test_process_ptr, CHAR* argv[]);
+INT tls_test_launch_external_test_server( INT* exit_status_ptr, CHAR* argv[], TLS_TEST_SEMAPHORE* semaphore_ptr, CHAR* port, UINT protocol);
 INT tls_test_kill_external_test_process( TLS_TEST_EXTERNAL_TEST_PROCESS* test_process_ptr);
 INT tls_test_wait_all_child_process( void* reserved_ptr);
 INT tls_test_wait_external_test_process( TLS_TEST_EXTERNAL_TEST_PROCESS* test_process_ptr, INT* exit_status_ptr);
