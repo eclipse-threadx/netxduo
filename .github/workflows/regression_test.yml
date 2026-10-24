@@ -21,13 +21,16 @@ jobs:
       pull-requests: write
       pages: write
       id-token: write
-    uses: eclipse-threadx/threadx/.github/workflows/regression_template.yml@master
+    uses: eclipse-threadx/threadx/.github/workflows/regression_template.yml@2a63ccf51c81c23a219aea32679b0a4f3c8bd2d9
     with:
       build_script: ./scripts/build_nxd.sh
       test_script: ./scripts/test_nxd.sh
       cmake_path: ./test/cmake/netxduo
       result_affix: NetXDuo
       coverage_name: default_build_coverage
+      # The test step runs all 43 configurations and took 201 minutes on
+      # 2026-10-25, against the template's 60 minute default.
+      test_timeout_minutes: 300
       # This suite builds 42 instrumented configurations in one job and needs
       # just over the template's 15 minute default, which it has been hitting
       # since at least 2026-10-02.
@@ -41,7 +44,7 @@ jobs:
       pull-requests: write
       pages: write
       id-token: write
-    uses: eclipse-threadx/threadx/.github/workflows/regression_template.yml@master
+    uses: eclipse-threadx/threadx/.github/workflows/regression_template.yml@2a63ccf51c81c23a219aea32679b0a4f3c8bd2d9
     with:
       build_script: ./scripts/build_web.sh
       test_script: ./scripts/test_web.sh
@@ -57,7 +60,7 @@ jobs:
       pull-requests: write
       pages: write
       id-token: write
-    uses: eclipse-threadx/threadx/.github/workflows/regression_template.yml@master
+    uses: eclipse-threadx/threadx/.github/workflows/regression_template.yml@2a63ccf51c81c23a219aea32679b0a4f3c8bd2d9
     with:
       build_script: ./scripts/build_ptp.sh
       test_script: ./scripts/test_ptp.sh
@@ -73,7 +76,7 @@ jobs:
       pull-requests: write
       pages: write
       id-token: write
-    uses: eclipse-threadx/threadx/.github/workflows/regression_template.yml@master
+    uses: eclipse-threadx/threadx/.github/workflows/regression_template.yml@2a63ccf51c81c23a219aea32679b0a4f3c8bd2d9
     with:
       build_script: ./scripts/build_mqtt.sh
       test_script: ./scripts/test_mqtt.sh
@@ -89,7 +92,7 @@ jobs:
       pull-requests: write
       pages: write
       id-token: write
-    uses: eclipse-threadx/threadx/.github/workflows/regression_template.yml@master
+    uses: eclipse-threadx/threadx/.github/workflows/regression_template.yml@2a63ccf51c81c23a219aea32679b0a4f3c8bd2d9
     with:
       build_script: ./scripts/build_nxd64.sh
       test_script: ./scripts/test_nxd64.sh
@@ -105,7 +108,7 @@ jobs:
       pull-requests: write
       pages: write
       id-token: write
-    uses: eclipse-threadx/threadx/.github/workflows/regression_template.yml@master
+    uses: eclipse-threadx/threadx/.github/workflows/regression_template.yml@2a63ccf51c81c23a219aea32679b0a4f3c8bd2d9
     with:
       build_script: ./scripts/build_nxd_fast.sh
       test_script: ./scripts/test_nxd_fast.sh
@@ -121,7 +124,7 @@ jobs:
       pull-requests: write
       pages: write
       id-token: write
-    uses: eclipse-threadx/threadx/.github/workflows/regression_template.yml@master
+    uses: eclipse-threadx/threadx/.github/workflows/regression_template.yml@2a63ccf51c81c23a219aea32679b0a4f3c8bd2d9
     with:
       build_script: ./scripts/build_secure.sh
       test_script: ./scripts/test_secure.sh
@@ -137,7 +140,7 @@ jobs:
       pull-requests: write
       pages: write
       id-token: write
-    uses: eclipse-threadx/threadx/.github/workflows/regression_template.yml@master
+    uses: eclipse-threadx/threadx/.github/workflows/regression_template.yml@2a63ccf51c81c23a219aea32679b0a4f3c8bd2d9
     with:
       build_script: ./scripts/build_crypto.sh
       test_script: ./scripts/test_crypto.sh
@@ -153,7 +156,7 @@ jobs:
       pull-requests: write
       pages: write
       id-token: write
-    uses: eclipse-threadx/threadx/.github/workflows/regression_template.yml@master
+    uses: eclipse-threadx/threadx/.github/workflows/regression_template.yml@2a63ccf51c81c23a219aea32679b0a4f3c8bd2d9
     with:
       install_script: ./scripts/install_secure.sh
       build_script: ./scripts/build_secure_interoperability.sh
@@ -170,7 +173,7 @@ jobs:
       pull-requests: write
       pages: write
       id-token: write
-    uses: eclipse-threadx/threadx/.github/workflows/regression_template.yml@master
+    uses: eclipse-threadx/threadx/.github/workflows/regression_template.yml@2a63ccf51c81c23a219aea32679b0a4f3c8bd2d9
     with:
       install_script: ./scripts/install_mqtt.sh
       build_script: ./scripts/build_mqtt_interoperability.sh
@@ -195,7 +198,7 @@ jobs:
       pages: write
       id-token: write
     needs: [NetXDuo, Web, MQTT, NetXDuo64, NetXDuo_Fast, Secure, Crypto, Secure_Interoperability, MQTT_Interoperability]
-    uses: eclipse-threadx/threadx/.github/workflows/regression_template.yml@master
+    uses: eclipse-threadx/threadx/.github/workflows/regression_template.yml@2a63ccf51c81c23a219aea32679b0a4f3c8bd2d9
     with:
       skip_test: true
       deploy_list: "NetXDuo Web MQTT NetXDuo64 NetXDuo_Fast Secure Crypto Secure_Interoperability MQTT_Interoperability"
