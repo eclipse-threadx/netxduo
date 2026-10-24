@@ -9,6 +9,8 @@
  * SPDX-License-Identifier: MIT
  **************************************************************************/
 
+// Portions of this file were generated with AI assistance.
+
 
 /**************************************************************************/
 /**************************************************************************/
@@ -169,6 +171,7 @@ NX_INTERFACE *interface_ptr;
                                 NX_PROTOCOL_TCP,
                                 packet_ptr -> nx_packet_length,
                                 ip_ptr -> nx_ipv6_hop_limit,
+                                0,
                                 socket_ptr -> nx_tcp_socket_connect_ip.nxd_ip_address.v6,
                                 socket_ptr -> nx_tcp_socket_ipv6_addr -> nxd_ipv6_address,
                                 NX_NULL))
