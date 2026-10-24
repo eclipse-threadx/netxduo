@@ -21,7 +21,7 @@ jobs:
       pull-requests: write
       pages: write
       id-token: write
-    uses: eclipse-threadx/threadx/.github/workflows/regression_template.yml@master
+    uses: eclipse-threadx/threadx/.github/workflows/regression_template.yml@822e1e9dd31c827a812adbdca27c457e27b9a4b1
     with:
       build_script: ./scripts/build_nxd.sh
       test_script: ./scripts/test_nxd.sh
@@ -41,7 +41,7 @@ jobs:
       pull-requests: write
       pages: write
       id-token: write
-    uses: eclipse-threadx/threadx/.github/workflows/regression_template.yml@master
+    uses: eclipse-threadx/threadx/.github/workflows/regression_template.yml@822e1e9dd31c827a812adbdca27c457e27b9a4b1
     with:
       build_script: ./scripts/build_web.sh
       test_script: ./scripts/test_web.sh
@@ -57,7 +57,7 @@ jobs:
       pull-requests: write
       pages: write
       id-token: write
-    uses: eclipse-threadx/threadx/.github/workflows/regression_template.yml@master
+    uses: eclipse-threadx/threadx/.github/workflows/regression_template.yml@822e1e9dd31c827a812adbdca27c457e27b9a4b1
     with:
       build_script: ./scripts/build_ptp.sh
       test_script: ./scripts/test_ptp.sh
@@ -73,7 +73,7 @@ jobs:
       pull-requests: write
       pages: write
       id-token: write
-    uses: eclipse-threadx/threadx/.github/workflows/regression_template.yml@master
+    uses: eclipse-threadx/threadx/.github/workflows/regression_template.yml@822e1e9dd31c827a812adbdca27c457e27b9a4b1
     with:
       build_script: ./scripts/build_mqtt.sh
       test_script: ./scripts/test_mqtt.sh
@@ -89,7 +89,7 @@ jobs:
       pull-requests: write
       pages: write
       id-token: write
-    uses: eclipse-threadx/threadx/.github/workflows/regression_template.yml@master
+    uses: eclipse-threadx/threadx/.github/workflows/regression_template.yml@822e1e9dd31c827a812adbdca27c457e27b9a4b1
     with:
       build_script: ./scripts/build_nxd64.sh
       test_script: ./scripts/test_nxd64.sh
@@ -105,7 +105,7 @@ jobs:
       pull-requests: write
       pages: write
       id-token: write
-    uses: eclipse-threadx/threadx/.github/workflows/regression_template.yml@master
+    uses: eclipse-threadx/threadx/.github/workflows/regression_template.yml@822e1e9dd31c827a812adbdca27c457e27b9a4b1
     with:
       build_script: ./scripts/build_nxd_fast.sh
       test_script: ./scripts/test_nxd_fast.sh
@@ -121,7 +121,7 @@ jobs:
       pull-requests: write
       pages: write
       id-token: write
-    uses: eclipse-threadx/threadx/.github/workflows/regression_template.yml@master
+    uses: eclipse-threadx/threadx/.github/workflows/regression_template.yml@822e1e9dd31c827a812adbdca27c457e27b9a4b1
     with:
       build_script: ./scripts/build_secure.sh
       test_script: ./scripts/test_secure.sh
@@ -137,7 +137,7 @@ jobs:
       pull-requests: write
       pages: write
       id-token: write
-    uses: eclipse-threadx/threadx/.github/workflows/regression_template.yml@master
+    uses: eclipse-threadx/threadx/.github/workflows/regression_template.yml@822e1e9dd31c827a812adbdca27c457e27b9a4b1
     with:
       build_script: ./scripts/build_crypto.sh
       test_script: ./scripts/test_crypto.sh
@@ -153,7 +153,7 @@ jobs:
       pull-requests: write
       pages: write
       id-token: write
-    uses: eclipse-threadx/threadx/.github/workflows/regression_template.yml@master
+    uses: eclipse-threadx/threadx/.github/workflows/regression_template.yml@822e1e9dd31c827a812adbdca27c457e27b9a4b1
     with:
       install_script: ./scripts/install_secure.sh
       build_script: ./scripts/build_secure_interoperability.sh
@@ -170,7 +170,7 @@ jobs:
       pull-requests: write
       pages: write
       id-token: write
-    uses: eclipse-threadx/threadx/.github/workflows/regression_template.yml@master
+    uses: eclipse-threadx/threadx/.github/workflows/regression_template.yml@822e1e9dd31c827a812adbdca27c457e27b9a4b1
     with:
       install_script: ./scripts/install_mqtt.sh
       build_script: ./scripts/build_mqtt_interoperability.sh
@@ -195,7 +195,7 @@ jobs:
       pages: write
       id-token: write
     needs: [NetXDuo, Web, MQTT, NetXDuo64, NetXDuo_Fast, Secure, Crypto, Secure_Interoperability, MQTT_Interoperability]
-    uses: eclipse-threadx/threadx/.github/workflows/regression_template.yml@master
+    uses: eclipse-threadx/threadx/.github/workflows/regression_template.yml@822e1e9dd31c827a812adbdca27c457e27b9a4b1
     with:
       skip_test: true
       deploy_list: "NetXDuo Web MQTT NetXDuo64 NetXDuo_Fast Secure Crypto Secure_Interoperability MQTT_Interoperability"
