@@ -10,6 +10,8 @@
  **************************************************************************/
 // Portions of this file were generated with AI assistance.
 
+/* Portions of this file were generated with AI assistance. */
+
 
 /**************************************************************************/
 /**************************************************************************/
@@ -292,6 +294,12 @@ NX_IPV6_DEFAULT_ROUTER_ENTRY *rt_entry;
         ipv6_address      = next_ipv6_address;
         next_ipv6_address = next_ipv6_address -> nxd_ipv6_address_next;
         memset(ipv6_address, 0, sizeof(NXD_IPV6_ADDRESS));
+
+#ifdef FEATURE_NX_IPV6
+        /* Preserve the index for address-change callbacks when this slot is
+           reused, as nxd_ipv6_address_delete does.  */
+        ipv6_address -> nxd_ipv6_address_index = (UCHAR)(ipv6_address - ip_ptr -> nx_ipv6_address);
+#endif /* FEATURE_NX_IPV6 */
     }
 
     /* Zero out the interface. */
