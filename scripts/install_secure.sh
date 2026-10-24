@@ -9,7 +9,12 @@
 #
 # SPDX-License-Identifier: MIT
 ##############################################################################
+
+# Portions of this file were generated with AI assistance.
+
 set -euo pipefail
+
+. "$(dirname "$(realpath "$0")")/ci_common.sh"
 
 readonly OPENSSL_VERSION="3.5.7"
 readonly OPENSSL_SHA256="a8c0d28a529ca480f9f36cf5792e2cd21984552a3c8e4aa11a24aa31aeac98e8"
@@ -23,33 +28,40 @@ trap 'rm -rf -- "${secure_tmp_dir}"' EXIT
 
 sudo dpkg --add-architecture i386
 
-sudo apt update
-sudo apt install -y \
-    gcc-14 \
-    g++-14 \
-    gcc-14-multilib \
-    g++-14-multilib \
-    python3-pip \
-    build-essential \
-    ca-certificates \
-    cmake \
-    ninja-build \
-    perl \
-    wget \
-    unifdef \
-    tofrodos \
-    gcovr \
-    libpcap-dev:i386 libgcc-s1:i386 \
+ci_apt_update
+
+# CMake comes from apt only when none is on PATH: a runner image's own CMake
+# would shadow the package.
+packages=(
+    gcc-14
+    g++-14
+    gcc-14-multilib
+    g++-14-multilib
+    python3-pip
+    build-essential
+    ca-certificates
+    ninja-build
+    perl
+    wget
+    unifdef
+    tofrodos
+    gcovr
+    libpcap-dev:i386 libgcc-s1:i386
     ethtool
+)
+if ! command -v cmake > /dev/null; then
+    packages+=(cmake)
+fi
+ci_apt_install "${packages[@]}"
 
 sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-14 140
 sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-14 140
 sudo update-alternatives --install /usr/bin/gcov gcov /usr/bin/gcov-14 140
 
 openssl_archive="${secure_tmp_dir}/openssl-${OPENSSL_VERSION}.tar.gz"
-wget --quiet --output-document "${openssl_archive}" \
-    "https://github.com/openssl/openssl/releases/download/openssl-${OPENSSL_VERSION}/openssl-${OPENSSL_VERSION}.tar.gz"
-printf '%s  %s\n' "${OPENSSL_SHA256}" "${openssl_archive}" | sha256sum --check --strict
+ci_download \
+    "https://github.com/openssl/openssl/releases/download/openssl-${OPENSSL_VERSION}/openssl-${OPENSSL_VERSION}.tar.gz" \
+    "${openssl_archive}" "${OPENSSL_SHA256}"
 tar -xzf "${openssl_archive}" -C "${secure_tmp_dir}"
 pushd "${secure_tmp_dir}/openssl-${OPENSSL_VERSION}"
 ./Configure --prefix="${OPENSSL_PREFIX}" --openssldir="${OPENSSL_PREFIX}/ssl" no-shared
@@ -59,9 +71,9 @@ popd
 
 wolfssl_archive="${secure_tmp_dir}/wolfssl-${WOLFSSL_VERSION}.tar.gz"
 # wolfSSL remains a host-side test executable; NetX Duo does not link to it.
-wget --quiet --output-document "${wolfssl_archive}" \
-    "https://github.com/wolfSSL/wolfssl/archive/refs/tags/v${WOLFSSL_VERSION}-stable.tar.gz"
-printf '%s  %s\n' "${WOLFSSL_SHA256}" "${wolfssl_archive}" | sha256sum --check --strict
+ci_download \
+    "https://github.com/wolfSSL/wolfssl/archive/refs/tags/v${WOLFSSL_VERSION}-stable.tar.gz" \
+    "${wolfssl_archive}" "${WOLFSSL_SHA256}"
 tar -xzf "${wolfssl_archive}" -C "${secure_tmp_dir}"
 wolfssl_source="${secure_tmp_dir}/wolfssl-${WOLFSSL_VERSION}-stable"
 cmake -S "${wolfssl_source}" -B "${secure_tmp_dir}/wolfssl-build" -G Ninja \

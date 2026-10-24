@@ -9,6 +9,7 @@
  * SPDX-License-Identifier: MIT
  **************************************************************************/
 
+/* Portions of this file were generated with AI assistance. */
 
 /**************************************************************************/
 /**************************************************************************/
@@ -1337,6 +1338,87 @@ NX_PACKET   *tmp_ptr;
     return(NX_WEB_HTTP_ERROR);
 }
 
+/* Move the response head to the first body byte and release header packets.  */
+static NX_PACKET *_nx_web_http_client_response_header_trim(NX_PACKET *packet_ptr, UINT offset)
+{
+#ifndef NX_DISABLE_PACKET_CHAIN
+NX_PACKET *next_packet_ptr;
+NX_PACKET *last_packet_ptr = packet_ptr -> nx_packet_last;
+#endif /* NX_DISABLE_PACKET_CHAIN */
+ULONG      remaining_length = packet_ptr -> nx_packet_length - offset;
+#ifndef NX_DISABLE_PACKET_CHAIN
+ULONG      fragment_length;
+#endif /* NX_DISABLE_PACKET_CHAIN */
+
+#ifndef NX_DISABLE_PACKET_CHAIN
+    fragment_length = (ULONG)(packet_ptr -> nx_packet_append_ptr - packet_ptr -> nx_packet_prepend_ptr);
+    while ((offset >= fragment_length) && (packet_ptr -> nx_packet_next != NX_NULL))
+    {
+        offset -= (UINT)fragment_length;
+        next_packet_ptr = packet_ptr -> nx_packet_next;
+        packet_ptr -> nx_packet_next = NX_NULL;
+        nx_packet_release(packet_ptr);
+        packet_ptr = next_packet_ptr;
+        fragment_length = (ULONG)(packet_ptr -> nx_packet_append_ptr - packet_ptr -> nx_packet_prepend_ptr);
+    }
+#endif /* NX_DISABLE_PACKET_CHAIN */
+
+    packet_ptr -> nx_packet_prepend_ptr += offset;
+    packet_ptr -> nx_packet_length = remaining_length;
+#ifndef NX_DISABLE_PACKET_CHAIN
+    packet_ptr -> nx_packet_last = last_packet_ptr;
+#endif /* NX_DISABLE_PACKET_CHAIN */
+    return(packet_ptr);
+}
+
+/* Locate the response status prefix using bytes present in the chain.  */
+UINT _nx_web_http_client_response_prefix_get(NX_PACKET *packet_ptr, CHAR *buffer, CHAR **prefix)
+{
+NX_PACKET *current_packet_ptr = packet_ptr;
+ULONG      copied = 0;
+ULONG      fragment_length;
+ULONG      copy_length;
+
+    if (packet_ptr -> nx_packet_length < 12U)
+    {
+        return(NX_WEB_HTTP_ERROR);
+    }
+
+    if ((ULONG)(packet_ptr -> nx_packet_append_ptr - packet_ptr -> nx_packet_prepend_ptr) >= 12U)
+    {
+        *prefix = (CHAR *)packet_ptr -> nx_packet_prepend_ptr;
+        return(NX_SUCCESS);
+    }
+
+    while ((current_packet_ptr != NX_NULL) && (copied < 12U))
+    {
+        fragment_length = (ULONG)(current_packet_ptr -> nx_packet_append_ptr -
+                                  current_packet_ptr -> nx_packet_prepend_ptr);
+        copy_length = 12U - copied;
+        if (fragment_length < copy_length)
+        {
+            copy_length = fragment_length;
+        }
+        if (copy_length != 0U)
+        {
+            memcpy(buffer + copied, current_packet_ptr -> nx_packet_prepend_ptr, copy_length);
+            copied += copy_length;
+        }
+#ifndef NX_DISABLE_PACKET_CHAIN
+        current_packet_ptr = current_packet_ptr -> nx_packet_next;
+#else
+        current_packet_ptr = NX_NULL;
+#endif /* NX_DISABLE_PACKET_CHAIN */
+    }
+
+    if (copied != 12U)
+    {
+        return(NX_WEB_HTTP_ERROR);
+    }
+    *prefix = buffer;
+    return(NX_SUCCESS);
+}
+
 /**************************************************************************/
 /*                                                                        */
 /*  FUNCTION                                               RELEASE        */
@@ -1444,6 +1526,7 @@ UINT        status = NX_SUCCESS;
 UINT        length = 0, offset = 0;
 NX_PACKET   *response_packet_ptr = NX_NULL;
 CHAR        *buffer_ptr;
+CHAR        response_start[12];
 UINT        i = 0;
 UINT        status_code = NX_SUCCESS;
 
@@ -1465,12 +1548,12 @@ UINT        status_code = NX_SUCCESS;
         /* Pickup the response from the Server.  */
         status =  _nx_web_http_client_get_server_response(client_ptr, &response_packet_ptr, wait_option);
 
-        /* Validate the response packet length.  */
+        /* Validate the response prefix against the packet chain.  */
         if (status == NX_SUCCESS)
         {
-            if (response_packet_ptr -> nx_packet_append_ptr - response_packet_ptr -> nx_packet_prepend_ptr < 12)
+            if (_nx_web_http_client_response_prefix_get(response_packet_ptr, response_start,
+                                                        &buffer_ptr) != NX_SUCCESS)
             {
-
                 /* Release invalid packet.  */
                 nx_packet_release(response_packet_ptr);
                 status = NX_WEB_HTTP_ERROR;
@@ -1492,9 +1575,6 @@ UINT        status_code = NX_SUCCESS;
 
             return(status);
         }
-
-        /* Setup pointer to server response.  */
-        buffer_ptr =  (CHAR *) response_packet_ptr -> nx_packet_prepend_ptr;
 
         /* Determine which status code is received.  */
         for (i = 0; i < _nx_web_http_client_status_maps_size; i++)
@@ -1559,11 +1639,8 @@ UINT        status_code = NX_SUCCESS;
                 }
                 client_ptr -> nx_web_http_client_actual_bytes_received = 0;
 
-                /* Adjust the pointers to skip over the response header.  */
-                response_packet_ptr -> nx_packet_prepend_ptr = response_packet_ptr -> nx_packet_prepend_ptr + offset;
-
-                /* Reduce the length.  */
-                response_packet_ptr -> nx_packet_length = response_packet_ptr -> nx_packet_length - offset;
+                /* Skip the response header across the packet chain.  */
+                response_packet_ptr = _nx_web_http_client_response_header_trim(response_packet_ptr, offset);
 
                 /* Set for processing chunked response.  */
                 if (client_ptr -> nx_web_http_client_response_chunked)
@@ -5674,6 +5751,305 @@ UINT    i;
 }
 
 
+/* Tracks the next byte of a response header across a packet chain.  */
+typedef struct NX_WEB_HTTP_CLIENT_HEADER_CURSOR_STRUCT
+{
+    NX_PACKET *packet_ptr;
+    UCHAR     *data_ptr;
+    ULONG      offset;
+    ULONG      length;
+} NX_WEB_HTTP_CLIENT_HEADER_CURSOR;
+
+/* Read one header byte, advancing to the next packet when needed.  */
+static UINT _nx_web_http_client_header_byte_get(NX_WEB_HTTP_CLIENT_HEADER_CURSOR *cursor, UCHAR *value)
+{
+    if (cursor -> offset >= cursor -> length)
+    {
+        return(NX_WEB_HTTP_ERROR);
+    }
+
+    while ((cursor -> packet_ptr != NX_NULL) &&
+           (cursor -> data_ptr == cursor -> packet_ptr -> nx_packet_append_ptr))
+    {
+#ifndef NX_DISABLE_PACKET_CHAIN
+        cursor -> packet_ptr = cursor -> packet_ptr -> nx_packet_next;
+#else
+        cursor -> packet_ptr = NX_NULL;
+#endif /* NX_DISABLE_PACKET_CHAIN */
+        if (cursor -> packet_ptr != NX_NULL)
+        {
+            cursor -> data_ptr = cursor -> packet_ptr -> nx_packet_prepend_ptr;
+        }
+    }
+
+    if (cursor -> packet_ptr == NX_NULL)
+    {
+        return(NX_WEB_HTTP_ERROR);
+    }
+
+    *value = *(cursor -> data_ptr);
+    cursor -> data_ptr++;
+    cursor -> offset++;
+    return(NX_SUCCESS);
+}
+
+/* Select the packet view or bounded copy of a parsed header field.  */
+static UINT _nx_web_http_client_header_field_select(NX_PACKET *packet_ptr, UCHAR *start_ptr,
+                                                    UINT length, CHAR *buffer, CHAR **field)
+{
+    if (length == 0U)
+    {
+        *field = buffer;
+        return(NX_SUCCESS);
+    }
+
+    if (length <= (ULONG)(packet_ptr -> nx_packet_append_ptr - start_ptr))
+    {
+        *field = (CHAR *)start_ptr;
+        return(NX_SUCCESS);
+    }
+
+    if (length > NX_WEB_HTTP_MAX_HEADER_FIELD)
+    {
+        return(NX_WEB_HTTP_ERROR);
+    }
+
+    *field = buffer;
+    return(NX_SUCCESS);
+}
+
+/* Parse response fields and return the body offset across the packet chain.  */
+static UINT _nx_web_http_client_header_parse(NX_WEB_HTTP_CLIENT *client_ptr, NX_PACKET *packet_ptr,
+                                              UINT *content_length, UINT process_fields)
+{
+NX_WEB_HTTP_CLIENT_HEADER_CURSOR cursor;
+UCHAR      byte;
+UCHAR      status_line[8];
+UCHAR      name_prefix[17];
+UCHAR      value_prefix[32];
+UINT       line_length = 0;
+UINT       name_length;
+UINT       value_length;
+UINT       i;
+UINT       value;
+UINT       digit_count;
+UINT       valid;
+UINT       version;
+NX_PACKET *name_packet_ptr;
+NX_PACKET *value_packet_ptr;
+UCHAR     *name_start_ptr;
+UCHAR     *value_start_ptr;
+CHAR       name_buffer[NX_WEB_HTTP_MAX_HEADER_FIELD];
+CHAR       value_buffer[NX_WEB_HTTP_MAX_HEADER_FIELD];
+CHAR      *name_ptr;
+CHAR      *value_ptr;
+
+    cursor.packet_ptr = packet_ptr;
+    cursor.data_ptr = packet_ptr -> nx_packet_prepend_ptr;
+    cursor.offset = 0;
+    cursor.length = packet_ptr -> nx_packet_length;
+    *content_length = 0;
+
+    /* Skip the status line, retaining its HTTP version.  */
+    for (;;)
+    {
+        if (_nx_web_http_client_header_byte_get(&cursor, &byte) != NX_SUCCESS)
+        {
+            return(0);
+        }
+        if (byte == (UCHAR)13)
+        {
+            if ((_nx_web_http_client_header_byte_get(&cursor, &byte) != NX_SUCCESS) ||
+                (byte != (UCHAR)10) || (line_length < 12))
+            {
+                return(0);
+            }
+            break;
+        }
+        if ((byte == (UCHAR)10) || (byte == (UCHAR)0))
+        {
+            return(0);
+        }
+        if (line_length < sizeof(status_line))
+        {
+            status_line[line_length] = byte;
+        }
+        line_length++;
+    }
+
+    if ((status_line[5] < (UCHAR)'0') || (status_line[5] > (UCHAR)'9') ||
+        (status_line[7] < (UCHAR)'0') || (status_line[7] > (UCHAR)'9'))
+    {
+        return(0);
+    }
+    version = ((UINT)(status_line[5] - (UCHAR)'0') << 4) |
+              (UINT)(status_line[7] - (UCHAR)'0');
+    if (version == 0)
+    {
+        return(0);
+    }
+#ifndef NX_WEB_HTTP_KEEPALIVE_DISABLE
+    if (process_fields != NX_FALSE)
+    {
+        client_ptr -> nx_web_http_client_keep_alive = (version > 0x10U) ? NX_TRUE : NX_FALSE;
+    }
+#endif
+    if (process_fields != NX_FALSE)
+    {
+        client_ptr -> nx_web_http_client_response_chunked = NX_FALSE;
+    }
+
+    for (;;)
+    {
+        if (_nx_web_http_client_header_byte_get(&cursor, &byte) != NX_SUCCESS)
+        {
+            return(0);
+        }
+        if (byte == (UCHAR)13)
+        {
+            if ((_nx_web_http_client_header_byte_get(&cursor, &byte) != NX_SUCCESS) ||
+                (byte != (UCHAR)10))
+            {
+                return(0);
+            }
+            return((UINT)cursor.offset);
+        }
+
+        name_packet_ptr = cursor.packet_ptr;
+        name_start_ptr = cursor.data_ptr - 1;
+
+        name_length = 0;
+        while (byte != (UCHAR)':')
+        {
+            if ((byte == (UCHAR)13) || (byte == (UCHAR)10) || (byte == (UCHAR)0))
+            {
+                return(0);
+            }
+            if (name_length < sizeof(name_prefix))
+            {
+                name_prefix[name_length] = byte;
+            }
+            if (name_length < sizeof(name_buffer))
+            {
+                name_buffer[name_length] = (CHAR)byte;
+            }
+            name_length++;
+            if (_nx_web_http_client_header_byte_get(&cursor, &byte) != NX_SUCCESS)
+            {
+                return(0);
+            }
+        }
+
+        do
+        {
+            if (_nx_web_http_client_header_byte_get(&cursor, &byte) != NX_SUCCESS)
+            {
+                return(0);
+            }
+        } while (byte == (UCHAR)' ');
+
+        value_packet_ptr = cursor.packet_ptr;
+        value_start_ptr = cursor.data_ptr - 1;
+        value_length = 0;
+        while (byte != (UCHAR)13)
+        {
+            if ((byte == (UCHAR)10) || (byte == (UCHAR)0))
+            {
+                return(0);
+            }
+            if (value_length < sizeof(value_prefix))
+            {
+                value_prefix[value_length] = byte;
+            }
+            if (value_length < sizeof(value_buffer))
+            {
+                value_buffer[value_length] = (CHAR)byte;
+            }
+            value_length++;
+            if (_nx_web_http_client_header_byte_get(&cursor, &byte) != NX_SUCCESS)
+            {
+                return(0);
+            }
+        }
+        if ((_nx_web_http_client_header_byte_get(&cursor, &byte) != NX_SUCCESS) ||
+            (byte != (UCHAR)10))
+        {
+            return(0);
+        }
+
+        if ((name_length == 14) &&
+            (_nx_web_http_client_memicmp(name_prefix, name_length, (UCHAR *)"Content-Length", 14) == NX_SUCCESS))
+        {
+            value = 0;
+            digit_count = 0;
+            valid = (value_length <= sizeof(value_prefix)) ? NX_TRUE : NX_FALSE;
+            for (i = 0; (i < value_length) && (valid != NX_FALSE); i++)
+            {
+                if ((value_prefix[i] >= (UCHAR)'0') && (value_prefix[i] <= (UCHAR)'9') &&
+                    (digit_count == i))
+                {
+                    if (value > (((UINT)~0U) - (UINT)(value_prefix[i] - (UCHAR)'0')) / 10U)
+                    {
+                        valid = NX_FALSE;
+                    }
+                    else
+                    {
+                        value = (value * 10U) + (UINT)(value_prefix[i] - (UCHAR)'0');
+                        digit_count++;
+                    }
+                }
+                else if (value_prefix[i] != (UCHAR)' ')
+                {
+                    valid = NX_FALSE;
+                }
+            }
+            if ((valid != NX_FALSE) && (digit_count != 0))
+            {
+                *content_length = value;
+            }
+        }
+
+        if (process_fields != NX_FALSE)
+        {
+            if ((name_length == 17) &&
+                (_nx_web_http_client_memicmp(name_prefix, name_length, (UCHAR *)"Transfer-Encoding", 17) == NX_SUCCESS) &&
+                (value_length == 7) &&
+                (_nx_web_http_client_memicmp(value_prefix, value_length, (UCHAR *)"chunked", 7) == NX_SUCCESS))
+            {
+                client_ptr -> nx_web_http_client_response_chunked = NX_TRUE;
+            }
+#ifndef NX_WEB_HTTP_KEEPALIVE_DISABLE
+            if ((name_length == 10) &&
+                (_nx_web_http_client_memicmp(name_prefix, name_length, (UCHAR *)"Connection", 10) == NX_SUCCESS))
+            {
+                if ((value_length == 10) &&
+                    (_nx_web_http_client_memicmp(value_prefix, value_length, (UCHAR *)"keep-alive", 10) == NX_SUCCESS))
+                {
+                    client_ptr -> nx_web_http_client_keep_alive = NX_TRUE;
+                }
+                else if ((value_length == 5) &&
+                         (_nx_web_http_client_memicmp(value_prefix, value_length, (UCHAR *)"close", 5) == NX_SUCCESS))
+                {
+                    client_ptr -> nx_web_http_client_keep_alive = NX_FALSE;
+                }
+            }
+#endif
+            if (client_ptr -> nx_web_http_client_response_callback != NX_NULL)
+            {
+                if ((_nx_web_http_client_header_field_select(name_packet_ptr, name_start_ptr,
+                                                              name_length, name_buffer, &name_ptr) != NX_SUCCESS) ||
+                    (_nx_web_http_client_header_field_select(value_packet_ptr, value_start_ptr,
+                                                              value_length, value_buffer, &value_ptr) != NX_SUCCESS))
+                {
+                    return(0);
+                }
+                client_ptr -> nx_web_http_client_response_callback(client_ptr, name_ptr, name_length,
+                                                                   value_ptr, value_length);
+            }
+        }
+    }
+}
+
 /**************************************************************************/ 
 /*                                                                        */ 
 /*  FUNCTION                                               RELEASE        */ 
@@ -5686,118 +6062,38 @@ UINT    i;
 /*                                                                        */
 /*  DESCRIPTION                                                           */ 
 /*                                                                        */ 
-/*    This function returns the content length of the supplied HTTP       */ 
-/*    response packet.  If the packet is no content or the packet is      */ 
-/*    invalid, a zero is returned.                                        */ 
+/*    This function returns the content length in a response packet       */
+/*    chain.  Missing or invalid content length returns zero.            */
 /*                                                                        */ 
 /*                                                                        */ 
 /*  INPUT                                                                 */ 
 /*                                                                        */ 
-/*    packet_ptr                            Pointer to HTTP request packet*/ 
+/*    client_ptr                            HTTP client control block     */
+/*    packet_ptr                            Pointer to response packet    */
 /*                                                                        */ 
 /*  OUTPUT                                                                */ 
 /*                                                                        */ 
-/*    client_ptr                            HTTP client control block     */
 /*    length                                Length of content             */ 
 /*                                                                        */ 
 /*  CALLS                                                                 */ 
 /*                                                                        */ 
-/*    None                                                                */ 
+/*    _nx_web_http_client_header_parse      Parse response fields         */
 /*                                                                        */ 
 /*  CALLED BY                                                             */ 
 /*                                                                        */ 
-/*    _nx_web_http_client_get_start         Start the GET operation       */
+/*    _nx_web_http_client_response_body_get  Get response body            */
 /*                                                                        */ 
 /**************************************************************************/
 UINT  _nx_web_http_client_content_length_get(NX_WEB_HTTP_CLIENT *client_ptr, NX_PACKET *packet_ptr)
 {
+UINT length;
 
-UINT    length;
-CHAR   *buffer_ptr;
-UINT    found = NX_FALSE;
-
-
-    NX_PARAMETER_NOT_USED(client_ptr);
-
-    /* Default the content length to an invalid value.  */
-    length =  0;
-
-    /* Setup pointer to buffer.  */
-    buffer_ptr = (CHAR *)packet_ptr -> nx_packet_prepend_ptr;
-
-    /* Find the "Content-length:" token first.  */
-    while ((buffer_ptr+14) < (CHAR *)packet_ptr -> nx_packet_append_ptr)
+    if (_nx_web_http_client_header_parse(client_ptr, packet_ptr, &length, NX_FALSE) == 0)
     {
-
-        /* Check for the Content-length token.  */
-        if (((*buffer_ptr ==      'c') || (*buffer_ptr ==      'C')) &&
-            ((*(buffer_ptr+1) ==  'o') || (*(buffer_ptr+1) ==  'O')) &&
-            ((*(buffer_ptr+2) ==  'n') || (*(buffer_ptr+2) ==  'N')) &&
-            ((*(buffer_ptr+3) ==  't') || (*(buffer_ptr+3) ==  'T')) &&
-            ((*(buffer_ptr+4) ==  'e') || (*(buffer_ptr+4) ==  'E')) &&
-            ((*(buffer_ptr+5) ==  'n') || (*(buffer_ptr+5) ==  'N')) &&
-            ((*(buffer_ptr+6) ==  't') || (*(buffer_ptr+6) ==  'T')) &&
-            (*(buffer_ptr+7) ==  '-') &&
-            ((*(buffer_ptr+8) ==  'l') || (*(buffer_ptr+8) ==  'L')) &&
-            ((*(buffer_ptr+9) ==  'e') || (*(buffer_ptr+9) ==  'E')) &&
-            ((*(buffer_ptr+10) == 'n') || (*(buffer_ptr+10) == 'N')) &&
-            ((*(buffer_ptr+11) == 'g') || (*(buffer_ptr+11) == 'G')) &&
-            ((*(buffer_ptr+12) == 't') || (*(buffer_ptr+12) == 'T')) &&
-            ((*(buffer_ptr+13) == 'h') || (*(buffer_ptr+13) == 'H')) &&
-            (*(buffer_ptr+14) == ':'))
-        {
-
-            /* Yes, found content-length token.  */
-            found = NX_TRUE;
-
-            /* Move past the Content-Length: field. Exit the loop. */
-            buffer_ptr += 15;
-            break;
-        }
-
-        /* Move the pointer up to the next character.  */
-        buffer_ptr++;
+        return(0);
     }
-
-    /* Check if found the content-length token.  */
-    if (found != NX_TRUE)
-    {
-
-        /* No, return an invalid length indicating a bad HTTP packet. */
-        return(length);
-    }
-
-    /* Now skip over white space. */
-    while ((buffer_ptr < (CHAR *)packet_ptr -> nx_packet_append_ptr) && (*buffer_ptr == ' '))
-    {
-        buffer_ptr++;
-    }
-
-    /* Now convert the length into a numeric value.  */
-    while ((buffer_ptr < (CHAR *)packet_ptr -> nx_packet_append_ptr) && (*buffer_ptr >= '0') && (*buffer_ptr <= '9'))
-    {
-
-        /* Update the content length.  */
-        length =  length * 10;
-        length =  length + (((UINT) (*buffer_ptr)) - 0x30);
-
-        /* Move the buffer pointer forward.  */
-        buffer_ptr++;
-    }
-
-    /* Determine if the content length was picked up properly.  */
-    if ((buffer_ptr >= (CHAR *)packet_ptr -> nx_packet_append_ptr) ||
-        ((*buffer_ptr != ' ') && (*buffer_ptr != (CHAR)13)))
-    {
-
-        /* Error, set the length to zero.  */
-        length =  0;
-    }
-
-    /* Return the length to the caller.  */
     return(length);
 }
-
 
 /**************************************************************************/
 /*                                                                        */
@@ -5887,175 +6183,28 @@ UCHAR   ch;
 /*                                                                        */ 
 /*  INPUT                                                                 */ 
 /*                                                                        */ 
-/*    packet_ptr                            Pointer to request packet     */ 
+/*    client_ptr                            HTTP client control block     */
+/*    packet_ptr                            Pointer to response packet    */
 /*                                                                        */ 
 /*  OUTPUT                                                                */ 
 /*                                                                        */ 
-/*    Byte Offset                           (0 implies no content)        */ 
+/*    Byte Offset                           (0 implies invalid header)    */
 /*                                                                        */ 
 /*  CALLS                                                                 */ 
 /*                                                                        */ 
-/*    _nx_web_http_client_memicmp           Compile two strings           */
-/*    [nx_web_http_client_response_callback]                              */
-/*                                          Application header callback   */
+/*    _nx_web_http_client_header_parse      Parse response fields         */
 /*                                                                        */ 
 /*  CALLED BY                                                             */ 
 /*                                                                        */ 
-/*    _nx_web_http_client_get_start         Start GET processing          */
+/*    _nx_web_http_client_response_body_get  Get response body            */
 /*                                                                        */ 
 /**************************************************************************/
 UINT  _nx_web_http_client_process_header_fields(NX_WEB_HTTP_CLIENT *client_ptr, NX_PACKET *packet_ptr)
 {
+UINT length;
 
-UINT    offset;
-CHAR    *buffer_ptr;
-CHAR    *field_name;
-UINT     field_name_length;
-CHAR    *field_value;
-UINT     field_value_length;
-#ifndef NX_WEB_HTTP_KEEPALIVE_DISABLE
-UINT    version = 0;
-#endif /* NX_WEB_HTTP_KEEPALIVE_DISABLE */
-
-
-    /* Default the content offset to zero.  */
-    offset =  0;
-    client_ptr -> nx_web_http_client_response_chunked = NX_FALSE;
-
-    /* Setup pointer to buffer.  */
-    buffer_ptr =  (CHAR *) packet_ptr -> nx_packet_prepend_ptr;
-
-#ifndef NX_WEB_HTTP_KEEPALIVE_DISABLE
-    if ((buffer_ptr + 7) < (CHAR *) packet_ptr -> nx_packet_append_ptr)
-    {
-        version = (UCHAR)((buffer_ptr[5] - '0') << 4) | (UCHAR)(buffer_ptr[7] - '0');
-    }
-
-    /* Is a valid HTTP version found?  */
-    if(version == 0)
-    {
-        client_ptr -> nx_web_http_client_keep_alive = NX_FALSE;
-        return 0;
-    }
-
-    /* Initialize the keepalive flag.  */
-    if(version > 0x10)
-        client_ptr -> nx_web_http_client_keep_alive = NX_TRUE;
-    else
-        client_ptr -> nx_web_http_client_keep_alive = NX_FALSE;
-#endif /* NX_WEB_HTTP_KEEPALIVE_DISABLE */
-
-    /* Skip over the first HTTP line (e.g. HTTP/1.1 200 OK).  */
-    while(((buffer_ptr+1) < (CHAR *) packet_ptr -> nx_packet_append_ptr) && (*buffer_ptr != (CHAR) 13) && (*(buffer_ptr + 1) !=  (CHAR) 10))
-    {
-        buffer_ptr++;
-        offset++;
-    }
-
-    /* Skip over the CR,LF. */
-    buffer_ptr += 2;
-    offset += 2;
-
-    /* Loop until we find the "cr,lf,cr,lf" token.  */
-    while (((buffer_ptr+1) < (CHAR *) packet_ptr -> nx_packet_append_ptr) && (*buffer_ptr != (CHAR) 0))
-    {
-
-        /* Check for the <cr,lf,cr,lf> token.  This signals a blank line, which also
-           specifies the start of the content.  */
-        if ((*buffer_ptr ==      (CHAR) 13) &&
-            (*(buffer_ptr+1) ==  (CHAR) 10))
-        {
-
-            /* Adjust the offset.  */
-            offset =  offset + 2;
-            break;
-        }
-
-
-        /* We haven't seen the <cr,lf,cr,lf> so we are still processing header data.
-         * Extract the field name and it's value.
-         */
-        field_name = buffer_ptr;
-        field_name_length = 0;
-
-        /* Look for the ':' that separates the field name from its value. */
-        while((buffer_ptr < (CHAR *)packet_ptr -> nx_packet_append_ptr) && (*buffer_ptr != ':'))
-        {
-            buffer_ptr++;
-            field_name_length++;
-        }
-        offset += field_name_length;
-
-        /* Skip ':'.  */
-        buffer_ptr++;
-        offset++;
-
-        /* Now skip over white space. */
-        while ((buffer_ptr < (CHAR *)packet_ptr -> nx_packet_append_ptr) && (*buffer_ptr == ' '))
-        {
-            buffer_ptr++;
-            offset++;
-        }
-
-        /* Now get the field value. */
-        field_value = buffer_ptr;
-        field_value_length = 0;
-
-        /* Loop until we see a <CR, LF>. */
-        while(((buffer_ptr+1) < (CHAR *) packet_ptr -> nx_packet_append_ptr) && (*buffer_ptr != (CHAR) 13) && (*(buffer_ptr+1) !=  (CHAR) 10))
-        {
-            buffer_ptr++;
-            field_value_length++;
-        }
-        offset += field_value_length;
-
-        /* Skip over the CR,LF. */
-        buffer_ptr += 2;
-        offset += 2;
-
-        /* Check if the response packet is chunked.  */
-        if (_nx_web_http_client_memicmp((UCHAR *)field_name, field_name_length, (UCHAR *)"Transfer-Encoding", 17) == 0)
-        {
-            if (_nx_web_http_client_memicmp((UCHAR *)field_value, field_value_length, (UCHAR *)"chunked", 7) == 0)
-            {
-                client_ptr -> nx_web_http_client_response_chunked = NX_TRUE;
-            }
-        }
-
-#ifndef NX_WEB_HTTP_KEEPALIVE_DISABLE
-
-        /* If the "connection" field exist, and the value is "keep-alive", set the keep-alive flag to TRUE. */
-        if (_nx_web_http_client_memicmp((UCHAR *)"connection", 10, (UCHAR *)field_name, field_name_length) == NX_SUCCESS)
-        {
-            if (_nx_web_http_client_memicmp((UCHAR *)"keep-alive", 10, (UCHAR *)field_value, field_value_length) == NX_SUCCESS)
-            {
-                client_ptr -> nx_web_http_client_keep_alive = NX_TRUE;
-            }
-            else if (_nx_web_http_client_memicmp((UCHAR *)"close", 5, (UCHAR *)field_value, field_value_length) == NX_SUCCESS)
-            {
-                client_ptr -> nx_web_http_client_keep_alive = NX_FALSE;
-            }
-        }
-#endif /* NX_WEB_HTTP_KEEPALIVE_DISABLE */
-
-        /* Invoke the header callback if present. */
-        /* If it was set, invoke the application response callback. */
-        if(client_ptr -> nx_web_http_client_response_callback)
-        {
-            client_ptr -> nx_web_http_client_response_callback(client_ptr, field_name, field_name_length, field_value, field_value_length);
-        }
-    }
-
-    /* Not find the "cr,lf,cr,lf" token.  */
-    if (((buffer_ptr+1) >= (CHAR *) packet_ptr -> nx_packet_append_ptr) || (*buffer_ptr == (CHAR) 0))
-    {
-        offset = 0;
-    }
-
-    /* Return the offset to the caller.  */
-    return(offset);
+    return(_nx_web_http_client_header_parse(client_ptr, packet_ptr, &length, NX_TRUE));
 }
-
 
 /**************************************************************************/ 
 /*                                                                        */ 
@@ -7875,4 +8024,3 @@ NX_PACKET *response_packet_ptr;
     /* Reset the state to ready.  */
     client_ptr -> nx_web_http_client_state = NX_WEB_HTTP_CLIENT_STATE_READY;
 }
-

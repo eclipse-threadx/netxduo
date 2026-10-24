@@ -110,6 +110,7 @@ NX_TCP_SOCKET  *socket_ptr;
 
             /* Reset expiration to zero. */
             server_ptr -> nx_tcpserver_sessions[i].nx_tcp_session_expiration = 0;
+            server_ptr -> nx_tcpserver_sessions[i].nx_tcp_session_streaming = NX_FALSE;
 
             /* Set connection flag to false. */
             server_ptr -> nx_tcpserver_sessions[i].nx_tcp_session_connected = NX_FALSE;
@@ -938,6 +939,7 @@ NX_TCP_SESSION *session_ptr = NX_NULL;
 
             /* Set default expiration. */
             server_ptr -> nx_tcpserver_listen_session -> nx_tcp_session_expiration = server_ptr -> nx_tcpserver_timeout;
+            server_ptr -> nx_tcpserver_listen_session -> nx_tcp_session_streaming = NX_FALSE;
 
             if(server_ptr -> nx_tcpserver_new_connection)
             {
@@ -1016,6 +1018,7 @@ NX_TCP_SOCKET  *socket_ptr;
 
             /* Reset default expiration. */
             server_ptr -> nx_tcpserver_sessions[i].nx_tcp_session_expiration = server_ptr -> nx_tcpserver_timeout;
+            server_ptr -> nx_tcpserver_sessions[i].nx_tcp_session_streaming = NX_FALSE;
 
             /* Invoke receive data callback. */
             server_ptr -> nx_tcpserver_receive_data(server_ptr, &server_ptr -> nx_tcpserver_sessions[i]);
@@ -1086,6 +1089,7 @@ NX_TCP_SOCKET  *socket_ptr;
 
             /* Reset epiration of session. */
             server_ptr -> nx_tcpserver_sessions[i].nx_tcp_session_expiration = 0; 
+            server_ptr -> nx_tcpserver_sessions[i].nx_tcp_session_streaming = NX_FALSE;
 
             /* Set connection flag to false. */
             server_ptr -> nx_tcpserver_sessions[i].nx_tcp_session_connected = NX_FALSE;
@@ -1154,7 +1158,8 @@ NX_TCP_SESSION *session_ptr;
         }
 
         /* Skip socket that is already timeout. */
-        if(session_ptr -> nx_tcp_session_expiration == 0)
+        if((session_ptr -> nx_tcp_session_expiration == 0) ||
+           (session_ptr -> nx_tcp_session_streaming == NX_TRUE))
         {
             continue;
         }

@@ -110,6 +110,10 @@ UCHAR *pss_scratch;
 #ifdef NX_SECURE_ENABLE_ECC_CIPHERSUITE
 const NX_CRYPTO_METHOD               *curve_method_cert;
 NX_SECURE_EC_PUBLIC_KEY              *ec_pubkey;
+#if (NX_SECURE_TLS_TLS_1_3_ENABLED)
+UINT                                  brainpool_expected_curve = 0u;
+#endif
+UCHAR                                *ecdsa_hash;
 #endif /* NX_SECURE_ENABLE_ECC_CIPHERSUITE */
 
     /*
@@ -183,6 +187,24 @@ NX_SECURE_EC_PUBLIC_KEY              *ec_pubkey;
             break;
         case NX_SECURE_TLS_SIGNATURE_ECDSA_SHA512:
             signature_algorithm = NX_SECURE_TLS_X509_TYPE_ECDSA_SHA_512;
+            break;
+        case NX_SECURE_TLS_SIGNATURE_ECDSA_BRAINPOOLP256R1_SHA256:
+            signature_algorithm = NX_SECURE_TLS_X509_TYPE_ECDSA_SHA_256;
+#ifdef NX_SECURE_ENABLE_ECC_CIPHERSUITE
+            brainpool_expected_curve = NX_CRYPTO_EC_BRAINPOOLP256r1;
+#endif
+            break;
+        case NX_SECURE_TLS_SIGNATURE_ECDSA_BRAINPOOLP384R1_SHA384:
+            signature_algorithm = NX_SECURE_TLS_X509_TYPE_ECDSA_SHA_384;
+#ifdef NX_SECURE_ENABLE_ECC_CIPHERSUITE
+            brainpool_expected_curve = NX_CRYPTO_EC_BRAINPOOLP384r1;
+#endif
+            break;
+        case NX_SECURE_TLS_SIGNATURE_ECDSA_BRAINPOOLP512R1_SHA512:
+            signature_algorithm = NX_SECURE_TLS_X509_TYPE_ECDSA_SHA_512;
+#ifdef NX_SECURE_ENABLE_ECC_CIPHERSUITE
+            brainpool_expected_curve = NX_CRYPTO_EC_BRAINPOOLP512r1;
+#endif
             break;
         case 0x0804u: /* rsa_pss_rsae_sha256 */
             signature_algorithm = NX_SECURE_TLS_X509_TYPE_RSA_SHA_256;
@@ -760,6 +782,7 @@ NX_SECURE_EC_PUBLIC_KEY              *ec_pubkey;
     else if (client_certificate -> nx_secure_x509_public_algorithm == NX_SECURE_TLS_X509_TYPE_EC)
     {
         /* Verify the ECDSA signature. */
+        ecdsa_hash = handshake_hash;
 
 #if (NX_SECURE_TLS_TLS_1_2_ENABLED || NX_SECURE_TLS_TLS_1_3_ENABLED)
 #ifdef NX_SECURE_ENABLE_DTLS
@@ -817,12 +840,24 @@ NX_SECURE_EC_PUBLIC_KEY              *ec_pubkey;
             /* Pointer to the received signature that we need to check. */
             received_signature = &packet_buffer[2];
 
-            /* Hash size is the size of SHA-1 (20) + MD5 (16). */
-            data_size = 36;
+            /* ECDSA signs the SHA-1 handshake hash. */
+            ecdsa_hash = &handshake_hash[16];
+            data_size = 20;
         }
 #endif
 
         ec_pubkey = &client_certificate -> nx_secure_x509_public_key.ec_public_key;
+
+#if (NX_SECURE_TLS_TLS_1_3_ENABLED)
+        if (tls_session -> nx_secure_tls_1_3 &&
+            ((brainpool_expected_curve != 0u) ||
+             ((ec_pubkey -> nx_secure_ec_named_curve >= NX_CRYPTO_EC_BRAINPOOLP256r1) &&
+              (ec_pubkey -> nx_secure_ec_named_curve <= NX_CRYPTO_EC_BRAINPOOLP512r1))) &&
+            (brainpool_expected_curve != ec_pubkey -> nx_secure_ec_named_curve))
+        {
+            return(NX_SECURE_TLS_UNSUPPORTED_CERT_SIGN_ALG);
+        }
+#endif
 
         /* Find out which named curve the remote certificate is using. */
         status = _nx_secure_tls_find_curve_method(&tls_session -> nx_secure_tls_ecc, (USHORT)(ec_pubkey -> nx_secure_ec_named_curve), &curve_method_cert, NX_NULL);
@@ -890,7 +925,7 @@ NX_SECURE_EC_PUBLIC_KEY              *ec_pubkey;
                                                              (NX_CRYPTO_METHOD*)public_cipher_method,
                                                              (UCHAR *)ec_pubkey -> nx_secure_ec_public_key,
                                                              (NX_CRYPTO_KEY_SIZE)(ec_pubkey -> nx_secure_ec_public_key_length << 3),
-                                                             handshake_hash,
+                                                             ecdsa_hash,
                                                              data_size,
                                                              NX_NULL,
                                                              received_signature,
@@ -950,4 +985,3 @@ NX_SECURE_EC_PUBLIC_KEY              *ec_pubkey;
     return(NX_NOT_SUPPORTED);
 #endif
 }
-

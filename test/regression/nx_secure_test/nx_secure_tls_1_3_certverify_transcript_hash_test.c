@@ -65,6 +65,7 @@ extern const NX_SECURE_TLS_CRYPTO nx_crypto_tls_ciphers_ecc;
 
 static ULONG spy_captured_length;
 static UINT  spy_call_count;
+static UINT  spy_hash_succeeds;
 
 /* Stand-in for the signature scheme's hash (SHA-384, 48-byte ICV). The caller drives hashing
    through three separate nx_crypto_operation calls -- HASH_INITIALIZE, HASH_UPDATE,
@@ -89,6 +90,10 @@ static UINT spy_hash_operation(UINT op, VOID *handler, struct NX_CRYPTO_METHOD_S
     {
         spy_captured_length = input_length_in_byte;
         spy_call_count++;
+    }
+    if (spy_hash_succeeds)
+    {
+        return(NX_CRYPTO_SUCCESS);
     }
     return(NX_CRYPTO_NOT_SUCCESSFUL);
 }
@@ -120,7 +125,9 @@ static NX_CRYPTO_METHOD dummy_public_cipher_method = {0};
 static NX_SECURE_X509_CRYPTO mismatched_hash_cipher_table[] =
 {
     /* OID identifier,                        public cipher,                hash method */
+    {NX_SECURE_TLS_X509_TYPE_ECDSA_SHA_256,  &dummy_public_cipher_method,  &spy_hash_method_sha384},
     {NX_SECURE_TLS_X509_TYPE_ECDSA_SHA_384,  &dummy_public_cipher_method,  &spy_hash_method_sha384},
+    {NX_SECURE_TLS_X509_TYPE_ECDSA_SHA_512,  &dummy_public_cipher_method,  &spy_hash_method_sha384},
 };
 
 /* Copy of TLS_AES_128_GCM_SHA256 with a SHA-384 hash, for configuration 2. See the header
@@ -176,6 +183,15 @@ NX_SECURE_X509_CERT local_certificate;
 NX_SECURE_X509_CERT remote_certificate;
 const NX_SECURE_TLS_CIPHERSUITE_INFO *sha256_ciphersuite;
 USHORT priority;
+UINT scheme_index;
+const USHORT brainpool_schemes[] =
+{
+    NX_SECURE_TLS_SIGNATURE_ECDSA_BRAINPOOLP256R1_SHA256,
+    NX_SECURE_TLS_SIGNATURE_ECDSA_BRAINPOOLP384R1_SHA384,
+    NX_SECURE_TLS_SIGNATURE_ECDSA_BRAINPOOLP512R1_SHA512,
+    NX_SECURE_TLS_SIGNATURE_ECDSA_SHA256
+};
+NX_PACKET *packet;
 
     printf("NetX Secure Test:   TLS 1.3 CertificateVerify Transcript Hash Length Test..");
 
@@ -224,7 +240,7 @@ USHORT priority;
        certificate_get(..., NX_NULL, ...) only matches identity certificates -- force it. */
     local_certificate.nx_secure_x509_certificate_is_identity_cert = NX_CRYPTO_TRUE;
     local_certificate.nx_secure_x509_cipher_table = mismatched_hash_cipher_table;
-    local_certificate.nx_secure_x509_cipher_table_size = 1;
+    local_certificate.nx_secure_x509_cipher_table_size = sizeof(mismatched_hash_cipher_table) / sizeof(mismatched_hash_cipher_table[0]);
     tls_session.nx_secure_tls_credentials.nx_secure_tls_certificate_store = store;
 
     tls_session.nx_secure_tls_socket_type = NX_SECURE_TLS_SESSION_TYPE_CLIENT;
@@ -236,6 +252,35 @@ USHORT priority;
     tls_session.nx_secure_tls_session_ciphersuite = &sha384_ciphersuite;
     check_send_side(&tls_session, 48);
 
+    /* A certificate's private key must use the curve named by its signature scheme. */
+    local_certificate.nx_secure_x509_public_algorithm = NX_SECURE_TLS_X509_TYPE_EC;
+    local_certificate.nx_secure_x509_private_key.ec_private_key.nx_secure_ec_named_curve = 19;
+    tls_session.nx_secure_tls_session_ciphersuite = sha256_ciphersuite;
+    spy_hash_succeeds = NX_TRUE;
+    status = nx_packet_allocate(&pool_0, &packet, NX_TCP_PACKET, NX_WAIT_FOREVER);
+    EXPECT_EQ(NX_SUCCESS, status);
+    for (scheme_index = 0; scheme_index < 3u; scheme_index++)
+    {
+        tls_session.nx_secure_tls_signature_algorithm = brainpool_schemes[scheme_index];
+        status = _nx_secure_tls_send_certificate_verify(&tls_session, packet);
+        EXPECT_EQ(NX_SECURE_TLS_UNSUPPORTED_CERT_SIGN_ALG, status);
+    }
+    local_certificate.nx_secure_x509_private_key.ec_private_key.nx_secure_ec_named_curve = NX_CRYPTO_EC_BRAINPOOLP256r1;
+    tls_session.nx_secure_tls_signature_algorithm = brainpool_schemes[3];
+    status = _nx_secure_tls_send_certificate_verify(&tls_session, packet);
+    EXPECT_EQ(NX_SECURE_TLS_UNSUPPORTED_CERT_SIGN_ALG, status);
+    local_certificate.nx_secure_x509_private_key.ec_private_key.nx_secure_ec_named_curve = NX_CRYPTO_EC_BRAINPOOLP512r1 + 1u;
+    status = _nx_secure_tls_send_certificate_verify(&tls_session, packet);
+    EXPECT_EQ(NX_CRYTPO_MISSING_ECC_CURVE, status);
+
+    tls_session.nx_secure_tls_1_3 = NX_FALSE;
+    tls_session.nx_secure_tls_protocol_version = NX_SECURE_TLS_VERSION_TLS_1_2;
+    status = _nx_secure_tls_send_certificate_verify(&tls_session, packet);
+    EXPECT_EQ(NX_CRYTPO_MISSING_ECC_CURVE, status);
+    tls_session.nx_secure_tls_1_3 = NX_TRUE;
+    nx_packet_release(packet);
+    spy_hash_succeeds = NX_FALSE;
+
     /* ---- Process side: _nx_secure_tls_process_certificate_verify (TLS 1.3 server). ---- */
 
     memset(&remote_certificate, 0, sizeof(remote_certificate));
@@ -246,7 +291,7 @@ USHORT priority;
     status = _nx_secure_x509_store_certificate_add(&remote_certificate, &store, NX_SECURE_X509_CERT_LOCATION_REMOTE);
     EXPECT_EQ(NX_SUCCESS, status);
     remote_certificate.nx_secure_x509_cipher_table = mismatched_hash_cipher_table;
-    remote_certificate.nx_secure_x509_cipher_table_size = 1;
+    remote_certificate.nx_secure_x509_cipher_table_size = sizeof(mismatched_hash_cipher_table) / sizeof(mismatched_hash_cipher_table[0]);
     tls_session.nx_secure_tls_credentials.nx_secure_tls_certificate_store = store;
 
     tls_session.nx_secure_tls_socket_type = NX_SECURE_TLS_SESSION_TYPE_SERVER;

@@ -8,6 +8,7 @@
  *
  * SPDX-License-Identifier: MIT
  **************************************************************************/
+/* Portions of this file were generated with AI assistance. */
 
 
 /**************************************************************************/
@@ -362,6 +363,8 @@ typedef struct NX_WEB_HTTP_SERVER_STRUCT
 /* Services without error checking.  */
 
 #define nx_web_http_server_callback_data_send                _nx_web_http_server_callback_data_send
+#define nx_web_http_server_event_stream_start                _nx_web_http_server_event_stream_start
+#define nx_web_http_server_event_stream_send                 _nx_web_http_server_event_stream_send
 #define nx_web_http_server_callback_response_send            _nx_web_http_server_callback_response_send
 #define nx_web_http_server_callback_response_send_extended   _nx_web_http_server_callback_response_send_extended
 #define nx_web_http_server_content_get                       _nx_web_http_server_content_get
@@ -398,6 +401,8 @@ typedef struct NX_WEB_HTTP_SERVER_STRUCT
 /* Services with error checking.  */
 
 #define nx_web_http_server_callback_data_send                _nxe_web_http_server_callback_data_send
+#define nx_web_http_server_event_stream_start                _nxe_web_http_server_event_stream_start
+#define nx_web_http_server_event_stream_send                 _nxe_web_http_server_event_stream_send
 #define nx_web_http_server_callback_response_send            _nxe_web_http_server_callback_response_send
 #define nx_web_http_server_callback_response_send_extended   _nxe_web_http_server_callback_response_send_extended
 #define nx_web_http_server_content_get                       _nxe_web_http_server_content_get
@@ -435,6 +440,9 @@ typedef struct NX_WEB_HTTP_SERVER_STRUCT
 
 
 UINT        nx_web_http_server_callback_data_send(NX_WEB_HTTP_SERVER *server_ptr, VOID *data_ptr, ULONG data_length);
+UINT        nx_web_http_server_event_stream_start(NX_WEB_HTTP_SERVER *server_ptr, NX_TCP_SESSION **session_pptr);
+UINT        nx_web_http_server_event_stream_send(NX_WEB_HTTP_SERVER *server_ptr, NX_TCP_SESSION *session_ptr,
+                                                VOID *data_ptr, ULONG data_length);
 UINT        nx_web_http_server_callback_response_send(NX_WEB_HTTP_SERVER *server_ptr, CHAR *status_code, CHAR *information, CHAR *additional_info);
 UINT        nx_web_http_server_callback_response_send_extended(NX_WEB_HTTP_SERVER *server_ptr, CHAR *status_code,
                                                                UINT status_code_length, CHAR *information,
@@ -514,6 +522,12 @@ UINT        nx_web_http_server_authentication_check_set(NX_WEB_HTTP_SERVER *http
 /* HTTP source code is being compiled, do not perform any API mapping.  */
 
 UINT        _nx_web_http_server_callback_data_send(NX_WEB_HTTP_SERVER *server_ptr, VOID *data_ptr, ULONG data_length);
+UINT        _nx_web_http_server_event_stream_start(NX_WEB_HTTP_SERVER *server_ptr, NX_TCP_SESSION **session_pptr);
+UINT        _nx_web_http_server_event_stream_send(NX_WEB_HTTP_SERVER *server_ptr, NX_TCP_SESSION *session_ptr,
+                                                 VOID *data_ptr, ULONG data_length);
+UINT        _nxe_web_http_server_event_stream_start(NX_WEB_HTTP_SERVER *server_ptr, NX_TCP_SESSION **session_pptr);
+UINT        _nxe_web_http_server_event_stream_send(NX_WEB_HTTP_SERVER *server_ptr, NX_TCP_SESSION *session_ptr,
+                                                  VOID *data_ptr, ULONG data_length);
 UINT        _nx_web_http_server_callback_response_send(NX_WEB_HTTP_SERVER *server_ptr, CHAR *status_code, CHAR *information, CHAR *additional_info);
 UINT        _nx_web_http_server_callback_response_send_extended(NX_WEB_HTTP_SERVER *server_ptr, CHAR *status_code,
                                                                 UINT status_code_length, CHAR *information,

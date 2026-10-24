@@ -150,6 +150,15 @@ UINT extension_type;
                 case NX_CRYPTO_EC_SECP521R1:
                     expected_sign_alg = NX_SECURE_TLS_SIGNATURE_ECDSA_SHA512;
                     break;
+                case NX_CRYPTO_EC_BRAINPOOLP256r1:
+                    expected_sign_alg = NX_SECURE_TLS_SIGNATURE_ECDSA_BRAINPOOLP256R1_SHA256;
+                    break;
+                case NX_CRYPTO_EC_BRAINPOOLP384r1:
+                    expected_sign_alg = NX_SECURE_TLS_SIGNATURE_ECDSA_BRAINPOOLP384R1_SHA384;
+                    break;
+                case NX_CRYPTO_EC_BRAINPOOLP512r1:
+                    expected_sign_alg = NX_SECURE_TLS_SIGNATURE_ECDSA_BRAINPOOLP512R1_SHA512;
+                    break;
                 default:
                     return(NX_SECURE_TLS_UNSUPPORTED_CERT_SIGN_ALG);
                 }
@@ -337,4 +346,3 @@ UINT extension_type;
     return(NX_NOT_SUPPORTED);
 #endif /* NX_SECURE_DISABLE_X509 */
 }
-

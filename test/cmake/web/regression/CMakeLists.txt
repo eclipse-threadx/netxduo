@@ -28,6 +28,7 @@ set(web_test_cases
     ${SOURCE_DIR}/web_test/netx_web_response_in_multiple_packets_test.c
     ${SOURCE_DIR}/web_test/netx_web_connect_three_times_test.c
     ${SOURCE_DIR}/web_test/netx_web_keep_alive_test.c
+    ${SOURCE_DIR}/web_test/netx_web_event_stream_test.c
     ${SOURCE_DIR}/web_test/netx_web_digest_authenticate_test.c
     ${SOURCE_DIR}/web_test/netx_web_digest_authenticate_test2.c
     ${SOURCE_DIR}/web_test/netx_web_server_content_process_test.c

@@ -9,6 +9,8 @@
 /* SPDX-License-Identifier: MIT                                            */
 /***************************************************************************/
 
+// Portions of this file were generated with AI assistance.
+
 /* This test concentrates on TLS ECC ciphersuites negotiation.  */
 
 #include "nx_api.h"
@@ -114,7 +116,7 @@ static UINT test_crypto_operation_success(UINT op,       /* Encrypt, Decrypt, Au
                                 VOID *packet_ptr,
                                 VOID (*nx_crypto_hw_process_callback)(VOID *packet_ptr, UINT status))
 {
-    if(output)
+    if(output && output_length_in_byte >= 2u)
     {
         output[0] = 1;
         output[1] = 1;
@@ -161,6 +163,16 @@ NX_SECURE_TLS_SESSION tls_session;
 UCHAR buffer[256];
 NX_SECURE_X509_CERTIFICATE_STORE store;
 NX_SECURE_X509_CERT certificate;
+#if (NX_SECURE_TLS_TLS_1_3_ENABLED)
+UINT i;
+UINT saved_curve;
+const USHORT brainpool_schemes[] =
+{
+    NX_SECURE_TLS_SIGNATURE_ECDSA_BRAINPOOLP256R1_SHA256,
+    NX_SECURE_TLS_SIGNATURE_ECDSA_BRAINPOOLP384R1_SHA384,
+    NX_SECURE_TLS_SIGNATURE_ECDSA_BRAINPOOLP512R1_SHA512
+};
+#endif
 
     /* Print out test information banner.  */
     printf("NetX Secure Test:   TLS Process Certificate Verify Test....................");
@@ -192,6 +204,19 @@ NX_SECURE_X509_CERT certificate;
     certificate.nx_secure_x509_cipher_table = test_x509_cipher_table;
     certificate.nx_secure_x509_cipher_table_size = 1;
     tls_session.nx_secure_tls_credentials.nx_secure_tls_certificate_store = store;
+
+#if (NX_SECURE_TLS_TLS_1_3_ENABLED)
+    /* Unsupported Brainpool schemes must fail before signature decoding. */
+    tls_session.nx_secure_tls_1_3 = NX_TRUE;
+    for (i = 0; i < sizeof(brainpool_schemes) / sizeof(brainpool_schemes[0]); i++)
+    {
+        buffer[0] = (UCHAR)(brainpool_schemes[i] >> 8);
+        buffer[1] = (UCHAR)brainpool_schemes[i];
+        status = _nx_secure_tls_process_certificate_verify(&tls_session, buffer, sizeof(buffer));
+        EXPECT_EQ(NX_SECURE_TLS_UNKNOWN_CERT_SIG_ALGORITHM, status);
+    }
+    tls_session.nx_secure_tls_1_3 = NX_FALSE;
+#endif
 
     status = _nx_secure_tls_process_certificate_verify(&tls_session, buffer, sizeof(buffer));
     EXPECT_EQ(NX_SECURE_TLS_UNSUPPORTED_TLS_VERSION, status);
@@ -242,6 +267,41 @@ NX_SECURE_X509_CERT certificate;
     certificate.nx_secure_x509_cipher_table_size = 1;
 
     test_x509_cipher_table->nx_secure_x509_crypto_identifier = NX_SECURE_TLS_X509_TYPE_ECDSA_SHA_256;
+#if (NX_SECURE_TLS_TLS_1_3_ENABLED)
+    /* A Brainpool signature scheme must match the certificate's named curve. */
+    tls_session.nx_secure_tls_1_3 = NX_TRUE;
+    test_x509_hash_method.nx_crypto_ICV_size_in_bits = 256;
+    test_x509_hash_method.nx_crypto_operation = test_crypto_operation_success;
+    buffer[0] = (UCHAR)(NX_SECURE_TLS_SIGNATURE_ECDSA_BRAINPOOLP256R1_SHA256 >> 8);
+    buffer[1] = (UCHAR)NX_SECURE_TLS_SIGNATURE_ECDSA_BRAINPOOLP256R1_SHA256;
+    buffer[2] = 0;
+    buffer[3] = 0;
+    status = _nx_secure_tls_process_certificate_verify(&tls_session, buffer, sizeof(buffer));
+    EXPECT_EQ(NX_SECURE_TLS_UNSUPPORTED_CERT_SIGN_ALG, status);
+
+    saved_curve = certificate.nx_secure_x509_public_key.ec_public_key.nx_secure_ec_named_curve;
+    certificate.nx_secure_x509_public_key.ec_public_key.nx_secure_ec_named_curve = NX_CRYPTO_EC_BRAINPOOLP256r1;
+    buffer[0] = (UCHAR)(NX_SECURE_TLS_SIGNATURE_ECDSA_SHA256 >> 8);
+    buffer[1] = (UCHAR)NX_SECURE_TLS_SIGNATURE_ECDSA_SHA256;
+    status = _nx_secure_tls_process_certificate_verify(&tls_session, buffer, sizeof(buffer));
+    EXPECT_EQ(NX_SECURE_TLS_UNSUPPORTED_CERT_SIGN_ALG, status);
+
+    buffer[0] = (UCHAR)(NX_SECURE_TLS_SIGNATURE_ECDSA_BRAINPOOLP256R1_SHA256 >> 8);
+    buffer[1] = (UCHAR)NX_SECURE_TLS_SIGNATURE_ECDSA_BRAINPOOLP256R1_SHA256;
+    status = _nx_secure_tls_process_certificate_verify(&tls_session, buffer, sizeof(buffer));
+    EXPECT_EQ(NX_SECURE_TLS_UNSUPPORTED_ECC_CURVE, status);
+
+    certificate.nx_secure_x509_public_key.ec_public_key.nx_secure_ec_named_curve = NX_CRYPTO_EC_BRAINPOOLP512r1 + 1u;
+    buffer[0] = (UCHAR)(NX_SECURE_TLS_SIGNATURE_ECDSA_SHA256 >> 8);
+    buffer[1] = (UCHAR)NX_SECURE_TLS_SIGNATURE_ECDSA_SHA256;
+    status = _nx_secure_tls_process_certificate_verify(&tls_session, buffer, sizeof(buffer));
+    EXPECT_EQ(NX_SECURE_TLS_UNSUPPORTED_ECC_CURVE, status);
+
+    certificate.nx_secure_x509_public_key.ec_public_key.nx_secure_ec_named_curve = saved_curve;
+    test_x509_hash_method.nx_crypto_operation = NX_NULL;
+    tls_session.nx_secure_tls_1_3 = NX_FALSE;
+    buffer[2] = 1;
+#endif
     buffer[0] = 0;
     buffer[1] = NX_SECURE_TLS_SIGNATURE_ALGORITHM_ECDSA;
     status = _nx_secure_tls_process_certificate_verify(&tls_session, buffer, sizeof(buffer));
