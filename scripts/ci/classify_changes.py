@@ -73,11 +73,16 @@ class Selection:
         self.full_suites = set()
         self.reasons = []
         self.full = False
+        self.netxduo_compile_all = False
 
     def add_reason(self, reason):
         """Append a reason once while preserving discovery order."""
         if reason not in self.reasons:
             self.reasons.append(reason)
+
+    def select_netxduo_compile_all(self):
+        """Select NetX Duo library compilation across all 43 profiles."""
+        self.netxduo_compile_all = True
 
     def add_bundle(self, bundle_name, reason):
         """Merge one named profile bundle into the selection."""
@@ -99,6 +104,7 @@ class Selection:
     def select_full(self, reason):
         """Select all declared profiles in every suite."""
         self.full = True
+        self.netxduo_compile_all = True
         self.full_suites.update(self.profile_map["suites"])
         for profiles in self.selected.values():
             profiles.clear()
@@ -155,6 +161,7 @@ class Selection:
             "full": str(self.full).lower(),
             "reason": "; ".join(self.reasons) if self.reasons else "smoke only",
             "changed_files": str(changed_file_count),
+            "netxduo_compile_all": str(self.netxduo_compile_all).lower(),
             "netxduo_matrix": json.dumps(
                 self._netxduo_matrix(), separators=(",", ":")
             ),
@@ -178,6 +185,10 @@ class Selection:
 def parse_cmake_profiles(cmake_file):
     """Read BUILD_CONFIGURATIONS from one suite CMake file."""
     contents = cmake_file.read_text(encoding="utf-8")
+    if "\n" not in contents.strip() and contents.strip().endswith(".txt"):
+        target = (cmake_file.parent / contents.strip()).resolve()
+        if target.is_file():
+            contents = target.read_text(encoding="utf-8")
     match = re.search(
         r"set\s*\(\s*BUILD_CONFIGURATIONS\b(.*?)\)", contents, re.DOTALL
     )
@@ -364,6 +375,7 @@ def classify_path(path, selection):
     elif path.startswith("common/inc/"):
         selection.select_full("public NetX Duo header")
     elif path.startswith("common/src/"):
+        selection.select_netxduo_compile_all()
         filename = path.rsplit("/", 1)[-1].lower()
         if _is_ipv6_source(filename):
             selection.add_bundle("netx_ipv6", "IPv6-specific NetX Duo source")
@@ -373,29 +385,38 @@ def classify_path(path, selection):
             selection.add_bundle("netx_shared", "shared NetX Duo source")
         selection.add_bundle("dependent_defaults", "dependent default profiles")
     elif path.startswith("addons/mqtt/"):
+        selection.select_netxduo_compile_all()
         selection.add_bundle("mqtt", "MQTT add-on")
     elif path.startswith("addons/websocket/"):
+        selection.select_netxduo_compile_all()
         selection.add_bundle("websocket", "WebSocket add-on")
     elif path.startswith(("addons/web/", "addons/http/")):
+        selection.select_netxduo_compile_all()
         selection.add_bundle("web_http", "Web or HTTP add-on")
     elif path.startswith(("addons/ptp/", "tsn/")):
+        selection.select_netxduo_compile_all()
         selection.add_bundle("ptp_tsn", "PTP or TSN component")
     elif path.startswith("addons/azure_iot/"):
         selection.select_full("retired Azure IoT component")
     elif path.startswith("addons/cloud/"):
+        selection.select_netxduo_compile_all()
         selection.add_bundle("netx_addon", "cloud add-on")
         selection.add_bundle("mqtt", "cloud MQTT consumers")
     elif path.startswith("addons/"):
+        selection.select_netxduo_compile_all()
         selection.add_bundle("netx_addon", "NetX Duo add-on")
     elif path.startswith("nx_secure/"):
+        selection.select_netxduo_compile_all()
         selection.add_bundle("secure", "NetX Secure component")
     elif path.startswith("crypto_libraries/"):
+        selection.select_netxduo_compile_all()
         selection.add_bundle("crypto", "cryptography component")
     elif path.startswith("test/regression/"):
         _classify_regression_path(path, selection)
     elif path.startswith("test/cmake/"):
         _classify_cmake_path(path, selection, selection.profile_map)
     elif path.startswith("utility/"):
+        selection.select_netxduo_compile_all()
         selection.add_bundle("netx_addon", "NetX Duo utility")
     elif path in {"CMakeLists.txt", ".gitmodules", "addons/CMakeLists.txt"}:
         selection.select_full("root or shared build configuration")
@@ -477,6 +498,9 @@ def write_summary(summary_file, outputs, paths):
         summary_stream.write("## Dev CI routing\n\n")
         summary_stream.write(f"Reason: {outputs['reason']}\n\n")
         summary_stream.write(f"Changed files: {outputs['changed_files']}\n\n")
+        summary_stream.write(
+            f"NetXDuo compile all: {outputs.get('netxduo_compile_all', 'false')}\n\n"
+        )
         summary_stream.write("| Suite | Profiles |\n| --- | --- |\n")
         summary_stream.write("| NetXDuo smoke | default_build_coverage |\n")
         summary_stream.write(
