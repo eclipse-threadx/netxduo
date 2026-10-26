@@ -240,7 +240,7 @@ UINT  _nxd_ipv6_interface_find(NX_IP *ip_ptr, ULONG *dest_address,
                                NXD_IPV6_ADDRESS **ipv6_addr, NX_INTERFACE *if_ptr);
 UINT  _nxd_ipv6_router_lookup(NX_IP *ip_ptr, NX_INTERFACE *if_ptr, ULONG *router_address, void **nd_cache_entry);
 VOID  _nxd_ipv6_router_solicitation_check(NX_IP *ip_ptr);
-UINT  _nxd_ipv6_raw_packet_send_internal(NX_IP *ip_ptr, NX_PACKET *packet_ptr,  NXD_ADDRESS *destination_ip, ULONG protocol);
+UINT  _nxd_ipv6_raw_packet_send_internal(NX_IP *ip_ptr, NX_PACKET *packet_ptr,  NXD_ADDRESS *destination_ip, ULONG protocol, UINT hop_limit);
 VOID  _nxd_ipv6_prefix_router_timer_tick(NX_IP *ip_ptr);
 NX_IPV6_DEFAULT_ROUTER_ENTRY* _nxd_ipv6_find_default_router_from_address(NX_IP *ip_ptr, ULONG *ip_addr);
 INT   _nxd_ipv6_search_onlink(NX_IP *ip_ptr, ULONG *dest_addr);

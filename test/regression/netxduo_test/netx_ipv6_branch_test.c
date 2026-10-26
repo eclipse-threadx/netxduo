@@ -9,6 +9,8 @@
 /* SPDX-License-Identifier: MIT                                            */
 /***************************************************************************/
 
+// Portions of this file were generated with AI assistance.
+
 /* This NetX test concentrates on the code coverage for IPv6 functions,
  * nx_tcp_connect_cleanup.c
  * nx_tcp_disconnect_cleanup.c
@@ -590,7 +592,7 @@ NX_IPV6_DESTINATION_ENTRY
         test_packet -> nx_packet_address.nx_packet_ipv6_address_ptr  = NX_NULL;
 
         /* Call function with NULL interface.  */
-        _nxd_ipv6_raw_packet_send_internal(&ip_0, test_packet, &destination_ip, 0);
+        _nxd_ipv6_raw_packet_send_internal(&ip_0, test_packet, &destination_ip, 0, 0);
     }
     else if (assert_count == 1)
     {
