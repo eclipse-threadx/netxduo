@@ -9,6 +9,8 @@
  * SPDX-License-Identifier: MIT
  **************************************************************************/
 
+// Portions of this file were generated with AI assistance.
+
 
 /**************************************************************************/
 /**************************************************************************/
@@ -177,8 +179,10 @@ NX_IP         *ip_ptr;
             /* Thread still suspended on the TCP socket.  Setup return error status and
                resume the thread.  */
 
-            /* Determine which transmit error is present.  */
-            if (socket_ptr -> nx_tcp_socket_state != NX_TCP_ESTABLISHED)
+            /* CLOSE_WAIT still permits sends, so an expired wait there is a
+               window or queue timeout rather than a disconnected socket.  */
+            if ((socket_ptr -> nx_tcp_socket_state != NX_TCP_ESTABLISHED) &&
+                (socket_ptr -> nx_tcp_socket_state != NX_TCP_CLOSE_WAIT))
             {
 
                 /* This socket is no longer connected.  */

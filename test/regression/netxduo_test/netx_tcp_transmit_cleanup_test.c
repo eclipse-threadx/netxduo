@@ -9,6 +9,8 @@
 /* SPDX-License-Identifier: MIT                                            */
 /***************************************************************************/
 
+// Portions of this file were generated with AI assistance.
+
 /* This NetX test concentrates on the basic TCP operation.  */
 
 #include   "tx_api.h"
@@ -257,6 +259,47 @@ UINT        compare_port;
     /* Check the TCP socket bind suspended count.  */
     if (client_socket.nx_tcp_socket_transmit_suspended_count != 0)       
         error_counter++;      
+
+    /* A send remains valid in CLOSE_WAIT.  Put this connected socket in that
+       state to test the timeout cleanup independently of FIN timing.  */
+    if (status == NX_WINDOW_OVERFLOW)
+    {
+        status = nx_packet_release(my_packet);
+        if (status != NX_SUCCESS)
+            error_counter++;
+    }
+
+    status = tx_mutex_get(&(ip_0.nx_ip_protection), TX_WAIT_FOREVER);
+    if (status == TX_SUCCESS)
+    {
+        client_socket.nx_tcp_socket_state = NX_TCP_CLOSE_WAIT;
+        if (tx_mutex_put(&(ip_0.nx_ip_protection)) != TX_SUCCESS)
+            error_counter++;
+    }
+    else
+        error_counter++;
+
+    if (error_counter == 0)
+    {
+        status = nx_packet_allocate(&pool_0, &my_packet, NX_TCP_PACKET, NX_WAIT_FOREVER);
+        if (status == NX_SUCCESS)
+        {
+            my_packet -> nx_packet_length = 220;
+            my_packet -> nx_packet_append_ptr = my_packet -> nx_packet_prepend_ptr + 220;
+            status = nx_tcp_socket_send(&client_socket, my_packet,
+                                        2 * NX_IP_PERIODIC_RATE);
+            if ((status != NX_WINDOW_OVERFLOW) ||
+                (client_socket.nx_tcp_socket_transmit_suspended_count != 0))
+                error_counter++;
+            if (status == NX_WINDOW_OVERFLOW)
+            {
+                if (nx_packet_release(my_packet) != NX_SUCCESS)
+                    error_counter++;
+            }
+        }
+        else
+            error_counter++;
+    }
 
     /* Check status.  */
     if (error_counter)
