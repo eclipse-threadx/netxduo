@@ -222,13 +222,14 @@ UINT  _nxd_ipv6_find_max_prefix_length(ULONG *addr1, ULONG *addr, UINT max_lengt
 VOID  _nx_ipv6_fragment_process(struct NX_IP_DRIVER_STRUCT *driver_req_ptr, UINT mtu);
 UINT  _nx_ipv6_header_add(NX_IP *ip_ptr, NX_PACKET **packet_pptr,
                           ULONG protocol, ULONG payload_size, ULONG hop_limit,
-                          ULONG *src_address, ULONG *dest_address, ULONG *fragment);
+                          ULONG traffic_class, ULONG *src_address, ULONG *dest_address,
+                          ULONG *fragment);
 UINT  _nx_ipv6_packet_copy(NX_PACKET *source_pkt_head, NX_PACKET *dest_pkt_head, UINT size);
 UINT  _nx_ipv6_multicast_join(NX_IP *, ULONG *, NX_INTERFACE *);
 UINT  _nx_ipv6_multicast_leave(NX_IP *, ULONG *, NX_INTERFACE *);
 UINT  _nx_ipv6_option_error(NX_IP *ip_ptr, NX_PACKET *packet_ptr, UCHAR option_type, UINT offset);
 VOID  _nx_ipv6_packet_receive(NX_IP *ip_ptr, NX_PACKET *packet_ptr);
-VOID  _nx_ipv6_packet_send(NX_IP *ip_ptr, NX_PACKET *packet_ptr, ULONG protocol, ULONG payload_size, ULONG hop_limit, ULONG *src_address, ULONG *dest_address);
+VOID  _nx_ipv6_packet_send(NX_IP *ip_ptr, NX_PACKET *packet_ptr, ULONG protocol, ULONG payload_size, ULONG hop_limit, ULONG traffic_class, ULONG *src_address, ULONG *dest_address);
 UINT  _nx_ipv6_prefix_list_add_entry(NX_IP *ip_ptr, ULONG *prefix, ULONG prefix_length, ULONG valid_lifetime);
 VOID  _nx_ipv6_prefix_list_delete(NX_IP *ip_ptr, ULONG *prefix, INT prefix_length);
 VOID  _nx_ipv6_prefix_list_delete_entry(NX_IP *ip_ptr, NX_IPV6_PREFIX_ENTRY *entry);
@@ -240,7 +241,7 @@ UINT  _nxd_ipv6_interface_find(NX_IP *ip_ptr, ULONG *dest_address,
                                NXD_IPV6_ADDRESS **ipv6_addr, NX_INTERFACE *if_ptr);
 UINT  _nxd_ipv6_router_lookup(NX_IP *ip_ptr, NX_INTERFACE *if_ptr, ULONG *router_address, void **nd_cache_entry);
 VOID  _nxd_ipv6_router_solicitation_check(NX_IP *ip_ptr);
-UINT  _nxd_ipv6_raw_packet_send_internal(NX_IP *ip_ptr, NX_PACKET *packet_ptr,  NXD_ADDRESS *destination_ip, ULONG protocol);
+UINT  _nxd_ipv6_raw_packet_send_internal(NX_IP *ip_ptr, NX_PACKET *packet_ptr,  NXD_ADDRESS *destination_ip, ULONG protocol, ULONG traffic_class);
 VOID  _nxd_ipv6_prefix_router_timer_tick(NX_IP *ip_ptr);
 NX_IPV6_DEFAULT_ROUTER_ENTRY* _nxd_ipv6_find_default_router_from_address(NX_IP *ip_ptr, ULONG *ip_addr);
 INT   _nxd_ipv6_search_onlink(NX_IP *ip_ptr, ULONG *dest_addr);

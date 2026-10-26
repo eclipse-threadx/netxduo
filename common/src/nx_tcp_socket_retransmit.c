@@ -8,6 +8,7 @@
  *
  * SPDX-License-Identifier: MIT
  **************************************************************************/
+
 // Portions of this file were generated with AI assistance.
 
 
@@ -417,7 +418,7 @@ ULONG      window_size;
             packet_ptr -> nx_packet_address.nx_packet_ipv6_address_ptr = socket_ptr -> nx_tcp_socket_ipv6_addr;
 
             _nx_ipv6_packet_send(ip_ptr, packet_ptr, NX_PROTOCOL_TCP,
-                                 packet_ptr -> nx_packet_length, ip_ptr -> nx_ipv6_hop_limit,
+                                 packet_ptr -> nx_packet_length, ip_ptr -> nx_ipv6_hop_limit, 0,
                                  socket_ptr -> nx_tcp_socket_ipv6_addr -> nxd_ipv6_address,
                                  socket_ptr -> nx_tcp_socket_connect_ip.nxd_ip_address.v6);
         }
