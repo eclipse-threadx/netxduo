@@ -957,6 +957,7 @@ set(sntp_test_cases
 
 set(tsn_test_cases
     ${SOURCE_DIR}/tsn_test/netx_mrp_state_machine_test.c
+    ${SOURCE_DIR}/tsn_test/netx_msrp_attribute_table_test.c
     ${SOURCE_DIR}/tsn_test/netx_shaper_cbs_test.c
     ${SOURCE_DIR}/tsn_test/netx_shaper_tas_test.c)
 
