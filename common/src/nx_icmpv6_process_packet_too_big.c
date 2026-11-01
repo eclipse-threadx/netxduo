@@ -156,7 +156,7 @@ NX_INTERFACE              *if_ptr;
 
         /* If a new ND cache is created, force the entry to be "INCOMPLETE" so that the timer logic will
            re-try, and then timeout if no responses are received. */
-        if(dest_entry_ptr -> nx_ipv6_destination_entry_nd_entry != NX_NULL)
+        if((status == NX_SUCCESS) && (dest_entry_ptr -> nx_ipv6_destination_entry_nd_entry != NX_NULL))
         {
             ND_CACHE_ENTRY *nd_entry = dest_entry_ptr -> nx_ipv6_destination_entry_nd_entry;
             if(nd_entry -> nx_nd_cache_nd_status == ND_CACHE_STATE_CREATED)
