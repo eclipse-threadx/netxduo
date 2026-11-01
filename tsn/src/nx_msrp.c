@@ -1360,23 +1360,41 @@ UCHAR                     lva_event;
 UCHAR                     four_packed_event;
 UCHAR                     three_packed_event;
 USHORT                    attribute_list_length;
+UINT                      attribute_list_end;
 UCHAR                     SRclass_id;
 UCHAR                    *stream_id;
-UCHAR                    *data_ptr = packet_ptr -> nx_packet_data_start;
+UCHAR                    *data_ptr = packet_ptr -> nx_packet_prepend_ptr;
+ULONG                     packet_length = packet_ptr -> nx_packet_length;
 
 
+    /* The MRPDU must be held in one packet.  */
+    if ((ULONG)(packet_ptr -> nx_packet_append_ptr - data_ptr) < packet_length)
+    {
+        return(NX_MSRP_NOT_SUPPORTED);
+    }
 
-    if (*(data_ptr + NX_MSRP_PROTOCAL_VERSION_INDEX) != 0)
+    if (packet_length == 0)
+    {
+        return(NX_INVALID_PACKET);
+    }
+
+    if (*data_ptr != 0)
     {
         return(NX_MSRP_VERSION_NOT_SUPPORTED);
     }
 
 
-    attribute_type_index = NX_MSRP_PROTOCAL_VERSION_INDEX + 1;
+    attribute_type_index = 1;
 
 
     while (is_end == 0)
     {
+
+        /* The message header and the vector header must be in the packet.  */
+        if ((packet_length - attribute_type_index) < 6)
+        {
+            return(NX_INVALID_PACKET);
+        }
 
         num_of_value_index = attribute_type_index + 4;
         attribute_list_length_index = attribute_type_index + 2;
@@ -1397,6 +1415,14 @@ UCHAR                    *data_ptr = packet_ptr -> nx_packet_data_start;
 
         attribute_list_length = (USHORT)(*(data_ptr + attribute_list_length_index) << 8 | *(data_ptr + attribute_list_length_index + 1));
 
+        /* The attribute list must be in the packet.  */
+        if (attribute_list_length > (packet_length - attribute_list_length_index - 2))
+        {
+            return(NX_INVALID_PACKET);
+        }
+
+        attribute_list_end = attribute_list_length_index + 2 + attribute_list_length;
+
 
         if (num_of_value)
         {
@@ -1407,7 +1433,11 @@ UCHAR                    *data_ptr = packet_ptr -> nx_packet_data_start;
 
             case NX_MSRP_TALKER_ADVERTISE_VECTOR:
 
-
+                /* The list must hold the vector header, the value, its events and an end mark.  */
+                if (attribute_list_length < (NX_MSRP_TALKER_ADVERTISE_ATTRIBUTE_LENGTH + 5))
+                {
+                    return(NX_INVALID_PACKET);
+                }
 
                 talker_advertise_ptr = (NX_MSRP_TALKER_ADVERTISE *)(data_ptr + first_value_index);
 
@@ -1431,6 +1461,12 @@ UCHAR                    *data_ptr = packet_ptr -> nx_packet_data_start;
                 break;
 
             case NX_MSRP_TALKER_LISTENER_VECTOR:
+
+                /* The list must hold the vector header, the value, its events and an end mark.  */
+                if (attribute_list_length < (NX_MSRP_LISTENER_ATTRIBUTE_LENGTH + 6))
+                {
+                    return(NX_INVALID_PACKET);
+                }
 
                 stream_id = (data_ptr + first_value_index);
 
@@ -1460,6 +1496,12 @@ UCHAR                    *data_ptr = packet_ptr -> nx_packet_data_start;
                 break;
 
             case NX_MSRP_TALKER_DOMAIN_VECTOR:
+
+                /* The list must hold the vector header, the value, its events and an end mark.  */
+                if (attribute_list_length < (NX_MSRP_DOMAIN_ATTRIBUTE_LENGTH + 5))
+                {
+                    return(NX_INVALID_PACKET);
+                }
 
                 SRclass_id = *(data_ptr + first_value_index);
 
@@ -1492,7 +1534,11 @@ UCHAR                    *data_ptr = packet_ptr -> nx_packet_data_start;
 
             case NX_MSRP_TALKER_FAILED_VECTOR:
 
-
+                /* The list must hold the vector header, the value, its events and an end mark.  */
+                if (attribute_list_length < (NX_MSRP_TALKER_FAILED_ATTRIBUTE_LENGTH + 5))
+                {
+                    return(NX_INVALID_PACKET);
+                }
 
                 talker_failed_ptr = (NX_MSRP_TALKER_FAILED *)(data_ptr + first_value_index);
 
@@ -1535,10 +1581,10 @@ UCHAR                    *data_ptr = packet_ptr -> nx_packet_data_start;
             }
         }
 
-        /* Endmask of each attribute *(data_ptr + attribute_list_length_index + attribute_list_length )*/
-        /* Endmask of each attribute *(data_ptr + attribute_list_length_index + attribute_list_length + 1))*/
-        if (*(data_ptr + attribute_list_length_index + attribute_list_length + 2) == NX_MSRP_ATTRIBUTE_END_MASK &&
-            *(data_ptr + attribute_list_length_index + attribute_list_length + 3) == NX_MSRP_ATTRIBUTE_END_MASK)
+        /* The MRPDU ends with an end mark, or with the packet.  */
+        if (((packet_length - attribute_list_end) < 2) ||
+            ((*(data_ptr + attribute_list_end) == NX_MSRP_ATTRIBUTE_END_MASK) &&
+             (*(data_ptr + attribute_list_end + 1) == NX_MSRP_ATTRIBUTE_END_MASK)))
         {
 
             is_end = 1;
@@ -1546,8 +1592,7 @@ UCHAR                    *data_ptr = packet_ptr -> nx_packet_data_start;
         else
         {
 
-            /* 4bytes : attrubute length + attribute_list_length + 1*/
-            attribute_type_index = attribute_type_index + attribute_list_length + 4;
+            attribute_type_index = attribute_list_end;
         }
     }
 
