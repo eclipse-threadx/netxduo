@@ -83,6 +83,8 @@ NX_CALLER_CHECKING_EXTERNS
 
 static VOID _nx_ftp_server_number_to_ascii(UCHAR *buffer_ptr, UINT buffer_size, UINT number, UCHAR pad);
 static VOID _nx_ftp_server_logout_client(NX_FTP_SERVER *ftp_server_ptr, NX_FTP_CLIENT_REQUEST *client_request_ptr);
+static UINT _nx_ftp_server_data_peer_refuse(NX_FTP_SERVER *ftp_server_ptr, NX_FTP_CLIENT_REQUEST *client_req_ptr);
+static UINT _nx_ftp_server_passive_connect_wait(NX_FTP_SERVER *ftp_server_ptr, NX_FTP_CLIENT_REQUEST *client_req_ptr);
 
 /**************************************************************************/
 /*                                                                        */
@@ -1825,8 +1827,8 @@ ULONG                   block_size;
                         if (client_req_ptr -> nx_ftp_client_request_passive_transfer_enabled == NX_TRUE)
                         {
 
-                            /* Now wait for the data connection to connect.  */
-                            status = nx_tcp_socket_state_wait(&(client_req_ptr -> nx_ftp_client_request_data_socket), NX_TCP_ESTABLISHED, NX_FTP_SERVER_TIMEOUT);
+                            /* Now wait for the client to connect the data connection.  */
+                            status = _nx_ftp_server_passive_connect_wait(ftp_server_ptr, client_req_ptr);
 
                             /* Check for connect error.  */
                             if (status)
@@ -2698,8 +2700,8 @@ ULONG                   block_size;
                         if (client_req_ptr -> nx_ftp_client_request_passive_transfer_enabled == NX_TRUE)
                         {
 
-                            /* Now wait for the data connection to connect.  */
-                            status = nx_tcp_socket_state_wait(&(client_req_ptr -> nx_ftp_client_request_data_socket), NX_TCP_ESTABLISHED, NX_FTP_SERVER_TIMEOUT);
+                            /* Now wait for the client to connect the data connection.  */
+                            status = _nx_ftp_server_passive_connect_wait(ftp_server_ptr, client_req_ptr);
 
                             /* Check for connect error.  */
                             if (status)
@@ -3115,8 +3117,8 @@ ULONG                   block_size;
                         if (client_req_ptr -> nx_ftp_client_request_passive_transfer_enabled == NX_TRUE)
                         {
 
-                            /* Now wait for the data connection to connect.  */
-                            status = nx_tcp_socket_state_wait(&(client_req_ptr -> nx_ftp_client_request_data_socket), NX_TCP_ESTABLISHED, NX_FTP_SERVER_TIMEOUT);
+                            /* Now wait for the client to connect the data connection.  */
+                            status = _nx_ftp_server_passive_connect_wait(ftp_server_ptr, client_req_ptr);
 
                             /* Check for connect error.  */
                             if (status)
@@ -4523,6 +4525,7 @@ NX_FTP_SERVER   *server_ptr;
 /*                                                                        */
 /*    fx_file_close                         Close file                    */
 /*    nx_ftp_packet_allocate                Allocate a packet             */
+/*    _nx_ftp_server_data_peer_refuse       Refuse data from another host */
 /*    _nx_ftp_server_data_socket_cleanup    Clean up data socket          */
 /*    _nx_ftp_server_logout_client          Logout the client             */
 /*                                                                        */
@@ -4554,6 +4557,17 @@ NX_FTP_CLIENT_REQUEST   *client_req_ptr;
         /* Now see if this socket has entered a disconnect state.  */
         while (client_req_ptr -> nx_ftp_client_request_data_socket.nx_tcp_socket_state > NX_TCP_ESTABLISHED)
         {
+
+            /* A passive data connection from another host does not end the transfer.  */
+            if (client_req_ptr -> nx_ftp_client_request_passive_transfer_enabled == NX_TRUE)
+            {
+                if (_nx_ftp_server_data_peer_refuse(ftp_server_ptr, client_req_ptr) == NX_TRUE)
+                {
+
+                    /* Continue the loop.  */
+                    continue;
+                }
+            }
 
             /* Yes, a disconnect is present, which signals an end of file of a client FTP write request.  */
 
@@ -4692,6 +4706,7 @@ NX_FTP_SERVER   *server_ptr;
 /*    nx_packet_release                     Release packet                */
 /*    nx_tcp_socket_receive                 Receive from data socket      */
 /*    _nx_ftp_server_block_header_retrieve  Retrieve the block header     */
+/*    _nx_ftp_server_data_peer_refuse       Refuse data from another host */
 /*                                                                        */
 /*  CALLED BY                                                             */
 /*                                                                        */
@@ -4719,6 +4734,17 @@ NX_FTP_CLIENT_REQUEST   *client_req_ptr;
         /* Now see if this socket has data.  If so, process all of it now!  */
         while (client_req_ptr -> nx_ftp_client_request_data_socket.nx_tcp_socket_receive_queue_count)
         {
+
+            /* Refuse a passive data connection from another host, which also discards its data.  */
+            if (client_req_ptr -> nx_ftp_client_request_passive_transfer_enabled == NX_TRUE)
+            {
+                if (_nx_ftp_server_data_peer_refuse(ftp_server_ptr, client_req_ptr) == NX_TRUE)
+                {
+
+                    /* Continue the loop.  */
+                    continue;
+                }
+            }
 
             /* Reset the client request activity timeout.  */
             client_req_ptr -> nx_ftp_client_request_activity_timeout =  NX_FTP_ACTIVITY_TIMEOUT;
@@ -6589,4 +6615,170 @@ VOID _nx_ftp_server_data_socket_cleanup(NX_FTP_SERVER *ftp_server_ptr, NX_FTP_CL
 
     /* Clear the passive transfer enabled flag.  */
     client_req_ptr -> nx_ftp_client_request_passive_transfer_enabled = NX_FALSE;
+}
+
+
+/**************************************************************************/
+/*                                                                        */
+/*  FUNCTION                                               RELEASE        */
+/*                                                                        */
+/*    _nx_ftp_server_data_peer_refuse                     PORTABLE C      */
+/*                                                           6.x          */
+/*  AUTHOR                                                                */
+/*                                                                        */
+/*    Eclipse ThreadX Contributors                                        */
+/*                                                                        */
+/*  DESCRIPTION                                                           */
+/*                                                                        */
+/*    This function refuses a passive data connection whose peer address  */
+/*    differs from the control connection's peer. The connection is reset */
+/*    and the data socket listens again for the client's connection.      */
+/*                                                                        */
+/*  INPUT                                                                 */
+/*                                                                        */
+/*    ftp_server_ptr                        Pointer to FTP server         */
+/*    client_req_ptr                        Pointer to FTP client         */
+/*                                                                        */
+/*  OUTPUT                                                                */
+/*                                                                        */
+/*    NX_TRUE                               Connection refused            */
+/*    NX_FALSE                              Connection from the client    */
+/*                                                                        */
+/*  CALLS                                                                 */
+/*                                                                        */
+/*    memcmp                                Compare IPv6 addresses        */
+/*    nx_tcp_socket_disconnect              Reset the data connection     */
+/*    nx_tcp_server_socket_unaccept         Unaccept the data socket      */
+/*    nx_tcp_server_socket_relisten         Listen again on the data port */
+/*    nx_tcp_server_socket_accept           Accept the next connection    */
+/*                                                                        */
+/*  CALLED BY                                                             */
+/*                                                                        */
+/*    _nx_ftp_server_data_disconnect_process                              */
+/*                                          Data disconnect processing    */
+/*    _nx_ftp_server_data_process           Data processing               */
+/*    _nx_ftp_server_passive_connect_wait   Wait for data connection      */
+/*                                                                        */
+/**************************************************************************/
+static UINT _nx_ftp_server_data_peer_refuse(NX_FTP_SERVER *ftp_server_ptr, NX_FTP_CLIENT_REQUEST *client_req_ptr)
+{
+
+NX_TCP_SOCKET   *data_socket_ptr;
+NXD_ADDRESS     *data_peer_ptr;
+NXD_ADDRESS     *control_peer_ptr;
+UINT            port;
+UINT            refuse =  NX_FALSE;
+
+
+    /* Pickup the peer addresses of the data and control connections.  */
+    data_socket_ptr =  &(client_req_ptr -> nx_ftp_client_request_data_socket);
+    data_peer_ptr =  &(data_socket_ptr -> nx_tcp_socket_connect_ip);
+    control_peer_ptr =  &(client_req_ptr -> nx_ftp_client_request_control_socket.nx_tcp_socket_connect_ip);
+
+    /* Compare the peer addresses.  */
+    if (data_peer_ptr -> nxd_ip_version != control_peer_ptr -> nxd_ip_version)
+    {
+        refuse =  NX_TRUE;
+    }
+#ifdef FEATURE_NX_IPV6
+    else if (data_peer_ptr -> nxd_ip_version == NX_IP_VERSION_V6)
+    {
+        if (memcmp(data_peer_ptr -> nxd_ip_address.v6, control_peer_ptr -> nxd_ip_address.v6,
+                   sizeof(data_peer_ptr -> nxd_ip_address.v6)) != 0)
+        {
+            refuse =  NX_TRUE;
+        }
+    }
+#endif /* FEATURE_NX_IPV6 */
+    else
+    {
+#ifndef NX_DISABLE_IPV4
+        if (data_peer_ptr -> nxd_ip_address.v4 != control_peer_ptr -> nxd_ip_address.v4)
+        {
+            refuse =  NX_TRUE;
+        }
+#endif /* NX_DISABLE_IPV4 */
+    }
+
+    if (refuse == NX_TRUE)
+    {
+
+        /* Reset the connection, then listen again on the same port.  */
+        port =  data_socket_ptr -> nx_tcp_socket_port;
+        (VOID)nx_tcp_socket_disconnect(data_socket_ptr, NX_NO_WAIT);
+        (VOID)nx_tcp_server_socket_unaccept(data_socket_ptr);
+        (VOID)nx_tcp_server_socket_relisten(ftp_server_ptr -> nx_ftp_server_ip_ptr, port, data_socket_ptr);
+        (VOID)nx_tcp_server_socket_accept(data_socket_ptr, NX_NO_WAIT);
+    }
+
+    return(refuse);
+}
+
+
+/**************************************************************************/
+/*                                                                        */
+/*  FUNCTION                                               RELEASE        */
+/*                                                                        */
+/*    _nx_ftp_server_passive_connect_wait                 PORTABLE C      */
+/*                                                           6.x          */
+/*  AUTHOR                                                                */
+/*                                                                        */
+/*    Eclipse ThreadX Contributors                                        */
+/*                                                                        */
+/*  DESCRIPTION                                                           */
+/*                                                                        */
+/*    This function waits up to NX_FTP_SERVER_TIMEOUT for the client to  */
+/*    connect the passive data connection, refusing connections from      */
+/*    other hosts.                                                        */
+/*                                                                        */
+/*  INPUT                                                                 */
+/*                                                                        */
+/*    ftp_server_ptr                        Pointer to FTP server         */
+/*    client_req_ptr                        Pointer to FTP client         */
+/*                                                                        */
+/*  OUTPUT                                                                */
+/*                                                                        */
+/*    status                                Completion status             */
+/*                                                                        */
+/*  CALLS                                                                 */
+/*                                                                        */
+/*    nx_tcp_socket_state_wait              Wait for connection           */
+/*    tx_time_get                           Get system time               */
+/*    _nx_ftp_server_data_peer_refuse       Refuse data from another host */
+/*                                                                        */
+/*  CALLED BY                                                             */
+/*                                                                        */
+/*    _nx_ftp_server_command_process        Command processing            */
+/*                                                                        */
+/**************************************************************************/
+static UINT _nx_ftp_server_passive_connect_wait(NX_FTP_SERVER *ftp_server_ptr, NX_FTP_CLIENT_REQUEST *client_req_ptr)
+{
+
+ULONG   start_time;
+ULONG   elapsed_time =  0;
+UINT    refused;
+UINT    status;
+
+
+    start_time =  tx_time_get();
+
+    /* Wait for a connection, then wait again for the remaining time if it came from another host.  */
+    do
+    {
+        refused =  NX_FALSE;
+        status =  nx_tcp_socket_state_wait(&(client_req_ptr -> nx_ftp_client_request_data_socket), NX_TCP_ESTABLISHED,
+                                           (ULONG)NX_FTP_SERVER_TIMEOUT - elapsed_time);
+
+        if (status == NX_SUCCESS)
+        {
+            refused =  _nx_ftp_server_data_peer_refuse(ftp_server_ptr, client_req_ptr);
+            if (refused == NX_TRUE)
+            {
+                status =  NX_NOT_CONNECTED;
+                elapsed_time =  tx_time_get() - start_time;
+            }
+        }
+    } while ((refused == NX_TRUE) && (elapsed_time < (ULONG)NX_FTP_SERVER_TIMEOUT));
+
+    return(status);
 }
