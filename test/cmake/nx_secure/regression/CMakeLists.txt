@@ -103,6 +103,8 @@ set(nx_secure_test_cases
     ${SOURCE_DIR}/nx_secure_test/nx_secure_dtls_multiple_sessions_ecjpake_test.c
     ${SOURCE_DIR}/nx_secure_test/nx_secure_dtls_multiple_ip_address_test.c
     ${SOURCE_DIR}/nx_secure_test/nx_secure_dtls_no_free_sessions_test.c
+    ${SOURCE_DIR}/nx_secure_test/nx_secure_dtls_stateless_cookie_test.c
+    ${SOURCE_DIR}/nx_secure_test/nx_secure_dtls_session_cookie_test.c
     ${SOURCE_DIR}/nx_secure_test/nx_secure_dtls_concurrent_sessions_test.c
     ${SOURCE_DIR}/nx_secure_test/nx_secure_dtls_concurrent_sessions_retransmit_test.c
     ${SOURCE_DIR}/nx_secure_test/nx_secure_dtls_abort_waiting_test.c
@@ -149,6 +151,7 @@ set(nx_secure_test_cases
     ${SOURCE_DIR}/nx_secure_test/nx_secure_tls_1_3_certverify_transcript_hash_test.c
     ${SOURCE_DIR}/nx_secure_test/nx_secure_x509_oversized_rsa_key_test.c
     ${SOURCE_DIR}/nx_secure_test/nx_secure_x509_asn1_zero_length_test.c
+    ${SOURCE_DIR}/nx_secure_test/nx_secure_client_handshake_message_bounds_test.c
     ${SOURCE_DIR}/nx_secure_test/nx_secure_tls_1_3_rsa_client_auth_test.c
     ${SOURCE_DIR}/nx_secure_test/nx_secure_tls_1_3_certificate_context_length_test.c
     ${SOURCE_DIR}/nx_secure_test/nx_secure_tls_1_3_certificate_extensions_length_test.c

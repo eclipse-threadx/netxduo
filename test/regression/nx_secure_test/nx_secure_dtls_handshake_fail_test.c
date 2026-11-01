@@ -9,6 +9,8 @@
 /* SPDX-License-Identifier: MIT                                            */
 /***************************************************************************/
 
+/* Portions of this file were generated with AI assistance. */
+
 /* This test concentrates on DTLS connections.  */
 
 #include   "nx_api.h"
@@ -1297,10 +1299,90 @@ NX_PACKET *packet_ptr;
     tx_thread_suspend(&thread_0);
 
 }
+/* A handshake record whose fragment length runs past the record. A server answers a
+   datagram from a client it has no session for only if it is an initial ClientHello,
+   so this record is sent after the cookie exchange, as the next message of a session:
+   record sequence 2, message sequence 1, the same as the ClientHello it follows. */
 static UCHAR dtls_bad_handshake_fragment_len2[] = {
-  0x16, 0xfe, 0xfd, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x0e,
-  0x01, 0x00, 0x0b, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x0a, 0x00, 0xfe, 0xfd
+  0x16, 0xfe, 0xfd, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0x00, 0x0e,
+  0x01, 0x00, 0x0b, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x0a, 0x00, 0xfe, 0xfd
 };
+
+/* An initial ClientHello offering RSA cipher suites the server supports, without a
+   cookie: record sequence 0, message sequence 0, body of 48 bytes. */
+static UCHAR dtls_initial_clienthello[] = {
+  0x16, 0xfe, 0xfd, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x3c,
+  0x01, 0x00, 0x00, 0x30, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x30,
+  0xfe, 0xfd,
+  0x32, 0x7b, 0x23, 0xc6, 0x64, 0x3c, 0x98, 0x69, 0x66, 0x33, 0x48, 0x73, 0x74, 0xb0, 0xdc, 0x51,
+  0x19, 0x49, 0x5c, 0xff, 0x2a, 0xe8, 0x94, 0x4a, 0x62, 0x55, 0x58, 0xec, 0x11, 0x22, 0x33, 0x44,
+  0x00, 0x00,
+  0x00, 0x08, 0x00, 0x3d, 0x00, 0x35, 0x00, 0x3c, 0x00, 0x2f,
+  0x01, 0x00
+};
+
+/* Send the initial ClientHello, read the cookie from the server's HelloVerifyRequest,
+   and send the ClientHello again carrying it, as record sequence 1 and message
+   sequence 1. The server then has a session for this client. */
+static VOID dtls_cookie_exchange(NX_UDP_SOCKET *socket_ptr, NXD_ADDRESS *server_address, UINT server_port)
+{
+UINT       status;
+NX_PACKET *packet_ptr;
+UCHAR      hello_verify[64];
+ULONG      length;
+UCHAR      clienthello[sizeof(dtls_initial_clienthello) + 255];
+UINT       cookie_length;
+UINT       body_length;
+
+    status = nx_packet_allocate(&pool_0, &packet_ptr, NX_UDP_PACKET, TX_WAIT_FOREVER);
+    status |= nx_packet_data_append(packet_ptr, dtls_initial_clienthello, sizeof(dtls_initial_clienthello),
+                                    &pool_0, NX_NO_WAIT);
+    status |= _nxd_udp_socket_send(socket_ptr, packet_ptr, server_address, server_port);
+    if (status)
+    {
+        ERROR_COUNTER();
+        return;
+    }
+
+    status = nx_udp_socket_receive(socket_ptr, &packet_ptr, 2 * NX_IP_PERIODIC_RATE);
+    if (status)
+    {
+        ERROR_COUNTER();
+        return;
+    }
+    status = nx_packet_data_extract_offset(packet_ptr, 0, hello_verify, sizeof(hello_verify), &length);
+    nx_packet_release(packet_ptr);
+    if ((status) || (length < 28) || (hello_verify[13] != NX_SECURE_TLS_HELLO_VERIFY_REQUEST) ||
+        (length != (28u + hello_verify[27])))
+    {
+        ERROR_COUNTER();
+        return;
+    }
+    cookie_length = hello_verify[27];
+
+    /* Insert the cookie after the empty session ID and fix the lengths and sequences. */
+    body_length = 48u + cookie_length;
+    memcpy(clienthello, dtls_initial_clienthello, 25 + 35);
+    clienthello[25 + 35] = (UCHAR)cookie_length;
+    memcpy(&clienthello[25 + 36], &hello_verify[28], cookie_length);
+    memcpy(&clienthello[25 + 36 + cookie_length], &dtls_initial_clienthello[25 + 36], sizeof(dtls_initial_clienthello) - (25 + 36));
+    clienthello[10] = 1;
+    clienthello[11] = (UCHAR)((body_length + 12) >> 8);
+    clienthello[12] = (UCHAR)(body_length + 12);
+    clienthello[15] = (UCHAR)(body_length >> 8);
+    clienthello[16] = (UCHAR)body_length;
+    clienthello[18] = 1;
+    clienthello[23] = (UCHAR)(body_length >> 8);
+    clienthello[24] = (UCHAR)body_length;
+
+    status = nx_packet_allocate(&pool_0, &packet_ptr, NX_UDP_PACKET, TX_WAIT_FOREVER);
+    status |= nx_packet_data_append(packet_ptr, clienthello, 25 + body_length, &pool_0, NX_NO_WAIT);
+    status |= _nxd_udp_socket_send(socket_ptr, packet_ptr, server_address, server_port);
+    if (status)
+    {
+        ERROR_COUNTER();
+    }
+}
 static VOID test_dtls_handshake_fragment_len2_client()
 {
 UINT status;
@@ -1315,6 +1397,8 @@ NX_PACKET *send_packet;
     {
         ERROR_COUNTER();
     }
+
+    dtls_cookie_exchange(&client_socket_0, &server_address, SERVER_PORT);
 
     status = nx_packet_allocate(&pool_0, &send_packet, NX_UDP_PACKET, TX_WAIT_FOREVER);
     if (status)

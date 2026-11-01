@@ -8,6 +8,7 @@
  *
  * SPDX-License-Identifier: MIT
  **************************************************************************/
+// Portions of this file were generated with AI assistance.
 
 
 /**************************************************************************/
@@ -2516,7 +2517,7 @@ NX_TFTP_CLIENT_REQUEST *client_request_ptr;
 
     /* Loop to save error message.  */
     server_ptr -> nx_tftp_server_error_string[sizeof(server_ptr -> nx_tftp_server_error_string) - 1] =  NX_NULL;
-    for (i = 0; i < NX_TFTP_ERROR_STRING_MAX; i++)
+    for (i = 0; (i < NX_TFTP_ERROR_STRING_MAX) && (buffer_ptr < packet_ptr -> nx_packet_append_ptr); i++)
     {
 
         /* Store desired file name.  */
@@ -2524,12 +2525,13 @@ NX_TFTP_CLIENT_REQUEST *client_request_ptr;
 
         /* Check for NULL character.  */
         if (server_ptr -> nx_tftp_server_error_string[i] == NX_NULL)
+        {
             break;
-
-        /* Check for packet buffer boundary. */
-        if (buffer_ptr >= packet_ptr -> nx_packet_append_ptr)
-            break;
+        }
     }
+
+    /* Terminate a message that ends with the datagram rather than a NULL.  */
+    server_ptr -> nx_tftp_server_error_string[i] =  NX_NULL;
 
     /* Extract the source IP and port numbers.  */
 

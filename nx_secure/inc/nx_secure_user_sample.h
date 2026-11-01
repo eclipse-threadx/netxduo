@@ -9,6 +9,8 @@
  * SPDX-License-Identifier: MIT
  **************************************************************************/
 
+/* Portions of this file were generated with AI assistance. */
+
 
 /**************************************************************************/
 /**************************************************************************/
@@ -104,10 +106,20 @@
    #define NX_SECURE_DISABLE_X509
 */
 
-/* NX_SECURE_DTLS_COOKIE_LENGTH defines the length of DTLS cookie.
+/* NX_SECURE_DTLS_COOKIE_LENGTH defines the length of DTLS cookie, from 17 to 255 bytes.
    The default value is 32. */
 /*
    #define NX_SECURE_DTLS_COOKIE_LENGTH 32
+*/
+
+/* NX_SECURE_DTLS_COOKIE_SECRET_LIFETIME defines, in seconds, how long a DTLS server keys
+   its HelloVerifyRequest cookies with one secret before replacing it. A cookie stays valid
+   until the secret after the one it was issued under is also replaced. The default value
+   is 300. The secrets are drawn from NX_RAND unless the application supplies one with
+   nx_secure_dtls_server_cookie_secret_set, so define NX_RAND as a cryptographic random
+   number generator or supply a secret. */
+/*
+   #define NX_SECURE_DTLS_COOKIE_SECRET_LIFETIME 300
 */
 
 /* NX_SECURE_DTLS_MAXIMUM_RETRANSMIT_RETRIES defineds the maximum retransmit retries

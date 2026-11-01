@@ -9,6 +9,8 @@
  * SPDX-License-Identifier: MIT
  **************************************************************************/
 
+/* Portions of this file were generated with AI assistance. */
+
 
 /**************************************************************************/
 /**************************************************************************/
@@ -62,8 +64,6 @@ UINT _nx_secure_dtls_send_helloverifyrequest(NX_SECURE_DTLS_SESSION *dtls_sessio
                                              NX_PACKET *send_packet)
 {
 UINT   length;
-UINT   i;
-UINT   random_value;
 UCHAR *packet_buffer;
 USHORT protocol_version;
 
@@ -94,26 +94,10 @@ USHORT protocol_version;
     packet_buffer[length + 1] = (UCHAR)(protocol_version & 0x00FF);
     length += 2;
 
-    /* Set the cookie length. */
-    dtls_session -> nx_secure_dtls_cookie_length = 20;
+    /* Set the cookie length. The cookie is the one derived when the ClientHello was
+       processed. */
     packet_buffer[length] = (UCHAR)(dtls_session -> nx_secure_dtls_cookie_length);
     length += 1;
-
-    /* Generate the cookie. */
-    for (i = 0; i < dtls_session -> nx_secure_dtls_cookie_length; i += (UINT)sizeof(random_value))
-    {
-        random_value = (UINT)NX_RAND();
-        NX_CHANGE_ULONG_ENDIAN(random_value);
-        NX_SECURE_MEMCPY(&dtls_session -> nx_secure_dtls_cookie[i],
-               (UCHAR *)&random_value, sizeof(random_value)); /* Use case of memcpy is verified. */
-    }
-
-    if (dtls_session -> nx_secure_dtls_cookie_length > sizeof(dtls_session -> nx_secure_dtls_cookie))
-    {
-
-        /* Packet buffer is too small to hold cookie. */
-        return(NX_SECURE_TLS_PACKET_BUFFER_TOO_SMALL);
-    }
 
     /* Copy the cookie into the packet. */
     NX_SECURE_MEMCPY(&packet_buffer[length], dtls_session -> nx_secure_dtls_cookie, dtls_session -> nx_secure_dtls_cookie_length); /* Use case of memcpy is verified. */

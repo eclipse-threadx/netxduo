@@ -8,6 +8,7 @@
  *
  * SPDX-License-Identifier: MIT
  **************************************************************************/
+// Portions of this file were generated with AI assistance.
 
 /**************************************************************************/
 /**************************************************************************/
@@ -848,30 +849,49 @@ UINT              i;
 UINT nx_mrp_attribute_evict(NX_MRP *mrp, NX_MRP_PARTICIPANT *participant, NX_MRP_ATTRIBUTE *target)
 {
 NX_MRP_ATTRIBUTE *attribute = target;
+NX_MRP_ATTRIBUTE *previous = NX_NULL;
+NX_MRP_ATTRIBUTE *current;
 
     if ((attribute -> registrar.state == NX_MRP_REGISTRAR_STATE_MT) &&
         ((attribute -> applicant.state == NX_MRP_APPLICANT_STATE_VO) ||
          (attribute -> applicant.state == NX_MRP_APPLICANT_STATE_AO) ||
          (attribute -> applicant.state == NX_MRP_APPLICANT_STATE_QO)))
     {
-        if (attribute -> pre == NX_NULL)
+
+        /* Find the predecessor from the list head, since MSRP does not maintain pre links.  */
+        current = participant -> inused_head;
+        while ((current != NX_NULL) && (current != attribute))
         {
-            participant -> inused_head = attribute -> next;
-            attribute -> next -> pre = NX_NULL;
-        }
-        else
-        {
-            attribute -> pre -> next = attribute -> next;
-            attribute -> next -> pre = attribute -> pre;
+            previous = current;
+            current = current -> next;
         }
 
-        if (participant -> indication_function != NX_NULL)
+        /* Only an attribute in the list is evicted. It keeps its next link so that the
+           leave timer walk can continue from it.  */
+        if (current != NX_NULL)
         {
-            participant -> indication_function(mrp, participant, attribute, NX_MRP_INDICATION_EVICT);
-        }
+            if (previous == NX_NULL)
+            {
+                participant -> inused_head = attribute -> next;
+            }
+            else
+            {
+                previous -> next = attribute -> next;
+            }
 
-        /* Delete the attribute from list */
-        attribute -> in_use = NX_FALSE;
+            if (attribute -> next != NX_NULL)
+            {
+                attribute -> next -> pre = previous;
+            }
+
+            if (participant -> indication_function != NX_NULL)
+            {
+                participant -> indication_function(mrp, participant, attribute, NX_MRP_INDICATION_EVICT);
+            }
+
+            /* Delete the attribute from list */
+            attribute -> in_use = NX_FALSE;
+        }
     }
 
     return(NX_SUCCESS);

@@ -9,6 +9,8 @@
  * SPDX-License-Identifier: MIT
  **************************************************************************/
 
+/* Portions of this file were generated with AI assistance. */
+
 
 /**************************************************************************/
 /**************************************************************************/
@@ -88,6 +90,7 @@ NX_PACKET *next_packet_ptr;
     dtls_session -> nx_secure_dtls_cookie_length = 0;
     NX_SECURE_MEMSET(dtls_session -> nx_secure_dtls_cookie, 0, sizeof(dtls_session -> nx_secure_dtls_cookie));
     dtls_session -> nx_secure_dtls_client_cookie_ptr = NX_NULL;
+    dtls_session -> nx_secure_dtls_cookie_verified = NX_FALSE;
 
     /* Reset the fragment length. */
     dtls_session -> nx_secure_dtls_fragment_length = 0;

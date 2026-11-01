@@ -73,7 +73,8 @@ if("-DNX_BSD_ENABLE" IN_LIST ${CMAKE_BUILD_TYPE})
       ${SOURCE_DIR}/bsd_test/netx_bsd_raw_basic_rx_nohdr_blocking_test.c
       ${SOURCE_DIR}/bsd_test/netx_bsd_raw_pppoe_test.c
       ${SOURCE_DIR}/bsd_test/netx_bsd_raw_ping_test.c
-      ${SOURCE_DIR}/bsd_test/netx_bsd_raw_tx_test.c)
+      ${SOURCE_DIR}/bsd_test/netx_bsd_raw_tx_test.c
+      ${SOURCE_DIR}/bsd_test/netx_bsd_raw_ipv6_dest_table_full_test.c)
   endif()
 endif()
 
@@ -122,6 +123,7 @@ set(dhcp_test_cases
     ${SOURCE_DIR}/dhcp_test/netx_dhcp_client_parameter_request_test.c
     ${SOURCE_DIR}/dhcp_test/netx_dhcp_coverage_test.c
     ${SOURCE_DIR}/dhcp_test/netx_dhcp_unicast_test.c
+    ${SOURCE_DIR}/dhcp_test/netx_dhcp_option_walk_bounds_test.c
     ${SOURCE_DIR}/dhcp_test/netx_dhcp_server_test.c
     ${SOURCE_DIR}/dhcp_test/netx_dhcp_server_improper_term_test.c
     ${SOURCE_DIR}/dhcp_test/netx_dhcp_server_second_interface_test.c
@@ -186,12 +188,16 @@ set(ftp_test_cases
     ${SOURCE_DIR}/ftp_test/netx_ftp_server_list_command_test.c
     ${SOURCE_DIR}/ftp_test/netx_ftp_server_dangling_pointer_test.c
     ${SOURCE_DIR}/ftp_test/netx_ftp_server_mss_too_small_test.c
+    ${SOURCE_DIR}/ftp_test/netx_ftp_server_epsv_peer_test.c
+    ${SOURCE_DIR}/ftp_test/netx_ftp_server_pasv_peer_test.c
     ${SOURCE_DIR}/ftp_test/netx_ftp_pasv_twice_test.c
     ${SOURCE_DIR}/ftp_test/netx_ftp_disconnection_event_test.c
     ${SOURCE_DIR}/ftp_test/netx_ftp_ipv6_epsv_test.c
     ${SOURCE_DIR}/ftp_test/netx_ftp_pasv_port_test.c
     ${SOURCE_DIR}/ftp_test/netx_ftp_pasv_stor_test.c
-    ${SOURCE_DIR}/ftp_test/netx_ftp_server_activity_timeout_test.c)
+    ${SOURCE_DIR}/ftp_test/netx_ftp_server_activity_timeout_test.c
+    ${SOURCE_DIR}/ftp_test/netx_ftp_client_pasv_peer_address_read_test.c
+    ${SOURCE_DIR}/ftp_test/netx_ftp_client_pasv_peer_address_write_test.c)
 
 set(http_test_cases
     ${SOURCE_DIR}/http_test/netx_http_get_put_referred_URI_test.c
@@ -356,6 +362,7 @@ set(netxduo_test_cases
     ${SOURCE_DIR}/netxduo_test/netx_ip_nxe_api_test.c
     ${SOURCE_DIR}/netxduo_test/netx_tcp_socket_listen_test.c
     ${SOURCE_DIR}/netxduo_test/netx_ipv6_disable_test.c
+    ${SOURCE_DIR}/netxduo_test/netx_icmpv6_packet_too_big_table_full_test.c
     ${SOURCE_DIR}/netxduo_test/netx_icmp_multiple_ping6_test1.c
     ${SOURCE_DIR}/netxduo_test/netx_ip_address_get_test.c
     ${SOURCE_DIR}/netxduo_test/netx_10_24_02_test.c
@@ -848,6 +855,7 @@ set(ppp_test_cases
     ${SOURCE_DIR}/ppp_test/netx_ppp_LCP_invalid_packet_test.c
     ${SOURCE_DIR}/ppp_test/netx_ppp_IPCP_abnormal_packet_test.c
     ${SOURCE_DIR}/ppp_test/netx_ppp_IPCP_nak_test.c
+    ${SOURCE_DIR}/ppp_test/netx_ppp_IPCP_option_bounds_test.c
     ${SOURCE_DIR}/ppp_test/netx_ppp_IPCP_retransmit_test.c
     ${SOURCE_DIR}/ppp_test/netx_ppp_pap_basic_test.c
     ${SOURCE_DIR}/ppp_test/netx_ppp_pfc_option_test.c
@@ -950,7 +958,10 @@ set(sntp_test_cases
     ${SOURCE_DIR}/sntp_test/netx_sntp_client_packet_chain_test.c)
 
 set(tsn_test_cases
+    ${SOURCE_DIR}/tsn_test/netx_mrp_attribute_evict_test.c
     ${SOURCE_DIR}/tsn_test/netx_mrp_state_machine_test.c
+    ${SOURCE_DIR}/tsn_test/netx_msrp_attribute_table_test.c
+    ${SOURCE_DIR}/tsn_test/netx_msrp_mrpdu_parse_test.c
     ${SOURCE_DIR}/tsn_test/netx_shaper_cbs_test.c
     ${SOURCE_DIR}/tsn_test/netx_shaper_tas_test.c)
 
@@ -1195,7 +1206,8 @@ set(tftp_test_cases
     ${SOURCE_DIR}/tftp_test/netx_tftp_read_interaction_test.c
     ${SOURCE_DIR}/tftp_test/netx_tftp_error_destionation_port_test.c
     ${SOURCE_DIR}/tftp_test/netx_tftp_malformed_packet_test.c
-    ${SOURCE_DIR}/tftp_test/netx_tftp_oversized_data_test.c)
+    ${SOURCE_DIR}/tftp_test/netx_tftp_oversized_data_test.c
+    ${SOURCE_DIR}/tftp_test/netx_tftp_error_message_bounds_test.c)
 
 if(NOT "-DNX_DISABLE_IPV6" IN_LIST ${CMAKE_BUILD_TYPE})
   list(APPEND tftp_test_cases

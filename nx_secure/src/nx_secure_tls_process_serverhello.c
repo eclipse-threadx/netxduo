@@ -9,6 +9,8 @@
  * SPDX-License-Identifier: MIT
  **************************************************************************/
 
+// Portions of this file were generated with AI assistance.
+
 
 /**************************************************************************/
 /**************************************************************************/
@@ -158,7 +160,8 @@ NX_SECURE_TLS_SERVER_STATE            old_client_state = tls_session -> nx_secur
     tls_session -> nx_secure_tls_session_id_length = packet_buffer[length];
     length++;
 
-    if ((length + tls_session -> nx_secure_tls_session_id_length) > message_length)
+    /* The session ID must leave room for the ciphersuite and compression method that follow it.  */
+    if ((length + tls_session -> nx_secure_tls_session_id_length + 3u) > message_length)
     {
         return(NX_SECURE_TLS_INCORRECT_MESSAGE_LENGTH);
     }
