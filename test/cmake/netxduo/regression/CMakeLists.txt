@@ -862,6 +862,7 @@ set(ppp_test_cases
     ${SOURCE_DIR}/ppp_test/netx_ppp_LCP_invalid_packet_test.c
     ${SOURCE_DIR}/ppp_test/netx_ppp_IPCP_abnormal_packet_test.c
     ${SOURCE_DIR}/ppp_test/netx_ppp_IPCP_nak_test.c
+    ${SOURCE_DIR}/ppp_test/netx_ppp_IPCP_option_bounds_test.c
     ${SOURCE_DIR}/ppp_test/netx_ppp_IPCP_retransmit_test.c
     ${SOURCE_DIR}/ppp_test/netx_ppp_pap_basic_test.c
     ${SOURCE_DIR}/ppp_test/netx_ppp_pfc_option_test.c
