@@ -8,6 +8,7 @@
 /*                                                                         */
 /* SPDX-License-Identifier: MIT                                            */
 /***************************************************************************/
+// Portions of this file were generated with AI assistance.
 
 /* This is the test control routine the NetX TCP/IP stack.  All tests are dispatched from this routine.  */
 
@@ -746,6 +747,8 @@ void    netx_ftp_service_commands_file_write_test_application_define(void *);
 void    netx_ftp_client_pasv_denied_test_application_define(void *);
 void    netx_ftp_client_pasv_file_read_test_application_define(void *);
 void    netx_ftp_client_pasv_file_write_test_application_define(void *);
+void    netx_ftp_client_pasv_peer_address_read_test_application_define(void *);
+void    netx_ftp_client_pasv_peer_address_write_test_application_define(void *);
 void    netx_ftp_client_invalid_username_password_length_test_application_define(void *first_unused_memory); 
 void    netx_ftp_client_multiple_connection_response_test_application_define(void*);
 void    netx_ftp_client_packet_leak_test_application_define(void *first_unused_memory); 
@@ -2022,6 +2025,8 @@ TEST_ENTRY  test_control_tests[] =
     {netx_ftp_client_pasv_denied_test_application_define, TEST_TIMEOUT_LOW},
     {netx_ftp_client_pasv_file_read_test_application_define, TEST_TIMEOUT_LOW},
     {netx_ftp_client_pasv_file_write_test_application_define, TEST_TIMEOUT_LOW},
+    {netx_ftp_client_pasv_peer_address_read_test_application_define, TEST_TIMEOUT_LOW},
+    {netx_ftp_client_pasv_peer_address_write_test_application_define, TEST_TIMEOUT_LOW},
     {netx_ftp_client_invalid_username_password_length_test_application_define, TEST_TIMEOUT_LOW},
     {netx_ftp_client_multiple_connection_response_test_application_define, TEST_TIMEOUT_LOW},
     {netx_ftp_client_packet_leak_test_application_define, TEST_TIMEOUT_LOW},
