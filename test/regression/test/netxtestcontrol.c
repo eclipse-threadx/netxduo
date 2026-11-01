@@ -894,6 +894,7 @@ void    netx_snmp_abnormal_packet_test_application_define(void *);
 void    netx_dhcp_basic_test_application_define(void *);
 void    netx_dhcp_basic_restore_test_application_define(void *);
 void    netx_dhcp_unicast_test_application_define(void *);
+void    netx_dhcp_option_walk_bounds_test_application_define(void *);
 void    netx_dhcp_user_option_add_test_application_define(void *);
 void    netx_dhcp_server_improper_term_test_application_define(void *);
 void    netx_dhcp_03_01_01_test_application_define(void *);
@@ -2144,6 +2145,7 @@ TEST_ENTRY  test_control_tests[] =
     {netx_dhcp_basic_test_application_define, TEST_TIMEOUT_MID},
     {netx_dhcp_basic_restore_test_application_define, TEST_TIMEOUT_MID},
     {netx_dhcp_unicast_test_application_define, TEST_TIMEOUT_LOW},
+    {netx_dhcp_option_walk_bounds_test_application_define, TEST_TIMEOUT_LOW},
     {netx_dhcp_user_option_add_test_application_define, TEST_TIMEOUT_LOW},
     {netx_dhcp_server_improper_term_test_application_define, TEST_TIMEOUT_LOW},
     {netx_dhcp_coverage_test_applicaiton_define, TEST_TIMEOUT_LOW},

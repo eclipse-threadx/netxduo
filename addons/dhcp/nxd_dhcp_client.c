@@ -7520,65 +7520,72 @@ static ULONG _nx_dhcp_update_renewal_timeout(ULONG timeout)
 /*  CALLED BY                                                             */ 
 /*                                                                        */ 
 /*    _nx_dhcp_get_option_value             Get the value of an option    */ 
-/*    _nx_dhcp_get_option_data              Get the string of an option   */ 
+/*    _nx_dhcp_interface_user_option_retrieve                             */
+/*                                          Retrieve a user option        */
 /*                                                                        */ 
 /**************************************************************************/
 static UCHAR  *_nx_dhcp_search_buffer(UCHAR *option_message, UINT option, UINT length)
 {
 
 UCHAR   *data;
-UINT    i;
+UCHAR   *found;
+UINT    remaining;
 UINT    size;
 
-    /* Setup buffer pointer.  */
+    /* Setup buffer pointer and the number of bytes left to examine.  */
     data = option_message;
-    i = 0;
+    remaining = length;
+    found = NX_NULL;
 
-    /* Search as long as there are valid options.   */
-    while (i < length - 1)
+    /* Search while an option's code and length bytes are both in the buffer.  */
+    while ((found == NX_NULL) && (remaining > 1U))
     {
-        /* Jump out when it reaches END option */
+
+        /* The END option ends the search.  */
         if (*data == NX_DHCP_OPTION_END)
         {
-            break;
+
+            remaining = 0U;
         }
 
-        /* Simply skip any padding */
+        /* Simply skip any padding.  */
         else if (*data == NX_DHCP_OPTION_PAD)
         {
 
             data++;
-            i++;
+            remaining--;
         }
-
-        /* On a match, return a pointer to the size.  */
-        else if (*data == option)
-        {
-
-            size = *(data + 1);
-
-            /* Check if the option data is in the packet.  */
-            if ((i + size + 1) > length)
-                return(NX_NULL);
-
-            /* Return a pointer to the option size byte.  */
-            return(data + 1);
-        }
-
-        /* Otherwise skip the option by adding the size to the pointer.  */
         else
         {
 
-            size = *(++data);
+            size = (UINT)data[1];
 
-            /* skip the data plus the size byte */
-            data += size + 1;
-            i += size + 1;
+            /* An option whose data does not fit in the buffer ends the search.  */
+            if (size > (remaining - 2U))
+            {
+
+                remaining = 0U;
+            }
+
+            /* On a match, return a pointer to the size.  */
+            else if (*data == option)
+            {
+
+                found = &data[1];
+            }
+
+            /* Otherwise skip the code, length and data bytes.  */
+            else
+            {
+
+                data = &data[size + 2U];
+                remaining -= size + 2U;
+            }
         }
     }
 
-    /* Return NULL to indicate the option was not found.  */
-    return(NX_NULL);
+    /* Return the option's size byte, or NULL if the option was not found.  */
+    return(found);
 }
 
 
