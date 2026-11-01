@@ -761,6 +761,8 @@ void    netx_ftp_two_listen_test_application_define(void *first_unused_memory);
 void    netx_ftp_parse_ipv6_address_test_application_define(void *);
 void    netx_ftp_server_abnormal_packet_test_application_define(void *);
 void    netx_ftp_server_list_command_test_application_define(void *);
+void    netx_ftp_server_epsv_peer_test_application_define(void *);
+void    netx_ftp_server_pasv_peer_test_application_define(void *);
 void    netx_ftp_server_dangling_pinter_test_application_define(void *);
 void    netx_ftp_pasv_twice_test_application_define(void *);
 void    netx_ftp_disconnection_event_test_application_define(void *);
@@ -2039,6 +2041,8 @@ TEST_ENTRY  test_control_tests[] =
     {netx_ftp_parse_ipv6_address_test_application_define, TEST_TIMEOUT_LOW},
     {netx_ftp_server_abnormal_packet_test_application_define, TEST_TIMEOUT_LOW},
     {netx_ftp_server_list_command_test_application_define, TEST_TIMEOUT_LOW},
+    {netx_ftp_server_epsv_peer_test_application_define, TEST_TIMEOUT_LOW},
+    {netx_ftp_server_pasv_peer_test_application_define, TEST_TIMEOUT_LOW},
     {netx_ftp_server_dangling_pinter_test_application_define, TEST_TIMEOUT_LOW},
     {netx_ftp_pasv_twice_test_application_define, TEST_TIMEOUT_LOW},
     {netx_ftp_disconnection_event_test_application_define, TEST_TIMEOUT_LOW},

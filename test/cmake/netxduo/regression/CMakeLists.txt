@@ -186,6 +186,8 @@ set(ftp_test_cases
     ${SOURCE_DIR}/ftp_test/netx_ftp_server_list_command_test.c
     ${SOURCE_DIR}/ftp_test/netx_ftp_server_dangling_pointer_test.c
     ${SOURCE_DIR}/ftp_test/netx_ftp_server_mss_too_small_test.c
+    ${SOURCE_DIR}/ftp_test/netx_ftp_server_epsv_peer_test.c
+    ${SOURCE_DIR}/ftp_test/netx_ftp_server_pasv_peer_test.c
     ${SOURCE_DIR}/ftp_test/netx_ftp_pasv_twice_test.c
     ${SOURCE_DIR}/ftp_test/netx_ftp_disconnection_event_test.c
     ${SOURCE_DIR}/ftp_test/netx_ftp_ipv6_epsv_test.c
