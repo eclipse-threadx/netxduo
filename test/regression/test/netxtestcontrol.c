@@ -784,6 +784,7 @@ void    netx_ppp_pap_null_name_password_test_application_define(void *);
 void    netx_ppp_LCP_invalid_packet_test_application_define(void *);
 void    netx_ppp_IPCP_abnormal_packet_test_application_define(void *);
 void    netx_ppp_IPCP_nak_test_application_define(void *);
+void    netx_ppp_IPCP_option_bounds_test_application_define(void *);
 void    netx_ppp_IPCP_retransmit_test_application_define(void *);
 void    netx_ppp_pap_basic_test_application_define(void *);
 void    netx_ppp_pfc_option_test_application_define(void *);
@@ -2063,6 +2064,7 @@ TEST_ENTRY  test_control_tests[] =
     {netx_ppp_LCP_invalid_packet_test_application_define, TEST_TIMEOUT_LOW},
     {netx_ppp_IPCP_abnormal_packet_test_application_define, TEST_TIMEOUT_LOW},
     {netx_ppp_IPCP_nak_test_application_define, TEST_TIMEOUT_LOW},
+    {netx_ppp_IPCP_option_bounds_test_application_define, TEST_TIMEOUT_LOW},
     {netx_ppp_IPCP_retransmit_test_application_define, TEST_TIMEOUT_LOW},
     {netx_ppp_pap_basic_test_application_define, TEST_TIMEOUT_LOW},
     {netx_ppp_pfc_option_test_application_define, TEST_TIMEOUT_LOW},

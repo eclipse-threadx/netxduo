@@ -7175,6 +7175,7 @@ void  _nx_ppp_ipcp_response_extract(NX_PPP *ppp_ptr, NX_PACKET *packet_ptr)
 
 UINT    i, j;    
 ULONG   length;
+ULONG   option_length;
     
     
    
@@ -7189,76 +7190,77 @@ ULONG   length;
     else
         length =  0;
 
-    /* Loop to parse the options to look for primary DNS address.  */
+    /* Loop to parse the options to look for primary DNS address. Each option needs at least its
+       type and length bytes in what remains.  */
     i =  6;
-    while (length)
+    while (length >= 2U)
     {
-    
-        /* Subtract the length.  */
-        if (length >= ((ULONG) packet_ptr -> nx_packet_prepend_ptr[i+1]))
-            length =  length - ((ULONG) packet_ptr -> nx_packet_prepend_ptr[i+1]);
-        else
-            length =  0;
 
-        /* Check for the IP address.  */
-        if (packet_ptr -> nx_packet_prepend_ptr[i] == NX_PPP_IP_ADDRESS_OPTION)
+        /* Pickup the length of this option, which includes its type and length bytes.  */
+        option_length =  (ULONG) packet_ptr -> nx_packet_prepend_ptr[i+1];
+
+        /* An option shorter than its own header, or one that runs past the message, ends the parse.  */
+        if ((option_length < 2U) || (option_length > length))
         {
 
-
-            /* Copy the IP address bytes into the PPP storage.  */
-            for(j = 0; j < 4; j++)
-            {
-
-                /* Copy a byte of the IP address. */
-                ppp_ptr -> nx_ppp_ipcp_local_ip[j] =  packet_ptr -> nx_packet_prepend_ptr[i+j+2];
-            }
-        }
-
-        /* Check for the primary DNS option. */
-        else if (packet_ptr -> nx_packet_prepend_ptr[i] == NX_PPP_DNS_SERVER_OPTION)
-        {
-    
-            /* Yes, we have a primary DNS address.  */
-            
-            /* Let's copy it into the PPP structure in case we need it later.  */
-            ppp_ptr -> nx_ppp_primary_dns_address =  ((((ULONG) packet_ptr -> nx_packet_prepend_ptr[i+2]) << 24) |
-                                                     (((ULONG) packet_ptr -> nx_packet_prepend_ptr[i+3]) << 16) |
-                                                     (((ULONG) packet_ptr -> nx_packet_prepend_ptr[i+4]) << 8)  |
-                                                      ((ULONG) packet_ptr -> nx_packet_prepend_ptr[i+5]));
-
-        }
-
-        /* Check for the primary DNS option. */
-        else if (packet_ptr -> nx_packet_prepend_ptr[i] == NX_PPP_DNS_SECONDARY_SERVER_OPTION)
-        {
-    
-            /* Yes, we have a secondary DNS address.  */
-
-            /* Let's copy it into the PPP structure in case we need it later.  */
-            ppp_ptr -> nx_ppp_secondary_dns_address =  ((((ULONG) packet_ptr -> nx_packet_prepend_ptr[i+2]) << 24) |
-                                                     (((ULONG) packet_ptr -> nx_packet_prepend_ptr[i+3]) << 16) |
-                                                     (((ULONG) packet_ptr -> nx_packet_prepend_ptr[i+4]) << 8)  |
-                                                      ((ULONG) packet_ptr -> nx_packet_prepend_ptr[i+5]));
-
-
-            /* Break out of the loop.  */
-            break;
-        }
-        
-        /* Otherwise move to the next option. */
-        if (length >= ((ULONG) packet_ptr -> nx_packet_prepend_ptr[i+1]))
-        {
-        
-            /* Yes, there is another option.  */
-            
-            /* Position to the next option.  */
-            i =  i + (((UINT) packet_ptr -> nx_packet_prepend_ptr[i+1]));
-        }
-        else
-        {
-        
             /* Make sure the length is 0.  */
             length =  0;
+        }
+        else
+        {
+
+            /* Check for the IP address, which must carry exactly four bytes.  */
+            if ((packet_ptr -> nx_packet_prepend_ptr[i] == NX_PPP_IP_ADDRESS_OPTION) && (option_length == 6U))
+            {
+
+
+                /* Copy the IP address bytes into the PPP storage.  */
+                for(j = 0; j < 4; j++)
+                {
+
+                    /* Copy a byte of the IP address. */
+                    ppp_ptr -> nx_ppp_ipcp_local_ip[j] =  packet_ptr -> nx_packet_prepend_ptr[i+j+2];
+                }
+            }
+
+            /* Check for the primary DNS option. */
+            else if ((packet_ptr -> nx_packet_prepend_ptr[i] == NX_PPP_DNS_SERVER_OPTION) && (option_length == 6U))
+            {
+    
+                /* Yes, we have a primary DNS address.  */
+            
+                /* Let's copy it into the PPP structure in case we need it later.  */
+                ppp_ptr -> nx_ppp_primary_dns_address =  ((((ULONG) packet_ptr -> nx_packet_prepend_ptr[i+2]) << 24) |
+                                                         (((ULONG) packet_ptr -> nx_packet_prepend_ptr[i+3]) << 16) |
+                                                         (((ULONG) packet_ptr -> nx_packet_prepend_ptr[i+4]) << 8)  |
+                                                          ((ULONG) packet_ptr -> nx_packet_prepend_ptr[i+5]));
+
+            }
+
+            /* Check for the secondary DNS option. */
+            else if ((packet_ptr -> nx_packet_prepend_ptr[i] == NX_PPP_DNS_SECONDARY_SERVER_OPTION) && (option_length == 6U))
+            {
+    
+                /* Yes, we have a secondary DNS address.  */
+
+                /* Let's copy it into the PPP structure in case we need it later.  */
+                ppp_ptr -> nx_ppp_secondary_dns_address =  ((((ULONG) packet_ptr -> nx_packet_prepend_ptr[i+2]) << 24) |
+                                                           (((ULONG) packet_ptr -> nx_packet_prepend_ptr[i+3]) << 16) |
+                                                           (((ULONG) packet_ptr -> nx_packet_prepend_ptr[i+4]) << 8)  |
+                                                            ((ULONG) packet_ptr -> nx_packet_prepend_ptr[i+5]));
+
+                /* The secondary DNS address ends the parse.  */
+                option_length =  length;
+            }
+            else
+            {
+
+                /* Skip any other option.  */
+            }
+
+            /* Position to the next option.  */
+            i =  i + ((UINT) option_length);
+            length =  length - option_length;
         }
     } 
 }
