@@ -9,6 +9,8 @@
  * SPDX-License-Identifier: MIT
  **************************************************************************/
 
+// Portions of this file were generated with AI assistance.
+
 
 /**************************************************************************/
 /**************************************************************************/
@@ -69,6 +71,13 @@ UINT length;
      * |      2       |       1       |  <Cookie Length>   |
      * | DTLS version | Cookie length | Server Cookie data |
      */
+
+    /* The version and the cookie length must be present before either is read.  */
+    if (message_length < 3u)
+    {
+        dtls_session -> nx_secure_dtls_cookie_length = 0;
+        return(NX_SECURE_TLS_INCORRECT_MESSAGE_LENGTH);
+    }
 
     /* Use our length as an index into the buffer. */
     length = 0;
