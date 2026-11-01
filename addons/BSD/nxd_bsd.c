@@ -12915,7 +12915,7 @@ NX_IP          *ip_ptr;
                                                    NX_WAIT_FOREVER, packet_ptr -> nx_packet_address.nx_packet_ipv6_address_ptr);
 
                 /* If the default router did not has a reachable ND_CACHE_ENTRY. Get the NDCacheEntry. */
-                if(!NDCacheEntry)
+                if((status == NX_SUCCESS) && (!NDCacheEntry))
                     NDCacheEntry = dest_entry_ptr -> nx_ipv6_destination_entry_nd_entry;
             }
 

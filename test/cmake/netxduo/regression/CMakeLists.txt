@@ -73,7 +73,8 @@ if("-DNX_BSD_ENABLE" IN_LIST ${CMAKE_BUILD_TYPE})
       ${SOURCE_DIR}/bsd_test/netx_bsd_raw_basic_rx_nohdr_blocking_test.c
       ${SOURCE_DIR}/bsd_test/netx_bsd_raw_pppoe_test.c
       ${SOURCE_DIR}/bsd_test/netx_bsd_raw_ping_test.c
-      ${SOURCE_DIR}/bsd_test/netx_bsd_raw_tx_test.c)
+      ${SOURCE_DIR}/bsd_test/netx_bsd_raw_tx_test.c
+      ${SOURCE_DIR}/bsd_test/netx_bsd_raw_ipv6_dest_table_full_test.c)
   endif()
 endif()
 
