@@ -8,6 +8,7 @@
  *
  * SPDX-License-Identifier: MIT
  **************************************************************************/
+// Portions of this file were generated with AI assistance.
 
 
 /**************************************************************************/
@@ -5272,9 +5273,11 @@ ULONG       temp =        0;
             return NX_FTP_INVALID_COMMAND;
         }
 
-        /* Save the passive IP address and  data port.  */
+        /* Connect the data socket to the control connection's peer, as the IPv6 path does, so a
+           server cannot direct the data connection to another host.  */
         ftp_client_ptr -> nx_ftp_client_data_socket.nx_tcp_socket_connect_ip.nxd_ip_version = NX_IP_VERSION_V4;
-        ftp_client_ptr -> nx_ftp_client_data_socket.nx_tcp_socket_connect_ip.nxd_ip_address.v4 = ip_address;
+        ftp_client_ptr -> nx_ftp_client_data_socket.nx_tcp_socket_connect_ip.nxd_ip_address.v4 =
+            ftp_client_ptr -> nx_ftp_client_control_socket.nx_tcp_socket_connect_ip.nxd_ip_address.v4;
         ftp_client_ptr -> nx_ftp_client_data_socket.nx_tcp_socket_connect_port =  data_port;
 
 #endif /* NX_DISABLE_IPV4 */
