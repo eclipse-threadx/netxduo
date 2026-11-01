@@ -9,6 +9,8 @@
  * SPDX-License-Identifier: MIT
  **************************************************************************/
 
+/* Portions of this file were generated with AI assistance. */
+
 
 /**************************************************************************/
 /**************************************************************************/
@@ -41,10 +43,11 @@
 /*    that is invoked when a UDP packet has been received. It checks the  */
 /*    DTLS session cache for a matching client (based on IP address and   */
 /*    port) and then invokes the application callback with the            */
-/*    appropriate session object. If a previous session was not found, a  */
-/*    new session is allocated (if available) and the DTLS handshake is   */
-/*    initiated. Once the handshake is complete the user callback is      */
-/*    invoked as above.                                                   */
+/*    appropriate session object. If a previous session was not found,    */
+/*    an initial ClientHello is answered with a HelloVerifyRequest, and   */
+/*    a new session is allocated (if available) only for a ClientHello    */
+/*    returning the cookie this server issued to its source. Once the     */
+/*    handshake is complete the user callback is invoked as above.        */
 /*                                                                        */
 /*  INPUT                                                                 */
 /*                                                                        */
@@ -59,6 +62,9 @@
 /*    _nxd_udp_source_extract               Extract IP address and port   */
 /*    _nx_udp_socket_port_get               Get local port                */
 /*    nx_secure_dtls_session_cache_find     Check DTLS session cache      */
+/*    _nx_secure_dtls_server_cookie_check   Verify ClientHello cookie     */
+/*    _nx_secure_dtls_server_helloverifyrequest_send                      */
+/*                                          Send HelloVerifyRequest       */
 /*    nx_secure_dtls_session_cache_get_new  Get new DTLS session          */
 /*    nx_secure_tls_packet_release          Release packet                */
 /*    nx_packet_allocate                    Allocate packet               */
@@ -91,6 +97,7 @@ UCHAR *send_data;
 NX_PACKET *temp_packet_ptr;
 NX_SECURE_DTLS_SERVER *dtls_server;
 NX_SECURE_DTLS_SESSION *dtls_session;
+NX_SECURE_DTLS_CLIENTHELLO_INFO hello_info;
 
     if(socket_ptr -> nx_udp_socket_receive_head == NX_NULL)
     {
@@ -125,9 +132,15 @@ NX_SECURE_DTLS_SESSION *dtls_session;
     if(status == NX_SECURE_DTLS_SESSION_NOT_FOUND)
     {
 
-        /* If received packet is ALERT, just drop it.  */
-        if ((socket_ptr -> nx_udp_socket_receive_head -> nx_packet_length < NX_SECURE_DTLS_RECORD_HEADER_SIZE) ||
-            (socket_ptr -> nx_udp_socket_receive_head -> nx_packet_prepend_ptr[8] == NX_SECURE_TLS_ALERT))
+        /* A source without a session gets one only by returning, in an initial
+           ClientHello, the cookie this server issued to it. That proves it can receive at
+           the address it claims before any session is committed to it. */
+        status = _nx_secure_dtls_server_cookie_check(dtls_server, socket_ptr -> nx_udp_socket_receive_head,
+                                                     &ip_address, remote_port, local_port, &hello_info);
+
+        /* Anything but an initial ClientHello is dropped without a reply, and one without
+           a valid cookie is answered with a HelloVerifyRequest. */
+        if ((status != NX_SUCCESS) && (status != NX_SECURE_TLS_NO_FREE_DTLS_SESSIONS))
         {
 
             /* Lockout interrupts.  */
@@ -153,11 +166,20 @@ NX_SECURE_DTLS_SESSION *dtls_session;
             /* Release the packet.  */
             nx_secure_tls_packet_release(packet_ptr);
 
+            if (status == NX_CONTINUE)
+            {
+                _nx_secure_dtls_server_helloverifyrequest_send(socket_ptr, &ip_address, remote_port, &hello_info);
+            }
+
             return;
         }
 
-        /* Get a new session. */
-        status = nx_secure_dtls_session_cache_get_new(dtls_server, &dtls_session, &ip_address, remote_port, local_port);
+        if (status == NX_SUCCESS)
+        {
+
+            /* Get a new session. */
+            status = nx_secure_dtls_session_cache_get_new(dtls_server, &dtls_session, &ip_address, remote_port, local_port);
+        }
 
         /* Make sure we got a session. */
         if(status == NX_SECURE_TLS_NO_FREE_DTLS_SESSIONS)
@@ -267,11 +289,34 @@ NX_SECURE_DTLS_SESSION *dtls_session;
             return;
         }
 
+        /* Get the protection before modifying the session. */
+        tx_mutex_get(&_nx_secure_tls_protection, TX_WAIT_FOREVER);
+
+        /* The ClientHello is the second of the handshake, after the HelloVerifyRequest
+           this server answered the first with, which it sent with the first's sequence
+           numbers. Continue the handshake from the ClientHello's message sequence, and
+           number this server's records from its record sequence, so the client accepts
+           the ServerHello as following the HelloVerifyRequest. */
+        dtls_session -> nx_secure_dtls_cookie_verified = NX_TRUE;
+        dtls_session -> nx_secure_dtls_expected_handshake_sequence = hello_info.nx_secure_dtls_clienthello_message_sequence;
+        dtls_session -> nx_secure_dtls_local_handshake_sequence = (USHORT)hello_info.nx_secure_dtls_clienthello_message_sequence;
+        dtls_session -> nx_secure_dtls_tls_session.nx_secure_tls_local_sequence_number[1] =
+            ((ULONG)hello_info.nx_secure_dtls_clienthello_record_sequence[0] << 8) |
+            (ULONG)hello_info.nx_secure_dtls_clienthello_record_sequence[1];
+        dtls_session -> nx_secure_dtls_tls_session.nx_secure_tls_local_sequence_number[0] =
+            ((ULONG)hello_info.nx_secure_dtls_clienthello_record_sequence[2] << 24) |
+            ((ULONG)hello_info.nx_secure_dtls_clienthello_record_sequence[3] << 16) |
+            ((ULONG)hello_info.nx_secure_dtls_clienthello_record_sequence[4] << 8) |
+            (ULONG)hello_info.nx_secure_dtls_clienthello_record_sequence[5];
+
         /* New session, retrieve the UDP packet and place in our session receive queue. */
         dtls_session -> nx_secure_dtls_receive_queue_head = packet_ptr;
 
         /* Make sure the queue pointer is cleared. */
         packet_ptr -> nx_packet_queue_next = NX_NULL;
+
+        /* Release the protection. */
+        tx_mutex_put(&_nx_secure_tls_protection);
 
         /* Notify the application of a new connection - it is up to the application to call
            nx_secure_dtls_session_start to kick off the handshake! */

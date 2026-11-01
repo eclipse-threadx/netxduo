@@ -9,6 +9,8 @@
 /* SPDX-License-Identifier: MIT                                            */
 /***************************************************************************/
 
+/* Portions of this file were generated with AI assistance. */
+
 /* This test concentrates on DTLS connections.  */
 
 #include   "nx_api.h"
@@ -387,8 +389,15 @@ NX_PACKET *packet_ptr;
 
     for (i = 0; i < NUM_SERVER_SESSIONS; i++)
     {
-        /* Wait for connection attempt. */
-        tx_semaphore_get(&semaphore_connect, NX_IP_PERIODIC_RATE);
+        /* Wait for connection attempt. A session exists only once the client has
+           returned its cookie, which the dropped messages delay by retransmissions. */
+        status = tx_semaphore_get(&semaphore_connect, 30 * NX_IP_PERIODIC_RATE);
+        if (status)
+        {
+            printf("No connection for DTLS server session at index %d\n", i);
+            ERROR_COUNTER();
+            break;
+        }
 
         status = nx_secure_dtls_server_session_start(connect_session[i], NX_WAIT_FOREVER);
 

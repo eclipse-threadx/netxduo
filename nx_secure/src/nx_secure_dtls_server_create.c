@@ -9,6 +9,8 @@
  * SPDX-License-Identifier: MIT
  **************************************************************************/
 
+/* Portions of this file were generated with AI assistance. */
+
 
 /**************************************************************************/
 /**************************************************************************/
@@ -147,6 +149,16 @@ NX_SECURE_DTLS_SERVER *tail_ptr;
 
     /* Reset the protocol version override. */
     server_ptr -> nx_dtls_server_protocol_version_override = 0;
+
+    /* The cookie secret is drawn when the first ClientHello arrives. */
+    NX_SECURE_MEMSET(server_ptr -> nx_dtls_server_cookie_secret, 0, sizeof(server_ptr -> nx_dtls_server_cookie_secret));
+    NX_SECURE_MEMSET(server_ptr -> nx_dtls_server_cookie_master_secret, 0, sizeof(server_ptr -> nx_dtls_server_cookie_master_secret));
+    server_ptr -> nx_dtls_server_cookie_master_secret_length = 0;
+    server_ptr -> nx_dtls_server_cookie_derivation_count = 0;
+    server_ptr -> nx_dtls_server_cookie_current = 0;
+    server_ptr -> nx_dtls_server_cookie_previous_valid = NX_FALSE;
+    server_ptr -> nx_dtls_server_cookie_ready = NX_FALSE;
+    server_ptr -> nx_dtls_server_cookie_rotation_time = 0;
 
     /* Initialize sessions. */
     for(i = 0; i < num_sessions; ++i)

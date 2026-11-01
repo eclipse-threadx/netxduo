@@ -104,6 +104,8 @@ set(nx_secure_test_cases
     ${SOURCE_DIR}/nx_secure_test/nx_secure_dtls_multiple_sessions_ecjpake_test.c
     ${SOURCE_DIR}/nx_secure_test/nx_secure_dtls_multiple_ip_address_test.c
     ${SOURCE_DIR}/nx_secure_test/nx_secure_dtls_no_free_sessions_test.c
+    ${SOURCE_DIR}/nx_secure_test/nx_secure_dtls_stateless_cookie_test.c
+    ${SOURCE_DIR}/nx_secure_test/nx_secure_dtls_session_cookie_test.c
     ${SOURCE_DIR}/nx_secure_test/nx_secure_dtls_concurrent_sessions_test.c
     ${SOURCE_DIR}/nx_secure_test/nx_secure_dtls_concurrent_sessions_retransmit_test.c
     ${SOURCE_DIR}/nx_secure_test/nx_secure_dtls_abort_waiting_test.c

@@ -34,6 +34,8 @@ target_sources(${PROJECT_NAME}
 	${CMAKE_CURRENT_LIST_DIR}/src/nx_secure_dtls_send_helloverifyrequest.c
 	${CMAKE_CURRENT_LIST_DIR}/src/nx_secure_dtls_send_record.c
 	${CMAKE_CURRENT_LIST_DIR}/src/nx_secure_dtls_send_serverhello.c
+	${CMAKE_CURRENT_LIST_DIR}/src/nx_secure_dtls_server_cookie.c
+	${CMAKE_CURRENT_LIST_DIR}/src/nx_secure_dtls_server_cookie_secret_set.c
 	${CMAKE_CURRENT_LIST_DIR}/src/nx_secure_dtls_server_create.c
 	${CMAKE_CURRENT_LIST_DIR}/src/nx_secure_dtls_server_delete.c
 	${CMAKE_CURRENT_LIST_DIR}/src/nx_secure_dtls_server_ecc_initialize.c
@@ -233,6 +235,7 @@ target_sources(${PROJECT_NAME}
 	${CMAKE_CURRENT_LIST_DIR}/src/nxe_secure_dtls_ecc_initialize.c
 	${CMAKE_CURRENT_LIST_DIR}/src/nxe_secure_dtls_packet_allocate.c
 	${CMAKE_CURRENT_LIST_DIR}/src/nxe_secure_dtls_psk_add.c
+	${CMAKE_CURRENT_LIST_DIR}/src/nxe_secure_dtls_server_cookie_secret_set.c
 	${CMAKE_CURRENT_LIST_DIR}/src/nxe_secure_dtls_server_create.c
 	${CMAKE_CURRENT_LIST_DIR}/src/nxe_secure_dtls_server_delete.c
 	${CMAKE_CURRENT_LIST_DIR}/src/nxe_secure_dtls_server_ecc_initialize.c
