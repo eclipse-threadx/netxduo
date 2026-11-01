@@ -8,6 +8,7 @@
  *
  * SPDX-License-Identifier: MIT
  **************************************************************************/
+// Portions of this file were generated with AI assistance.
 
 
 /**************************************************************************/
@@ -1320,7 +1321,7 @@ UINT        matching = NX_FALSE;
 
                 /* Loop to save error message to TFTP Client.  */
                 tftp_client_ptr -> nx_tftp_client_error_string[sizeof(tftp_client_ptr -> nx_tftp_client_error_string) - 1] =  NX_NULL;
-                for (i = 0; i < NX_TFTP_ERROR_STRING_MAX; i++)
+                for (i = 0; (i < NX_TFTP_ERROR_STRING_MAX) && (buffer_ptr < packet_ptr -> nx_packet_append_ptr); i++)
                 {
 
                     /* Store desired file name.  */
@@ -1332,6 +1333,9 @@ UINT        matching = NX_FALSE;
                         break;
                     }
                 }
+
+                /* Terminate a message that ends with the datagram rather than a NULL.  */
+                tftp_client_ptr -> nx_tftp_client_error_string[i] =  NX_NULL;
 
                 /* Release the packet.  */
                 nx_packet_release(packet_ptr);
@@ -1765,8 +1769,9 @@ UCHAR       resend_ACK_packet = NX_FALSE;
         tftp_client_ptr -> nx_tftp_client_error_code |=  (UINT) (*buffer_ptr);
         buffer_ptr++;
 
-        /* Loop to save error message.  */
-        for (i = 0; (i < (sizeof(tftp_client_ptr -> nx_tftp_client_error_string) -1)) && (*buffer_ptr); i++)
+        /* Loop to save error message, stopping at the end of the datagram.  */
+        for (i = 0; (i < (sizeof(tftp_client_ptr -> nx_tftp_client_error_string) -1)) &&
+                    (buffer_ptr < (*packet_ptr) -> nx_packet_append_ptr) && (*buffer_ptr != 0U); i++)
         {
 
             /* Store desired file name.  */
@@ -2072,8 +2077,9 @@ UINT        matching = NX_FALSE;
             tftp_client_ptr -> nx_tftp_client_error_code |= (UINT) (*buffer_ptr);
             buffer_ptr++;
 
-            /* Loop to save error message.  */
-            for (i = 0; (i < (sizeof(tftp_client_ptr -> nx_tftp_client_error_string) -1)) && (*buffer_ptr); i++)
+            /* Loop to save error message, stopping at the end of the datagram.  */
+            for (i = 0; (i < (sizeof(tftp_client_ptr -> nx_tftp_client_error_string) -1)) &&
+                        (buffer_ptr < packet_ptr -> nx_packet_append_ptr) && (*buffer_ptr != 0U); i++)
             {
 
                 /* Store desired file name.  */
