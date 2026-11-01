@@ -123,6 +123,7 @@ set(dhcp_test_cases
     ${SOURCE_DIR}/dhcp_test/netx_dhcp_client_parameter_request_test.c
     ${SOURCE_DIR}/dhcp_test/netx_dhcp_coverage_test.c
     ${SOURCE_DIR}/dhcp_test/netx_dhcp_unicast_test.c
+    ${SOURCE_DIR}/dhcp_test/netx_dhcp_option_walk_bounds_test.c
     ${SOURCE_DIR}/dhcp_test/netx_dhcp_server_test.c
     ${SOURCE_DIR}/dhcp_test/netx_dhcp_server_improper_term_test.c
     ${SOURCE_DIR}/dhcp_test/netx_dhcp_server_second_interface_test.c
