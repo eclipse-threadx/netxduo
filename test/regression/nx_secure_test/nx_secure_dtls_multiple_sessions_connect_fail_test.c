@@ -9,6 +9,8 @@
 /* SPDX-License-Identifier: MIT                                            */
 /***************************************************************************/
 
+/* Portions of this file were generated with AI assistance. */
+
 /* This test concentrates on DTLS connections.  */
 
 #include   "nx_api.h"
@@ -323,35 +325,26 @@ NX_PACKET *packet_ptr;
         ERROR_COUNTER();
     }
 
-    for (i = 0; i < NUM_CLIENT_TEST; i++)
+    /* Client 1 cannot return the cookie it was sent, so it never gets a session and
+       never takes one from the pool: only clients 0 and 2 connect. */
+    for (i = 0; i < NUM_SERVER_SESSIONS; i++)
     {
 
         /* Wait for connection attempt. */
-        tx_semaphore_get(&semaphore_connect, NX_IP_PERIODIC_RATE);
+        status = tx_semaphore_get(&semaphore_connect, 10 * NX_IP_PERIODIC_RATE);
+        if (status)
+        {
+            printf("Session %d: no connection\n", i);
+            ERROR_COUNTER();
+            break;
+        }
 
         status = nx_secure_dtls_server_session_start(connect_session[i], NX_IP_PERIODIC_RATE);
 
-        if (i != 1 && status)
+        if (status)
         {
-            printf("Clinet %d: Error in establishing DTLS server session: 0x%02X\n", i, status);
+            printf("Session %d: Error in establishing DTLS server session: 0x%02X\n", i, status);
             ERROR_COUNTER();
-        }
-        else if (i == 1)
-        {
-
-            if (status)
-            {
-
-                /* Delete the session.  */
-                nx_secure_dtls_session_end(connect_session[i], NX_NO_WAIT);
-
-                /* Resume client 2 to connect to server.  */
-                tx_thread_resume(&client_thread[2]);
-            }
-            else
-            {
-                ERROR_COUNTER();
-            }
         }
     }
 
@@ -413,6 +406,12 @@ NX_PACKET *packet_ptr;
     if ((client_pool[0].nx_packet_pool_available != client_pool[0].nx_packet_pool_total) ||
         (client_pool[1].nx_packet_pool_available != client_pool[1].nx_packet_pool_total) ||
         (client_pool[2].nx_packet_pool_available != client_pool[2].nx_packet_pool_total))
+    {
+        ERROR_COUNTER();
+    }
+
+    /* Only the two clients that returned their cookies were given a session. */
+    if (server_connect_count != NUM_SERVER_SESSIONS)
     {
         ERROR_COUNTER();
     }
@@ -581,6 +580,9 @@ CHAR socket_name[] = "Client socket X";
     }
 
     nx_secure_dtls_session_delete(&dtls_client_session[client_index]);
+
+    /* Client 1 failed without taking a server session; let client 2 connect. */
+    tx_thread_resume(&client_thread[2]);
 
     status = nx_udp_socket_unbind(&client_socket[client_index]);
     if (status)

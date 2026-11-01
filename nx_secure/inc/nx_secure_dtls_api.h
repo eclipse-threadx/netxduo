@@ -9,6 +9,8 @@
  * SPDX-License-Identifier: MIT
  **************************************************************************/
 
+/* Portions of this file were generated with AI assistance. */
+
 
 /**************************************************************************/
 /**************************************************************************/
@@ -80,6 +82,7 @@ extern   "C" {
 #define nx_secure_dtls_server_local_certificate_remove        _nx_secure_dtls_server_local_certificate_remove
 #define nx_secure_dtls_server_notify_set                      _nx_secure_dtls_server_notify_set
 #define nx_secure_dtls_server_start                           _nx_secure_dtls_server_start
+#define nx_secure_dtls_server_cookie_secret_set               _nx_secure_dtls_server_cookie_secret_set
 #define nx_secure_dtls_server_stop                            _nx_secure_dtls_server_stop
 #define nx_secure_dtls_server_trusted_certificate_add         _nx_secure_dtls_server_trusted_certificate_add
 #define nx_secure_dtls_server_trusted_certificate_remove      _nx_secure_dtls_server_trusted_certificate_remove
@@ -117,6 +120,7 @@ extern   "C" {
 #define nx_secure_dtls_server_local_certificate_remove        _nxe_secure_dtls_server_local_certificate_remove
 #define nx_secure_dtls_server_notify_set                      _nxe_secure_dtls_server_notify_set
 #define nx_secure_dtls_server_start                           _nxe_secure_dtls_server_start
+#define nx_secure_dtls_server_cookie_secret_set               _nxe_secure_dtls_server_cookie_secret_set
 #define nx_secure_dtls_server_stop                            _nxe_secure_dtls_server_stop
 #define nx_secure_dtls_server_trusted_certificate_add         _nxe_secure_dtls_server_trusted_certificate_add
 #define nx_secure_dtls_server_trusted_certificate_remove      _nxe_secure_dtls_server_trusted_certificate_remove
@@ -184,6 +188,9 @@ UINT nx_secure_dtls_server_notify_set(NX_SECURE_DTLS_SERVER *server_ptr,
                                         UINT (*error_notify)(NX_SECURE_DTLS_SESSION *dtls_session, UINT error_code));
 
 UINT nx_secure_dtls_server_start(NX_SECURE_DTLS_SERVER *server_ptr);
+
+UINT nx_secure_dtls_server_cookie_secret_set(NX_SECURE_DTLS_SERVER *server_ptr,
+                                             const UCHAR *secret, UINT secret_length);
 
 UINT nx_secure_dtls_server_stop(NX_SECURE_DTLS_SERVER *server_ptr);
 

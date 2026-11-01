@@ -9,6 +9,8 @@
 /* SPDX-License-Identifier: MIT                                            */
 /***************************************************************************/
 
+/* Portions of this file were generated with AI assistance. */
+
 /* This test concentrates on DTLS connections.  */
 
 #include   "nx_api.h"
@@ -436,8 +438,9 @@ UCHAR *data;
 
     data = packet_ptr -> nx_packet_prepend_ptr;
 
-    /* Drop the Server Hello Verify Request. */
-    if ((data[8] == NX_SECURE_TLS_HANDSHAKE) && (data[21] == NX_SECURE_TLS_HELLO_VERIFY_REQUEST))
+    /* Drop the ServerHello, so that the server session waits for the client's next
+       flight. The cookie exchange must complete for the server to have a session. */
+    if ((data[8] == NX_SECURE_TLS_HANDSHAKE) && (data[21] == NX_SECURE_TLS_SERVER_HELLO))
     {
         nx_packet_release(packet_ptr);
         return;

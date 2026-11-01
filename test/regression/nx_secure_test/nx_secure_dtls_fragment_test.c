@@ -9,6 +9,8 @@
 /* SPDX-License-Identifier: MIT                                            */
 /***************************************************************************/
 
+/* Portions of this file were generated with AI assistance. */
+
 /* This test concentrates on DTLS connections.  */
 
 #include   "nx_api.h"
@@ -294,8 +296,10 @@ UINT temp_len;
     if ((data[8] == NX_SECURE_TLS_HANDSHAKE))
     {
 
-        /* Client Hello: message sequence = 0, Client Key Exchange: message sequence = 2.  */
-        if ((data[25] == 0) && (data[26] == 0 || data[26] == 2))
+        /* Client Key Exchange: message sequence = 2. A ClientHello is not fragmented: a
+           server accepts a ClientHello only in one datagram, since it answers it
+           without holding a session.  */
+        if ((data[25] == 0) && (data[26] == 2))
         {
 
             /* Copy the packet for fragment.  */

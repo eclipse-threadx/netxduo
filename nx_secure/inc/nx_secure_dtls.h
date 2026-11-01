@@ -9,6 +9,8 @@
  * SPDX-License-Identifier: MIT
  **************************************************************************/
 
+/* Portions of this file were generated with AI assistance. */
+
 
 /**************************************************************************/
 /**************************************************************************/
@@ -99,12 +101,43 @@ extern   "C" {
 /* The cookie size limit for DTLS 1.2 clinet. */
 #define NX_SECURE_DTLS_MAX_COOKIE_LENGTH          255
 
+/* A DTLS server cookie is a key identifier byte followed by a MAC of at least 128 bits. */
+#if (NX_SECURE_DTLS_COOKIE_LENGTH < 17) || (NX_SECURE_DTLS_COOKIE_LENGTH > NX_SECURE_DTLS_MAX_COOKIE_LENGTH)
+#error "NX_SECURE_DTLS_COOKIE_LENGTH must be between 17 and 255."
+#endif
+
+/* Size in bytes of each secret keying the DTLS server cookie. */
+#define NX_SECURE_DTLS_COOKIE_SECRET_SIZE         32
+
+/* Lifetime in seconds of a DTLS server cookie secret. A cookie issued under a secret is
+   accepted until the secret after it has also been retired. */
+#ifndef NX_SECURE_DTLS_COOKIE_SECRET_LIFETIME
+#define NX_SECURE_DTLS_COOKIE_SECRET_LIFETIME     300
+#endif /* NX_SECURE_DTLS_COOKIE_SECRET_LIFETIME */
+
 /* Event flag masks for DTLS retransmit thread. */
 #define NX_SECURE_DTLS_ALL_EVENTS                 ((ULONG)0xFFFFFFFF)   /* All event flags              */
 #define NX_SECURE_DTLS_PERIODIC_EVENT             ((ULONG)0x00000001)   /* Periodic event               */
 
 /* Forward declaration for pointer in DTLS session structure. */
 struct NX_SECURE_DTLS_SERVER_STRUCT;
+
+/* Fields of an initial ClientHello received from an unknown source that the server needs
+   to answer it, or to start a session for it, without holding a session. */
+typedef struct NX_SECURE_DTLS_CLIENTHELLO_INFO_STRUCT
+{
+    /* Record sequence number and handshake message sequence of the ClientHello. */
+    UCHAR nx_secure_dtls_clienthello_record_sequence[6];
+    UINT  nx_secure_dtls_clienthello_message_sequence;
+
+    /* Cookie the server expects from this client. */
+    UCHAR nx_secure_dtls_clienthello_cookie[NX_SECURE_DTLS_COOKIE_LENGTH];
+    UINT  nx_secure_dtls_clienthello_cookie_length;
+
+    /* Index of the local address the ClientHello was sent to, from which the reply must
+       come, or 0xFFFFFFFF if it is not known. */
+    UINT  nx_secure_dtls_clienthello_address_index;
+} NX_SECURE_DTLS_CLIENTHELLO_INFO;
 
 /* Definition of the top-level DTLS session control block used by the application. */
 typedef struct NX_SECURE_DTLS_SESSION_STRUCT
@@ -131,6 +164,10 @@ typedef struct NX_SECURE_DTLS_SESSION_STRUCT
     UCHAR  nx_secure_dtls_cookie[NX_SECURE_DTLS_COOKIE_LENGTH];
 
     UCHAR *nx_secure_dtls_client_cookie_ptr;
+
+    /* Set when a server session is allocated for a ClientHello whose cookie the server
+       already verified, so that ClientHello is not answered with a HelloVerifyRequest. */
+    UINT nx_secure_dtls_cookie_verified;
 
     /* The DTLS handshake messages have a sequence number that is incremented
        with each message sent. */
@@ -217,6 +254,20 @@ typedef struct NX_SECURE_DTLS_SERVER_STRUCT
     /* Reserved for possible future use. */
     ULONG                   nx_dtls_server_reserved;
 
+    /* Secrets keying the HelloVerifyRequest cookie. The index of the current secret is the
+       key identifier carried in each cookie; the other secret is the one it replaced. */
+    UCHAR                   nx_dtls_server_cookie_secret[2][NX_SECURE_DTLS_COOKIE_SECRET_SIZE];
+    UINT                    nx_dtls_server_cookie_current;
+    UINT                    nx_dtls_server_cookie_previous_valid;
+    UINT                    nx_dtls_server_cookie_ready;
+    ULONG                   nx_dtls_server_cookie_rotation_time;
+
+    /* Secret supplied by the application, from which cookie secrets are derived instead of
+       drawn from NX_RAND. */
+    UCHAR                   nx_dtls_server_cookie_master_secret[NX_SECURE_DTLS_COOKIE_SECRET_SIZE];
+    UINT                    nx_dtls_server_cookie_master_secret_length;
+    ULONG                   nx_dtls_server_cookie_derivation_count;
+
     /* Define the link between other DTLS server structures created by the application.  */
     struct NX_SECURE_DTLS_SERVER_STRUCT
         *nx_dtls_server_created_previous,
@@ -242,6 +293,8 @@ UINT _nx_secure_dtls_server_local_certificate_add(NX_SECURE_DTLS_SERVER *server_
 
 
 UINT _nx_secure_dtls_server_start(NX_SECURE_DTLS_SERVER *server_ptr);
+UINT _nx_secure_dtls_server_cookie_secret_set(NX_SECURE_DTLS_SERVER *server_ptr,
+                                              const UCHAR *secret, UINT secret_length);
 
 UINT _nx_secure_dtls_session_create(NX_SECURE_DTLS_SESSION *session_ptr,
                                     const NX_SECURE_TLS_CRYPTO *crypto_table,
@@ -366,6 +419,8 @@ UINT _nxe_secure_dtls_server_notify_set(NX_SECURE_DTLS_SERVER *server_ptr,
                                         UINT (*error_notify)(NX_SECURE_DTLS_SESSION *dtls_session, UINT error_code));
 
 UINT _nxe_secure_dtls_server_start(NX_SECURE_DTLS_SERVER *server_ptr);
+UINT _nxe_secure_dtls_server_cookie_secret_set(NX_SECURE_DTLS_SERVER *server_ptr,
+                                               const UCHAR *secret, UINT secret_length);
 
 UINT _nxe_secure_dtls_server_stop(NX_SECURE_DTLS_SERVER *server_ptr);
 
@@ -483,6 +538,17 @@ VOID _nx_secure_dtls_retransmit(NX_SECURE_DTLS_SESSION *dtls_session);
 VOID nx_secure_dtls_session_cache_delete(NX_SECURE_DTLS_SERVER *dtls_server, NXD_ADDRESS *ip_address, UINT remote_port, UINT local_port);
 UINT nx_secure_dtls_session_cache_get_new(NX_SECURE_DTLS_SERVER *dtls_server, NX_SECURE_DTLS_SESSION **dtls_session, NXD_ADDRESS *ip_address, UINT remote_port, UINT local_port);
 UINT  nx_secure_dtls_session_cache_find(NX_SECURE_DTLS_SERVER *dtls_server, NX_SECURE_DTLS_SESSION **dtls_session, NXD_ADDRESS *ip_address, UINT remote_port, UINT local_port);
+UINT _nx_secure_dtls_server_cookie_check(NX_SECURE_DTLS_SERVER *dtls_server, NX_PACKET *packet_ptr,
+                                         const NXD_ADDRESS *ip_address, UINT remote_port, UINT local_port,
+                                         NX_SECURE_DTLS_CLIENTHELLO_INFO *hello_info);
+UINT _nx_secure_dtls_server_helloverifyrequest_send(NX_UDP_SOCKET *socket_ptr, NXD_ADDRESS *ip_address,
+                                                    UINT remote_port,
+                                                    const NX_SECURE_DTLS_CLIENTHELLO_INFO *hello_info);
+UINT _nx_secure_dtls_session_cookie_verify(NX_SECURE_DTLS_SESSION *dtls_session,
+                                           UCHAR *parameters, UINT parameters_length,
+                                           UCHAR *suites, UINT suites_length,
+                                           const UCHAR *client_cookie, UINT client_cookie_length,
+                                           UCHAR *cookie_verified);
 
 #endif /* NX_SECURE_ENABLE_DTLS */
 

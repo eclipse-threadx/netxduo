@@ -9,6 +9,8 @@
  * SPDX-License-Identifier: MIT
  **************************************************************************/
 
+/* Portions of this file were generated with AI assistance. */
+
 
 /**************************************************************************/
 /**************************************************************************/
@@ -67,6 +69,7 @@ static UINT _nx_secure_dtls_check_ciphersuite(const NX_SECURE_TLS_CIPHERSUITE_IN
 /*    _nx_secure_tls_proc_clienthello_sec_sa_extension                    */
 /*                                          Process ECC extensions        */
 /*    _nx_secure_dtls_check_ciphersuite     Check if ECC suite is usable  */
+/*    _nx_secure_dtls_session_cookie_verify Verify ClientHello cookie     */
 /*    _nx_secure_x509_local_device_certificate_get                        */
 /*                                          Get the local certificate     */
 /*    [nx_crypto_init]                      Initialize crypto             */
@@ -98,6 +101,9 @@ NX_SECURE_TLS_HELLO_EXTENSION         extension_data[NX_SECURE_TLS_HELLO_EXTENSI
 UINT                                  num_extensions = NX_SECURE_TLS_HELLO_EXTENSIONS_MAX;
 UCHAR                                *ciphersuite_list;
 UCHAR                                *packet_buffer_start;
+UCHAR                                *cookie;
+UCHAR                                *suites;
+UINT                                  parameters_length;
 #ifdef NX_SECURE_ENABLE_ECJPAKE_CIPHERSUITE
 INT                                   extension_total_length;
 USHORT                                extension_length;
@@ -203,6 +209,7 @@ NX_SECURE_TLS_ECDHE_HANDSHAKE_DATA   *ecdhe_data;
     }
 
     /* DTLS - there might be a cookie we need to check. */
+    parameters_length = (UINT)(packet_buffer - packet_buffer_start);
 
     /* The cookie length is one byte and must be present. */
     if (((UINT)(packet_buffer - packet_buffer_start) + 1) > message_length)
@@ -220,22 +227,17 @@ NX_SECURE_TLS_ECDHE_HANDSHAKE_DATA   *ecdhe_data;
         return(NX_SECURE_TLS_INCORRECT_MESSAGE_LENGTH);
     }
 
-    /* A client is verified only by returning the cookie this server issued to it, which
-       is what proves it can receive at the address it claims. The client's bytes are
-       compared against the stored cookie and never written over it - that field holds
-       the value this server generated. A client that returns nothing, or the wrong
-       cookie, is sent a HelloVerifyRequest and must try again. */
-    if ((cookie_length != 0) &&
-        (cookie_length == dtls_session -> nx_secure_dtls_cookie_length) &&
-        (NX_SECURE_MEMCMP(dtls_session -> nx_secure_dtls_cookie, packet_buffer, cookie_length) == 0))
+    /* A DTLS server verifies the cookie before it allocates a session, and marks the
+       session for the one ClientHello it verified. */
+    cookie_verified = NX_FALSE;
+    if (dtls_session -> nx_secure_dtls_cookie_verified == NX_TRUE)
     {
         cookie_verified = NX_TRUE;
     }
-    else
-    {
-        cookie_verified = NX_FALSE;
-    }
+    dtls_session -> nx_secure_dtls_cookie_verified = NX_FALSE;
+    cookie = packet_buffer;
     packet_buffer += cookie_length;
+    suites = packet_buffer;
 
     /* The ciphersuite list length is two bytes and must be present. */
     if (((UINT)(packet_buffer - packet_buffer_start) + 2) > message_length)
@@ -292,6 +294,22 @@ NX_SECURE_TLS_ECDHE_HANDSHAKE_DATA   *ecdhe_data;
     }
 
     packet_buffer += compression_methods_length;
+
+    /* A client is verified only by returning the cookie issued to it, which is what proves
+       it can receive at the address it claims. Unless a DTLS server already verified it,
+       the cookie is derived again from this ClientHello and compared; a client that
+       returns nothing, or the wrong cookie, is sent a HelloVerifyRequest carrying the
+       derived cookie and must try again. */
+    if (cookie_verified == NX_FALSE)
+    {
+        status = _nx_secure_dtls_session_cookie_verify(dtls_session, packet_buffer_start, parameters_length,
+                                                       suites, (UINT)(packet_buffer - suites),
+                                                       cookie, cookie_length, &cookie_verified);
+        if (status != NX_SUCCESS)
+        {
+            return(status);
+        }
+    }
 
     /* Padding data? */
     if (message_length >= (UINT)(packet_buffer - packet_buffer_start + 2))

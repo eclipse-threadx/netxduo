@@ -9,6 +9,8 @@
  * SPDX-License-Identifier: MIT
  **************************************************************************/
 
+/* Portions of this file were generated with AI assistance. */
+
 
 /**************************************************************************/
 /**************************************************************************/
@@ -82,6 +84,12 @@ UINT status = NX_SUCCESS;
 
     /* Get the protection. */
     tx_mutex_get(&_nx_secure_tls_protection, TX_WAIT_FOREVER);
+
+    /* Clear the cookie secrets. */
+    NX_SECURE_MEMSET(server_ptr -> nx_dtls_server_cookie_secret, 0, sizeof(server_ptr -> nx_dtls_server_cookie_secret));
+    NX_SECURE_MEMSET(server_ptr -> nx_dtls_server_cookie_master_secret, 0, sizeof(server_ptr -> nx_dtls_server_cookie_master_secret));
+    server_ptr -> nx_dtls_server_cookie_master_secret_length = 0;
+    server_ptr -> nx_dtls_server_cookie_ready = NX_FALSE;
 
     /* Remove the DTLS server instance from the created list. */
     /* See if the DTLS server instance is the only one on the list. */
