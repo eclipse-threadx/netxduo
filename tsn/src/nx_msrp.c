@@ -8,6 +8,7 @@
  *
  * SPDX-License-Identifier: MIT
  **************************************************************************/
+// Portions of this file were generated with AI assistance.
 
 /**************************************************************************/
 /**************************************************************************/
@@ -201,6 +202,12 @@ NX_MRP_ATTRIBUTE *attribute_head = participant -> inused_head;
 
     *attribute_ptr = nx_mrp_attribute_new(mrp, participant, (NX_MRP_ATTRIBUTE *)msrp_attribute_array, sizeof(NX_MSRP_ATTRIBUTE), NX_MSRP_ATTRIBUTE_ARRAY_MAX_SIZE);
 
+    if (*attribute_ptr == NX_NULL)
+    {
+
+        return(NX_MSRP_ATTRIBUTE_FIND_ERROR);
+    }
+
     /*Initialize attribute_type and part of attribute value.*/
     (*attribute_ptr) -> attribute_type = attribute_type;
 
@@ -228,14 +235,11 @@ NX_MRP_ATTRIBUTE *attribute_head = participant -> inused_head;
     case NX_MSRP_TALKER_FAILED_VECTOR:
     default:
 
+        /* The attribute type is not stored, so release the entry.  */
+        (*attribute_ptr) -> in_use = NX_FALSE;
+        *attribute_ptr = NX_NULL;
+
         return(NX_MSRP_ATTRIBUTE_TYPE_ERROR);
-    }
-
-
-    if (*attribute_ptr == NX_NULL)
-    {
-
-        return(NX_MSRP_ATTRIBUTE_FIND_ERROR);
     }
 
 
