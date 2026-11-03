@@ -9,6 +9,8 @@
  * SPDX-License-Identifier: MIT
  **************************************************************************/
 
+// Portions of this file were generated with AI assistance.
+
 
 /**************************************************************************/
 /**************************************************************************/
@@ -202,7 +204,7 @@ NX_ICMPV6_OPTION *rs_options;
 #endif /* NX_ENABLE_INTERFACE_CAPABILITY */
 
     /*lint -e{929} suppress cast of pointer to pointer, since it is necessary  */
-    _nx_ipv6_packet_send(ip_ptr, pkt_ptr, NX_PROTOCOL_ICMPV6, pkt_ptr -> nx_packet_length, 255,
+    _nx_ipv6_packet_send(ip_ptr, pkt_ptr, NX_PROTOCOL_ICMPV6, pkt_ptr -> nx_packet_length, 255, 0,
                          pkt_ptr -> nx_packet_address.nx_packet_ipv6_address_ptr -> nxd_ipv6_address,
                          (ULONG *)_nx_ipv6_all_router_address);
 

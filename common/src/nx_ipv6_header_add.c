@@ -9,6 +9,8 @@
  * SPDX-License-Identifier: MIT
  **************************************************************************/
 
+// Portions of this file were generated with AI assistance.
+
 
 /**************************************************************************/
 /**************************************************************************/
@@ -60,6 +62,7 @@
 /*    payload_size                          Size of the payload           */
 /*    hop_limit                             Hop limit value to set in IP  */
 /*                                             header.                    */
+/*    traffic_class                         Traffic class for the header  */
 /*    src_address                           Source address                */
 /*    dest_address                          Destination address           */
 /*    fragment                              Fragmentable or not           */
@@ -80,7 +83,8 @@
 /**************************************************************************/
 UINT _nx_ipv6_header_add(NX_IP *ip_ptr, NX_PACKET **packet_pptr,
                          ULONG protocol, ULONG payload_size, ULONG hop_limit,
-                         ULONG *src_address, ULONG *dest_address, ULONG *fragment)
+                         ULONG traffic_class, ULONG *src_address, ULONG *dest_address,
+                         ULONG *fragment)
 {
 
 NX_IPV6_HEADER            *ip_header_ptr;
@@ -225,7 +229,7 @@ USHORT                     short_val;
         packet_ptr -> nx_packet_ip_header = packet_ptr -> nx_packet_prepend_ptr;
 
         /* bits 31-28: IP version.  Bits 27-20: Traffic Class.  Bits 19-00: Flow Lable */
-        ip_header_ptr -> nx_ip_header_word_0 = (ULONG)(6 << 28);
+        ip_header_ptr -> nx_ip_header_word_0 = (ULONG)(6 << 28) | ((traffic_class & 0xFF) << 20);
         NX_CHANGE_ULONG_ENDIAN(ip_header_ptr -> nx_ip_header_word_0);
 
         /* bits 31-16: payload size.  Bits 15-8: Next Header.   Bits 7-0 Hop limit */

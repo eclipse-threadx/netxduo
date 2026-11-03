@@ -9,6 +9,8 @@
  * SPDX-License-Identifier: MIT
  **************************************************************************/
 
+// Portions of this file were generated with AI assistance.
+
 
 /**************************************************************************/
 /**************************************************************************/
@@ -55,7 +57,7 @@
 /*    protocol                              Value for the protocol field  */
 /*    ttl                                   Value for ttl or hop limit    */
 /*    tos                                   Value for tos or traffic      */
-/*                                            class and flow label        */
+/*                                            class                       */
 /*                                                                        */
 /*  OUTPUT                                                                */
 /*                                                                        */
@@ -91,7 +93,9 @@ UINT  status = NX_SUCCESS;
 
 #ifdef NX_DISABLE_IPV4
     NX_PARAMETER_NOT_USED(ttl);
+#ifndef FEATURE_NX_IPV6
     NX_PARAMETER_NOT_USED(tos);
+#endif /* FEATURE_NX_IPV6 */
 #endif /* NX_DISABLE_IPV4 */
 
     /* Add debug information. */
@@ -125,7 +129,7 @@ UINT  status = NX_SUCCESS;
     {
         packet_ptr -> nx_packet_address.nx_packet_ipv6_address_ptr = &(ip_ptr -> nx_ipv6_address[address_index]);
 
-        status =  _nxd_ipv6_raw_packet_send_internal(ip_ptr, packet_ptr, destination_ip, protocol);
+        status =  _nxd_ipv6_raw_packet_send_internal(ip_ptr, packet_ptr, destination_ip, protocol, tos);
     }
 #endif /* FEATURE_NX_IPV6 */
 
