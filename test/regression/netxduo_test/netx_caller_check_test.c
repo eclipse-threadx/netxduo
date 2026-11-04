@@ -1,5 +1,6 @@
 /***************************************************************************
  * Copyright (c) 2024 Microsoft Corporation 
+ * Copyright (c) 2026 Eclipse ThreadX contributors
  * 
  * This program and the accompanying materials are made available under the
  * terms of the MIT License which is available at
@@ -7,6 +8,8 @@
  * 
  * SPDX-License-Identifier: MIT
  **************************************************************************/
+
+// Portions of this file were generated with AI assistance.
 
 /* This NetX test concentrates on caller check for error checking functions. */
 
@@ -439,6 +442,12 @@ TX_THREAD  *old_thread = _tx_thread_current_ptr;
     if (id == 1)
         _tx_thread_current_ptr = TX_NULL;
 
+#ifdef NX_ENABLE_LOW_WATERMARK
+    if (nx_packet_pool_low_watermark_set(&pool_0, 0) != NX_CALLER_ERROR)
+    {
+        error_counter++;
+    }
+#endif /* NX_ENABLE_LOW_WATERMARK */
     if (nxd_udp_packet_info_extract(packet_ptr, NX_NULL, NX_NULL, NX_NULL, NX_NULL) != NX_CALLER_ERROR)
     {
         error_counter++;
@@ -829,6 +838,9 @@ TX_INTERRUPT_SAVE_AREA
 UINT        i;
 UINT        old_state;
 TX_THREAD  *old_thread;
+#ifdef NX_ENABLE_LOW_WATERMARK
+UINT        receive_queue_maximum;
+#endif /* NX_ENABLE_LOW_WATERMARK */
 NX_PACKET  *packet_ptr;
 ULONG       ulong_value;
 UINT        uint_value;
@@ -856,6 +868,12 @@ struct sched_param sp;
     nx_tcp_socket_create(&ip_0, &tcp_socket, "TCP Socket", 
                          NX_IP_NORMAL, NX_FRAGMENT_OKAY, NX_IP_TIME_TO_LIVE, 65535,
                          NX_NULL, NX_NULL);
+
+#ifdef NX_ENABLE_LOW_WATERMARK
+    /* Set the socket's receive queue maximum to the value it already has, so a
+       call the caller check lets through changes nothing.  */
+    receive_queue_maximum = tcp_socket.nx_tcp_socket_receive_queue_maximum;
+#endif /* NX_ENABLE_LOW_WATERMARK */
 
     TX_DISABLE
     old_state = _tx_thread_system_state;
@@ -934,6 +952,13 @@ struct sched_param sp;
         error_counter++;
     }
 
+#ifdef NX_ENABLE_LOW_WATERMARK
+    if (nx_tcp_socket_receive_queue_max_set(&tcp_socket, receive_queue_maximum) == NX_CALLER_ERROR)
+    {
+        error_counter++;
+    }
+#endif /* NX_ENABLE_LOW_WATERMARK */
+
     /* 2.2 _tx_thread_system_state = 1 */
     _tx_thread_system_state = 1;
     if (nx_udp_info_get(&ip_0, NX_NULL, NX_NULL, NX_NULL, NX_NULL, NX_NULL, NX_NULL, NX_NULL) != NX_CALLER_ERROR)
@@ -970,6 +995,12 @@ struct sched_param sp;
     {
         error_counter++;
     }
+#ifdef NX_ENABLE_LOW_WATERMARK
+    if (nx_tcp_socket_receive_queue_max_set(&tcp_socket, receive_queue_maximum) != NX_CALLER_ERROR)
+    {
+        error_counter++;
+    }
+#endif /* NX_ENABLE_LOW_WATERMARK */
     ip_0.nx_ip_tcp_packet_receive = NX_NULL;
     if (nx_tcp_enable(&ip_0) != NX_CALLER_ERROR)
     {
@@ -1013,6 +1044,12 @@ struct sched_param sp;
     {
         error_counter++;
     }
+#ifdef NX_ENABLE_LOW_WATERMARK
+    if (nx_tcp_socket_receive_queue_max_set(&tcp_socket, receive_queue_maximum) == NX_CALLER_ERROR)
+    {
+        error_counter++;
+    }
+#endif /* NX_ENABLE_LOW_WATERMARK */
     ip_0.nx_ip_tcp_packet_receive = NX_NULL;
     if (nx_tcp_enable(&ip_0) == NX_CALLER_ERROR)
     {
