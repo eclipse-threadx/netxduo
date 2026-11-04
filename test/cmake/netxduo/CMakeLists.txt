@@ -55,6 +55,8 @@ set(BUILD_CONFIGURATIONS
     v6_no_rx_size_check_build
     v6_dtls_offload_build
     v6_trace_build
+    v6_ip_id_random_build
+    v6_option_limits_build
     optimize_build)
 set(CMAKE_CONFIGURATION_TYPES
     ${BUILD_CONFIGURATIONS}
@@ -349,6 +351,16 @@ set(v6_no_dad_address_notify_build ${IPV6} ${NO_DAD} ${ADDRESS_CHANGE_NOTIFY})
 set(v6_no_rx_size_check_build ${IPV6} ${NO_RX_SIZE_CHECK})
 set(v6_dtls_offload_build ${IPV6} ${TCPIP_OFFLOAD} ${MULTI_INTERFACE} ${DTLS})
 set(v6_trace_build ${IPV6} ${TRACE} ${MULTI_INTERFACE})
+
+# Each of these compiles code in common/src that no other configuration does,
+# and the existing suite passes under it and reaches all of that code: IP
+# identification randomisation where IPv6 packets are fragmented, and the
+# arms that record build options too large for their field, with the
+# neighbour retransmission timer below the fast timer's resolution.
+set(v6_ip_id_random_build ${IPV6} ${RAND_ID})
+set(v6_option_limits_build ${IPV6} -DNX_ARP_MAXIMUM_RETRIES=256 -DNX_ARP_MAX_QUEUE_DEPTH=16
+                           -DNX_TCP_KEEPALIVE_RETRIES=16 -DNX_MAX_MULTICAST_GROUPS=256
+                           -DNX_MAX_LISTEN_REQUESTS=256 -DNX_RETRANS_TIMER=1)
 set(default_build_coverage -DNX_TAHI_ENABLE -DNX_MAX_PHYSICAL_INTERFACES=4 -DNX_ENABLE_IPV6_PATH_MTU_DISCOVERY)
 set(optimize_build ${default_build_coverage} -O3)
 set(dhcp_default_build_coverage ${default_build_coverage} -DNX_DHCP_CLIENT_USER_CREATE_PACKET_POOL -DNX_DISABLE_ASSERT)
