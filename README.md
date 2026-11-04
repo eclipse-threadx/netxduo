@@ -133,6 +133,8 @@ Instruction for building the NetX Duo as static library using Arm GNU Toolchain 
     $ cmake --build ./build
     ```
 
+    Defining `NX_DISABLE_PACKET_CHAIN` in `nx_user.h` makes CMake omit MQTT, WebSocket, RTP, and NetX Secure, which require packet chaining. CMake also disables IP fragmentation. Set `NXD_DISABLE_PACKET_CHAIN=ON` to select the same configuration without editing `nx_user.h`. Set `NXD_ENABLE_ADDONS=OFF` to omit all add-ons, or `NXD_ENABLE_NX_SECURE=OFF` to omit NetX Secure independently.
+
 ## Licensing
 
 License terms for using Eclipse ThreadX are defined in the LICENSE.txt file of this repo. Please refer to this file for all definitive licensing information for all content, incl. the history of this repo. 
