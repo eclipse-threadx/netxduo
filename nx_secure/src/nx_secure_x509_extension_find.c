@@ -98,6 +98,12 @@ UINT         found_extension = NX_CRYPTO_FALSE;
     current_buffer = certificate -> nx_secure_x509_extensions_data;
     extensions_sequence_length = certificate -> nx_secure_x509_extensions_data_length;
 
+    /* Make sure extensions data is present. */
+    if (current_buffer == NX_CRYPTO_NULL || extensions_sequence_length == 0)
+    {
+        return(NX_SECURE_X509_EXTENSION_NOT_FOUND);
+    }
+
     /* Keep looping until we run out of data to parse. */
     while (extensions_sequence_length > 0)
     {
