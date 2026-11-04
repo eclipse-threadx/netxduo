@@ -1,0 +1,200 @@
+= NetX Duo uProtocol MQTT 5 addon
+
+This addon implements the uProtocol MQTT transport at
+https://github.com/eclipse-uprotocol/up-spec/tree/3130bc5bfe661f60509b9d5e1d03995d608a18b2[commit 3130bc5bfe661f60509b9d5e1d03995d608a18b2].
+It supports publish, notification, request and response messages, both E2E and D2D topic mappings, and push delivery through registered listeners.
+It contains original C99 code and adds no external library dependency.
+
+The implementation was generated with Codex (GPT-6).
+Human review, IP due diligence and hardware validation are required before upstream submission.
+The source headers deliberately say review is required instead of asserting that a human has already reviewed the implementation.
+This document is the local API guide and source material for the matching `rtos-docs-asciidoc` documentation contribution.
+
+== Integration
+
+The normal NetX Duo CMake target includes the MQTT and uProtocol sources and include directories.
+For a manually maintained build, add `nxd_mqtt5_client.c`, `nxd_uprotocol.c` and `nxd_uprotocol_codec.c` alongside the existing MQTT client.
+Include `nxd_uprotocol.h` in the application.
+All firmware translation units must use the same NetX/MQTT/uProtocol configuration.
+Rebuild applications when updating: the MQTT client control-block size has changed.
+
+. Initialize ThreadX, NetX Duo, the IP instance and a packet pool.
+. Create an `NXD_MQTT_CLIENT` using the existing API and caller-provided thread stack.
+. Configure MQTT credentials if the broker requires them.
+. Fill `NXD_UPROTOCOL_CONFIG` with the local uEntity URI, broker address/port, connection settings and an epoch-millisecond clock callback.
+. Call `nxd_uprotocol_create`, which selects MQTT 5 and reserves the client's receive/acknowledgement lifecycle for this transport.
+. Call `nxd_uprotocol_connect`, then register listeners and send messages.
+. Call `nxd_uprotocol_process` periodically from an application thread, supplying a receive buffer.
+. Quiesce application callers, delete the uProtocol transport, then delete the MQTT client.
+
+See `samples/demo_uprotocol_mqtt.c` for a complete application-thread function.
+The example expects an initialized IP interface and demonstrates publish/subscribe against a broker.
+Supply fresh entropy for every UUID and a synchronized Unix-millisecond clock; ThreadX uptime alone is insufficient for cross-device expiry checks.
+
+== MQTT versions and properties
+
+An ordinary MQTT client defaults to MQTT 3.1.1, with the existing API signatures.
+`nxd_mqtt_client_protocol_version_set(client, NXD_MQTT_VERSION_5)` opts an idle client into MQTT 5.
+The setter rejects a version change while connected or while packets remain queued.
+There is no automatic detection or fallback.
+Separate client instances can use different versions in the same firmware.
+
+`nxd_mqtt_client_session_configure` sets MQTT 5 Session Expiry Interval (seconds) and Maximum Packet Size (bytes) while idle.
+The existing connect call's `clean_session` argument supplies MQTT 5 Clean Start when version 5 is selected.
+The existing TLS connect API also works with version 5.
+For uProtocol, populate `config.tls_setup` when compiling with `NX_SECURE_ENABLE` and choose the broker's TLS port.
+The default sample uses plain TCP for local demonstration.
+
+`nxd_mqtt_client_publish_properties` takes the existing publish arguments plus an encoded MQTT property block and its length before the wait option.
+The property block excludes its Property Length prefix; the client generates that prefix.
+`nxd_mqtt_client_message_get_properties` returns topic, raw application payload and properties into caller-provided buffers.
+It reports required sizes and leaves an oversized message queued for retry.
+`nxd_mqtt_client_message_discard` explicitly releases the oldest queued message.
+The original getter ignores MQTT 5 properties and still returns only the application payload.
+
+Supported MQTT 5 functionality includes QoS 0/1 publishing and subscriptions, properties, session configuration, broker reason codes and negotiated packet, receive, QoS, retain and wildcard limits.
+QoS 2 publishing/subscriptions remain unsupported, consistent with the existing public MQTT API.
+Topic aliases, subscription identifiers, shared subscriptions and enhanced authentication are not enabled by this implementation.
+The MQTT 5 acknowledgement callback includes packet type, identifier and reason code; `nxd_mqtt_last_reason_code` retains the latest decoded reason.
+The uProtocol addon owns that callback on its attached MQTT client.
+
+== Messages and ownership
+
+`NXD_UPROTOCOL_URI` contains an authority, a 32-bit entity ID (instance in the high 16 bits), an 8-bit major version and a 16-bit resource ID.
+UUIDs use sixteen network-order bytes and must be UUIDv7.
+The UUID helper takes application-supplied time and ten fresh random bytes.
+
+`NXD_UPROTOCOL_MESSAGE` contains attributes and a borrowed payload pointer/length.
+Optional scalar presence uses `NXD_UPROTOCOL_HAS_*` flags, preserving explicit zero values.
+Priority values match the pinned schema: zero means unspecified, and 1 through 7 mean CS0 through CS6.
+An unspecified priority has effective service class CS1.
+All service classes use MQTT QoS 1 equally; the transport preserves the priority attribute but does not promise differentiated scheduling.
+Payload format values also match the pinned schema, including 7 for UTF-8 text and 6 for raw bytes.
+An empty payload must have unspecified payload format.
+
+`nxd_uprotocol_send` validates the message, resolves local authorities, checks source identity and expiry, and waits for PUBACK.
+Successful send means broker acknowledgement, not delivery or execution at the remote uEntity.
+A timeout can occur after the broker has accepted a message; applications must account for duplicates.
+The sender retains ownership of message and payload memory, which must remain stable until send returns.
+
+For a non-expiring publish or notification, leave `NXD_UPROTOCOL_HAS_TTL` clear.
+There is a specification issue to discuss with maintainers: the pinned uProtocol attributes rules treat TTL zero as non-expiring, while its MQTT mapping requires an explicit TTL zero to produce Message Expiry Interval zero.
+This implementation follows the pinned mapping literally for an explicitly present zero.
+Under https://docs.oasis-open.org/mqtt/mqtt/v5.0/os/mqtt-v5.0-os.html[MQTT 5 section 3.3.2.3.3], an omitted expiry means no expiration; an explicit zero can cause the broker to discard a message before onward delivery.
+
+Properties encode `uP=1`, UUID strings, message type names, URI strings, priority and optional scalar/string attributes according to the pinned MQTT mapping.
+The application payload is not wrapped in protobuf or JSON.
+This addon is a transport implementation with native C data types, not a complete uProtocol language SDK: protobuf serialization of the data model, discovery/subscription services, RPC correlation tables and RPC convenience wrappers are outside this implementation.
+Applications construct response attributes from their request, including request ID, priority and TTL.
+
+== Listening and execution model
+
+Listeners register a source pattern, optional sink pattern, callback and context.
+The pinned specification's resource-pattern combinations are checked.
+Identical registrations are idempotent; callbacks may be reused across filters.
+Matching callbacks share one MQTT subscription where their broker topic filters coincide.
+Removing the last listener for a broker filter unsubscribes it.
+Registration and removal wait for SUBACK/UNSUBACK so broker rejection is visible.
+
+Wildcards follow the pinned UUri rules: `*` authority, `FFFF` entity type/instance, `FF` version and `FFFF` resource.
+The mapping converts these to MQTT `+` segments.
+E2E topics contain five source segments, followed by five sink segments for addressed messages.
+D2D topics contain source and sink authorities.
+Sending D2D messages requires a sink authority; a D2D Publish's sink contains only its authority as permitted by the pinned attributes specification.
+
+`nxd_uprotocol_process` dispatches at most one queued message per invocation and services reconnection deadlines.
+It rejects expired messages and checks the received topic against the decoded attributes before invoking listeners.
+The application supplies receive storage and controls how often to call process.
+There is no additional transport worker thread or heap allocation.
+The existing MQTT worker still handles protocol traffic and keepalive.
+
+Callbacks execute on the thread calling process; their message/payload views expire when the callback returns.
+Callbacks may send messages but must not recursively process, register/unregister listeners or delete the transport.
+Those operations return FAILED_PRECONDITION during dispatch.
+Public transport operations are serialized by a ThreadX mutex.
+Do not call blocking APIs from an ISR or the MQTT worker callback.
+Do not share the attached MQTT client's publish/subscribe/receive APIs with unrelated users.
+
+The transport implements push delivery.
+`nxd_uprotocol_receive` returns UNIMPLEMENTED as specified for transports without pull support.
+`process` returning NOT_FOUND simply means the MQTT receive queue was empty.
+Oversized messages are explicitly discarded by process with RESOURCE_EXHAUSTED, preventing one message from blocking the queue indefinitely.
+
+== Connection recovery
+
+After connect has been requested, process detects a lost connection and retries with exponential backoff: approximately 0.5, 1, 2, 4, 8, then 10 seconds, capped at 10 seconds.
+Resolution is limited by ThreadX ticks and the application's process cadence.
+Each connection uses the configured Clean Start and Session Expiry settings.
+Subscriptions are restored when CONNACK says no session is present.
+Saved QoS 1 publishes resume within the new connection's Receive Maximum; acknowledgements release capacity for the next saved message.
+If restoration fails, the transport disconnects and schedules another retry.
+Deletion stops retrying and detaches callbacks.
+
+Wait options are ThreadX ticks for the individual blocking network/acknowledgement operations, not an end-to-end wall-clock budget for a call that performs multiple operations.
+The existing MQTT stack also contains internal waits; this addon does not promise a hard real-time deadline for connect, subscribe or shutdown.
+
+== Resource configuration
+
+[cols="2,1,3"]
+|===
+|Setting |Default |Purpose
+|`NXD_UPROTOCOL_MAX_LISTENERS` |8 |Total registrations per transport
+|`NXD_UPROTOCOL_MAX_LISTENERS_PER_FILTER` |4 |Registrations with the same source/sink pattern
+|`NXD_UPROTOCOL_PROPERTIES_SIZE` |2048 |Send/receive attribute encoding capacity
+|`NXD_UPROTOCOL_TOKEN_SIZE` |256 |Token storage including terminating NUL
+|`NXD_UPROTOCOL_TRACE_SIZE` |128 |Traceparent storage including terminating NUL
+|===
+
+URI authority length is fixed by the protocol at 128 characters.
+Payload capacity comes from the caller's receive buffer and the MQTT packet pool, plus configured/negotiated packet limits.
+No global application payload maximum is introduced.
+Exceeding a local capacity produces an error rather than silent truncation.
+The token and trace capacities are local implementation limits and must be sized for the deployment.
+
+== Authorization
+
+The local identity check restricts sends to the configured source authority/entity/version.
+This is not cryptographic authentication.
+Deploy broker authentication and ACLs controlling publish/subscribe topic access.
+Incoming attributes must match the topic, allowing broker ACLs to enforce the identity boundary.
+Permissions and token attributes are transported, not interpreted as an authorization decision.
+
+== C and MISRA review notes
+
+The sources use C99, fixed storage and the existing NetX packet pool; there are no `goto` statements or heap allocations.
+Wire integers are read and written as individual bytes, without depending on alignment or CPU byte order.
+URI equality compares fields, not structure padding.
+
+Review the following deliberate practices against the project's MISRA deviation process:
+
+* Early returns keep packet bounds checks adjacent to each read and resource-failure branch.
+* Casts remove `const` only when calling legacy NetX append/publish functions that take mutable pointers but copy the input without modifying it.
+* Standard string and memory functions operate on validated, bounded storage. They do not provide payload serialization.
+* ThreadX mutex/event return values are sometimes discarded where object validity and thread context are API preconditions.
+* The optional Linux broker harness casts POSIX socket address structures and uses host processes; that code is excluded from firmware.
+
+No MISRA analyzer or certification assessment has been run.
+These notes identify review work and do not assert MISRA compliance.
+
+== Verification and contribution
+
+See `VALIDATION.adoc` for the executed profiles, coverage, reproduction commands and outstanding validation.
+
+The MQTT regression suite includes original MQTT 3.1.1 tests, MQTT 5 codec/malformed-packet tests, uProtocol codec tests and a RAM-network broker test.
+The latter checks connection properties, fragmented PUBLISH, broker rejection, shared listeners, acknowledgements, expiry, oversized-message disposal, session-loss resubscription, and persistent-session retransmission after the broker lowers Receive Maximum.
+The normal build/test wrappers remain `scripts/build_mqtt.sh` and `scripts/test_mqtt.sh`.
+
+On Linux, configure the MQTT suite with `-DNXD_UPROTOCOL_BROKER_TESTS=ON` to add a Mosquitto interoperability test.
+It uses installed Python and Mosquitto, starts a temporary loopback broker and relays bytes from the RAM network.
+It exercises the actual ThreadX/NetX/MQTT implementation without root-owned virtual interfaces.
+It is broker interoperability, not independent-uProtocol-library conformance testing.
+
+References consulted (no implementation code copied):
+
+* https://github.com/eclipse-uprotocol/up-spec/blob/3130bc5bfe661f60509b9d5e1d03995d608a18b2/up-l1/mqtt_5.adoc[MQTT mapping]
+* https://github.com/eclipse-uprotocol/up-spec/blob/3130bc5bfe661f60509b9d5e1d03995d608a18b2/up-l1/README.adoc[Transport API]
+* The same commit's `basics/uri.adoc`, `uuid.adoc`, `uattributes.adoc`, `qos.adoc`, and schema enum definitions.
+* https://docs.oasis-open.org/mqtt/mqtt/v5.0/os/mqtt-v5.0-os.html[OASIS MQTT 5.0]
+
+Before submitting upstream, the responsible human must review the generated code, confirm ECA coverage, arrange applicable IP review, and submit the matching documentation contribution.
+AI-assisted commits require the repository's `Assisted-by` trailer, identifying Codex (GPT-6).

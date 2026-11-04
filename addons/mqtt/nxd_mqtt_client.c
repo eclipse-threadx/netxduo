@@ -71,6 +71,7 @@ static VOID _nxd_mqtt_release_transmit_packet(NXD_MQTT_CLIENT *client_ptr, NX_PA
 static VOID _nxd_mqtt_release_receive_packet(NXD_MQTT_CLIENT *client_ptr, NX_PACKET *packet_ptr, NX_PACKET *previous_packet_ptr);
 static UINT _nxd_mqtt_client_retransmit_message(NXD_MQTT_CLIENT *client_ptr, ULONG wait_option);
 static UINT _nxd_mqtt_client_connect_packet_send(NXD_MQTT_CLIENT *client_ptr, ULONG wait_option);
+static VOID _nxd_mqtt_process_disconnect(NXD_MQTT_CLIENT *client_ptr);
 
 /**************************************************************************/
 /*                                                                        */
@@ -316,6 +317,24 @@ UCHAR               temp_data[2];
         return(NXD_MQTT_NOT_CONNECTED);
     }
 
+    if (client_ptr -> nxd_mqtt_protocol_version == NXD_MQTT_VERSION_5)
+    {
+        UINT i;
+        if (_nxd_mqtt5_topic_validate(topic_name, topic_name_length, 1) || QoS > 1u)
+        {
+            tx_mutex_put(client_ptr -> nxd_mqtt_client_mutex_ptr);
+            return(NXD_MQTT_INVALID_PARAMETER);
+        }
+        for (i = 0; i < topic_name_length; i++)
+        {
+            if ((topic_name[i] == '+' || topic_name[i] == '#') && !client_ptr -> nxd_mqtt_peer_wildcard_available)
+            {
+                tx_mutex_put(client_ptr -> nxd_mqtt_client_mutex_ptr);
+                return(NXD_MQTT_INVALID_PARAMETER);
+            }
+        }
+    }
+
     status = _nxd_mqtt_client_packet_allocate(client_ptr, &packet_ptr, NX_WAIT_FOREVER);
     if (status)
     {
@@ -325,6 +344,10 @@ UCHAR               temp_data[2];
 
     /* Compute the remaining length field, starting with 2 bytes of packet ID */
     length = 2;
+    if (client_ptr -> nxd_mqtt_protocol_version == NXD_MQTT_VERSION_5)
+    {
+        length++;
+    }
 
     /* Count the topic. */
     length += (2 + topic_name_length);
@@ -374,6 +397,17 @@ UCHAR               temp_data[2];
     }
 
     /* Append topic name */
+    if (client_ptr -> nxd_mqtt_protocol_version == NXD_MQTT_VERSION_5)
+    {
+        temp_data[0] = 0;
+        ret = nx_packet_data_append(packet_ptr, temp_data, 1, client_ptr -> nxd_mqtt_client_packet_pool_ptr, NX_WAIT_FOREVER);
+        if (ret)
+        {
+            tx_mutex_put(client_ptr -> nxd_mqtt_client_mutex_ptr);
+            nx_packet_release(packet_ptr);
+            return(ret);
+        }
+    }
     ret = _nxd_mqtt_client_append_message(client_ptr, packet_ptr, topic_name, topic_name_length, NX_WAIT_FOREVER);
 
     if (ret)
@@ -589,6 +623,12 @@ UINT status = NXD_MQTT_SUCCESS;
 /**************************************************************************/
 static UINT _nxd_mqtt_packet_send(NXD_MQTT_CLIENT *client_ptr, NX_PACKET *packet_ptr, UINT wait_option)
 {
+    if (client_ptr -> nxd_mqtt_protocol_version == NXD_MQTT_VERSION_5 &&
+        packet_ptr -> nx_packet_length > client_ptr -> nxd_mqtt_peer_maximum_packet_size)
+    {
+        return(NXD_MQTT_INSUFFICIENT_BUFFER_SPACE);
+    }
+
 UINT status = NXD_MQTT_SUCCESS;
 
 #ifdef NXD_MQTT_OVER_WEBSOCKET
@@ -1041,8 +1081,34 @@ UINT    ret = NXD_MQTT_COMMUNICATION_FAILURE;
 MQTT_PACKET_CONNACK *connack_packet_ptr = (MQTT_PACKET_CONNACK *)(packet_ptr -> nx_packet_prepend_ptr);
 
 
-    /* Check the length.  */
-    if ((packet_ptr -> nx_packet_length != sizeof(MQTT_PACKET_CONNACK)) ||
+    if (client_ptr -> nxd_mqtt_protocol_version == NXD_MQTT_VERSION_5)
+    {
+        ret = _nxd_mqtt5_connack(client_ptr, packet_ptr);
+        if (ret == NX_SUCCESS)
+        {
+            NX_PACKET *queued = client_ptr -> message_transmit_queue_head;
+            NX_PACKET *previous = NX_NULL;
+            while (queued != NX_NULL)
+            {
+                NX_PACKET *next = queued -> nx_packet_queue_next;
+                if (!client_ptr -> nxd_mqtt_session_present || (queued -> nx_packet_prepend_ptr[0] >> 4) != 3u)
+                {
+                    _nxd_mqtt_release_transmit_packet(client_ptr, queued, previous);
+                }
+                else { previous = queued; }
+                queued = next;
+            }
+
+            client_ptr -> nxd_mqtt5_inflight = 0;
+            client_ptr -> nxd_mqtt5_retransmit_next = client_ptr -> message_transmit_queue_head;
+            client_ptr -> nxd_mqtt_client_state = NXD_MQTT_CLIENT_STATE_CONNECTED;
+            if (client_ptr -> nxd_mqtt_client_packet_identifier == 0)
+            {
+                client_ptr -> nxd_mqtt_client_packet_identifier = 1;
+            }
+        }
+    }
+    else if ((packet_ptr -> nx_packet_length != sizeof(MQTT_PACKET_CONNACK)) ||
         (connack_packet_ptr -> mqtt_connack_packet_header >> 4 != MQTT_CONTROL_PACKET_TYPE_CONNACK))
     {
         /* Invalid packet length.  Free the packet and process error. */
@@ -1314,6 +1380,20 @@ ULONG                         bytes_copied;
         return(NXD_MQTT_INVALID_PACKET);
     }
 
+    if (client_ptr -> nxd_mqtt_protocol_version == NXD_MQTT_VERSION_5)
+    {
+        ULONG message_offset = offset + 2 + topic_length + (QoS ? 2u : 0u);
+        ULONG message_length = offset + remaining_length;
+        ULONG properties_offset;
+        UINT properties_length;
+        if (QoS > 1u || topic_length == 0 || message_offset > message_length ||
+            _nxd_mqtt5_publish_offsets(packet_ptr, &message_offset, &message_length,
+                                       &properties_offset, &properties_length))
+        {
+            return(NXD_MQTT_INVALID_PACKET);
+        }
+    }
+
     if (QoS == 0)
     {
         enqueue_message = 1;
@@ -1523,8 +1603,24 @@ NX_PACKET                    *response_packet;
 UINT                          ret;
 UCHAR                         fixed_header;
 USHORT                        transmit_packet_id;
+UINT                          reason = 0;
+UINT                          saved_unsent = 0;
+MQTT_PACKET_PUBLISH_RESPONSE   normalized;
 
     response_ptr = (MQTT_PACKET_PUBLISH_RESPONSE *)(packet_ptr -> nx_packet_prepend_ptr);
+
+    if (client_ptr -> nxd_mqtt_protocol_version == NXD_MQTT_VERSION_5)
+    {
+        if (_nxd_mqtt5_ack(client_ptr, packet_ptr, &packet_id, &reason))
+        {
+            return(NXD_MQTT_INVALID_PACKET);
+        }
+        normalized.mqtt_publish_response_packet_header = packet_ptr -> nx_packet_prepend_ptr[0];
+        normalized.mqtt_publish_response_packet_remaining_length = 2;
+        normalized.mqtt_publish_response_packet_packet_identifier_msb = (UCHAR)(packet_id >> 8);
+        normalized.mqtt_publish_response_packet_packet_identifier_lsb = (UCHAR)packet_id;
+        response_ptr = &normalized;
+    }
 
     /* Validate the packet. */
     if (response_ptr -> mqtt_publish_response_packet_remaining_length != 2)
@@ -1543,6 +1639,11 @@ USHORT                        transmit_packet_id;
     transmit_packet_ptr = client_ptr -> message_transmit_queue_head;
     while (transmit_packet_ptr)
     {
+        if (client_ptr -> nxd_mqtt_protocol_version == NXD_MQTT_VERSION_5 &&
+            transmit_packet_ptr == client_ptr -> nxd_mqtt5_retransmit_next)
+        {
+            saved_unsent = 1;
+        }
         fixed_header = *(transmit_packet_ptr -> nx_packet_prepend_ptr);
         transmit_packet_id = *((USHORT *)transmit_packet_ptr -> nx_packet_data_start);
         if (transmit_packet_id == packet_id)
@@ -1558,6 +1659,11 @@ USHORT                        transmit_packet_id;
                 {
 
                     /* Check ack notify function.  */
+                    if (client_ptr -> nxd_mqtt_protocol_version == NXD_MQTT_VERSION_5 && client_ptr -> nxd_mqtt5_ack_notify)
+                    {
+                        client_ptr -> nxd_mqtt5_ack_notify(client_ptr, MQTT_CONTROL_PACKET_TYPE_PUBACK,
+                                                         packet_id, reason, client_ptr -> nxd_mqtt5_ack_context);
+                    }
                     if (client_ptr -> nxd_mqtt_ack_receive_notify)
                     {
 
@@ -1567,7 +1673,27 @@ USHORT                        transmit_packet_id;
 
                     /* QoS Level1 message receives an ACK. */
                     /* This message can be released. */
+                    if (client_ptr -> nxd_mqtt_protocol_version == NXD_MQTT_VERSION_5)
+                    {
+                        /* A peer may acknowledge a saved packet before its retransmission. */
+                        if (client_ptr -> nxd_mqtt5_retransmit_next == transmit_packet_ptr)
+                        {
+                            client_ptr -> nxd_mqtt5_retransmit_next = transmit_packet_ptr -> nx_packet_queue_next;
+                        }
+                        else if (!saved_unsent && client_ptr -> nxd_mqtt5_inflight)
+                        {
+                            client_ptr -> nxd_mqtt5_inflight--;
+                        }
+                    }
                     _nxd_mqtt_release_transmit_packet(client_ptr, transmit_packet_ptr, previous_packet_ptr);
+                    if (client_ptr -> nxd_mqtt_protocol_version == NXD_MQTT_VERSION_5 &&
+                        client_ptr -> nxd_mqtt5_retransmit_next != NX_NULL)
+                    {
+                        if (_nxd_mqtt_client_retransmit_message(client_ptr, NX_NO_WAIT))
+                        {
+                            _nxd_mqtt_process_disconnect(client_ptr);
+                        }
+                    }
 
                     /* Return with value 1, so the caller will release packet_ptr */
                     return(1);
@@ -1704,6 +1830,7 @@ UINT       remaining_length;
 ULONG      offset;
 UCHAR      bytes[2];
 ULONG      bytes_copied;
+UINT       reason = 0;
 
 
     response_header = *(packet_ptr -> nx_packet_prepend_ptr);
@@ -1723,6 +1850,15 @@ ULONG      bytes_copied;
     }
 
     packet_id = (USHORT)(((*bytes) << 8) | (*(bytes + 1)));
+
+    if (client_ptr -> nxd_mqtt_protocol_version == NXD_MQTT_VERSION_5)
+    {
+        if (_nxd_mqtt5_ack(client_ptr, packet_ptr, &packet_id, &reason))
+        {
+            return(NXD_MQTT_INVALID_PACKET);
+        }
+        remaining_length = ((response_header >> 4) == MQTT_CONTROL_PACKET_TYPE_SUBACK) ? 3u : 2u;
+    }
 
     /* Search all the outstanding transmitted packets for a match. */
     previous_packet_ptr = NX_NULL;
@@ -1745,6 +1881,11 @@ ULONG      bytes_copied;
                     return(1);
                 }
 
+                if (client_ptr -> nxd_mqtt_protocol_version == NXD_MQTT_VERSION_5 && client_ptr -> nxd_mqtt5_ack_notify)
+                {
+                    client_ptr -> nxd_mqtt5_ack_notify(client_ptr, response_header >> 4, packet_id,
+                                                     reason, client_ptr -> nxd_mqtt5_ack_context);
+                }
                 /* Check ack notify function.  */
                 if (client_ptr -> nxd_mqtt_ack_receive_notify)
                 {
@@ -1768,6 +1909,11 @@ ULONG      bytes_copied;
                     return(1);
                 }
 
+                if (client_ptr -> nxd_mqtt_protocol_version == NXD_MQTT_VERSION_5 && client_ptr -> nxd_mqtt5_ack_notify)
+                {
+                    client_ptr -> nxd_mqtt5_ack_notify(client_ptr, response_header >> 4, packet_id,
+                                                     reason, client_ptr -> nxd_mqtt5_ack_context);
+                }
                 /* Check ack notify function.  */
                 if (client_ptr -> nxd_mqtt_ack_receive_notify)
                 {
@@ -2107,6 +2253,12 @@ ULONG      packet_length;
         {
             /* Parse the incoming packet. */
             status = _nxd_mqtt_read_remaining_length(packet_ptr, &remaining_length, &offset);
+            if (client_ptr -> nxd_mqtt_protocol_version == NXD_MQTT_VERSION_5 &&
+                _nxd_mqtt5_packet_check(client_ptr, packet_ptr) == NXD_MQTT_INVALID_PACKET)
+            {
+                _nxd_mqtt_process_disconnect(client_ptr);
+                break;
+            }
             if (status == NXD_MQTT_PARTIAL_PACKET)
             {
 
@@ -2160,7 +2312,8 @@ ULONG      packet_length;
 
             case MQTT_CONTROL_PACKET_TYPE_PUBACK:
             case MQTT_CONTROL_PACKET_TYPE_PUBREL:
-                _nxd_mqtt_process_publish_response(client_ptr, packet_ptr);
+                status = _nxd_mqtt_process_publish_response(client_ptr, packet_ptr);
+                packet_invalid = (status == NXD_MQTT_INVALID_PACKET);
                 break;
 
             case MQTT_CONTROL_PACKET_TYPE_SUBSCRIBE:
@@ -2170,7 +2323,8 @@ ULONG      packet_length;
 
             case MQTT_CONTROL_PACKET_TYPE_SUBACK:
             case MQTT_CONTROL_PACKET_TYPE_UNSUBACK:
-                _nxd_mqtt_process_sub_unsub_ack(client_ptr, packet_ptr);
+                status = _nxd_mqtt_process_sub_unsub_ack(client_ptr, packet_ptr);
+                packet_invalid = (status == NXD_MQTT_INVALID_PACKET);
                 break;
 
 
@@ -2194,6 +2348,10 @@ ULONG      packet_length;
                 break;
             }
 
+            if (packet_invalid && client_ptr -> nxd_mqtt_protocol_version == NXD_MQTT_VERSION_5)
+            {
+                _nxd_mqtt_process_disconnect(client_ptr);
+            }
             if (packet_consumed || packet_invalid)
             {
                 break;
@@ -3133,6 +3291,9 @@ UINT                status;
 
     /* Clear the MQTT Client control block. */
     NXD_MQTT_SECURE_MEMSET((void *)client_ptr, 0, sizeof(NXD_MQTT_CLIENT));
+    client_ptr -> nxd_mqtt_protocol_version = NXD_MQTT_VERSION_3_1_1;
+    client_ptr -> nxd_mqtt_peer_maximum_packet_size = 268435455UL;
+    client_ptr -> nxd_mqtt_maximum_packet_size = 268435455UL;
 
 #ifndef NXD_MQTT_CLOUD_ENABLE
 
@@ -3532,10 +3693,16 @@ UINT                status = NXD_MQTT_SUCCESS;
 UINT                mutex_status;
 UCHAR               fixed_header;
 
-    transmit_packet_ptr = client_ptr -> message_transmit_queue_head;
+    transmit_packet_ptr = client_ptr -> nxd_mqtt_protocol_version == NXD_MQTT_VERSION_5 ?
+                          client_ptr -> nxd_mqtt5_retransmit_next : client_ptr -> message_transmit_queue_head;
 
     while (transmit_packet_ptr)
     {
+        if (client_ptr -> nxd_mqtt_protocol_version == NXD_MQTT_VERSION_5 &&
+            client_ptr -> nxd_mqtt5_inflight >= client_ptr -> nxd_mqtt_peer_receive_maximum)
+        {
+            break;
+        }
         fixed_header = *(transmit_packet_ptr -> nx_packet_prepend_ptr);
 
         if ((fixed_header & 0xF0) == (MQTT_CONTROL_PACKET_TYPE_PUBLISH << 4))
@@ -3548,6 +3715,12 @@ UCHAR               fixed_header;
             if (status != NXD_MQTT_SUCCESS)
             {
                 return(NXD_MQTT_PACKET_POOL_FAILURE);
+            }
+
+            if (client_ptr -> nxd_mqtt_protocol_version == NXD_MQTT_VERSION_5)
+            {
+                client_ptr -> nxd_mqtt5_retransmit_next = transmit_packet_ptr -> nx_packet_queue_next;
+                client_ptr -> nxd_mqtt5_inflight++;
             }
 
             /* Release the mutex. */
@@ -3575,7 +3748,8 @@ UCHAR               fixed_header;
                 return(status);
             }
         }
-        transmit_packet_ptr = transmit_packet_ptr -> nx_packet_queue_next;
+        transmit_packet_ptr = client_ptr -> nxd_mqtt_protocol_version == NXD_MQTT_VERSION_5 ?
+                              client_ptr -> nxd_mqtt5_retransmit_next : transmit_packet_ptr -> nx_packet_queue_next;
     }
 
     /* Update the timeout value. */
@@ -4019,6 +4193,20 @@ UINT                 keepalive = (client_ptr -> nxd_mqtt_keepalive/NX_IP_PERIODI
 
     /* Set the length of the packet. */
     length = 10;
+    if (client_ptr -> nxd_mqtt_protocol_version == NXD_MQTT_VERSION_5)
+    {
+        length += 11; /* Property Length, Session Expiry, Maximum Packet Size. */
+        if (connection_flags & MQTT_CONNECT_FLAGS_WILL_FLAG)
+        {
+            length++; /* Empty Will Properties. */
+        }
+        client_ptr -> nxd_mqtt_session_present = 0;
+        client_ptr -> nxd_mqtt_peer_maximum_packet_size = 268435455UL;
+        client_ptr -> nxd_mqtt_peer_receive_maximum = 65535u;
+        client_ptr -> nxd_mqtt_peer_maximum_qos = 2u;
+        client_ptr -> nxd_mqtt_peer_retain_available = 1u;
+        client_ptr -> nxd_mqtt_peer_wildcard_available = 1u;
+    }
 
     /* Add the size of the client Identifier. */
     length += (client_ptr -> nxd_mqtt_client_id_length + 2);
@@ -4075,7 +4263,7 @@ UINT                 keepalive = (client_ptr -> nxd_mqtt_keepalive/NX_IP_PERIODI
     }
 
     /* Fill in protocol level, */
-    temp_data[0] = MQTT_PROTOCOL_LEVEL;
+    temp_data[0] = (UCHAR)client_ptr -> nxd_mqtt_protocol_version;
 
     /* Fill in byte 8: connect flags */
     temp_data[1] = connection_flags;
@@ -4095,6 +4283,16 @@ UINT                 keepalive = (client_ptr -> nxd_mqtt_keepalive/NX_IP_PERIODI
         return(NXD_MQTT_PACKET_POOL_FAILURE);
     }
 
+    if (client_ptr -> nxd_mqtt_protocol_version == NXD_MQTT_VERSION_5)
+    {
+        ret = _nxd_mqtt5_connect_properties(client_ptr, packet_ptr, wait_option);
+        if (ret)
+        {
+            nx_packet_release(packet_ptr);
+            return(ret);
+        }
+    }
+
     /* Fill in payload area, in the order of: client identifier, will topic, will message,
        user name, and password. */
     ret = _nxd_mqtt_client_append_message(client_ptr, packet_ptr, client_ptr -> nxd_mqtt_client_id, 
@@ -4103,6 +4301,16 @@ UINT                 keepalive = (client_ptr -> nxd_mqtt_keepalive/NX_IP_PERIODI
     /* Next fill will topic and will message if the will flag is set. */
     if (!ret && (connection_flags & MQTT_CONNECT_FLAGS_WILL_FLAG))
     {
+        if (client_ptr -> nxd_mqtt_protocol_version == NXD_MQTT_VERSION_5)
+        {
+            temp_data[0] = 0;
+            ret = nx_packet_data_append(packet_ptr, temp_data, 1, client_ptr -> nxd_mqtt_client_packet_pool_ptr, wait_option);
+            if (ret)
+            {
+                nx_packet_release(packet_ptr);
+                return(ret);
+            }
+        }
         ret = _nxd_mqtt_client_append_message(client_ptr, packet_ptr, (CHAR *)client_ptr -> nxd_mqtt_client_will_topic,
                                               client_ptr -> nxd_mqtt_client_will_topic_length, wait_option);
 
@@ -4356,6 +4564,21 @@ UINT _nxd_mqtt_client_publish_packet_send(NXD_MQTT_CLIENT *client_ptr, NX_PACKET
 UINT       status;
 UINT       ret = NXD_MQTT_SUCCESS;
 
+    if (client_ptr -> nxd_mqtt_protocol_version == NXD_MQTT_VERSION_5)
+    {
+        if (packet_ptr -> nx_packet_length > client_ptr -> nxd_mqtt_peer_maximum_packet_size)
+        {
+            return(NXD_MQTT_INSUFFICIENT_BUFFER_SPACE);
+        }
+        tx_mutex_get(client_ptr -> nxd_mqtt_client_mutex_ptr, NX_WAIT_FOREVER);
+        if (QoS && (client_ptr -> nxd_mqtt5_retransmit_next != NX_NULL ||
+                    client_ptr -> nxd_mqtt5_inflight >= client_ptr -> nxd_mqtt_peer_receive_maximum))
+        {
+            tx_mutex_put(client_ptr -> nxd_mqtt_client_mutex_ptr);
+            return(NX_TX_QUEUE_DEPTH);
+        }
+    }
+
     if (QoS != 0)
     {
     /* This packet needs to be stored locally for possible retransmission. */
@@ -4365,6 +4588,10 @@ UINT       ret = NXD_MQTT_SUCCESS;
         if (_nxd_mqtt_copy_transmit_packet(client_ptr, packet_ptr, &transmit_packet_ptr,
                                            packet_id, NX_TRUE, wait_option))
         {
+            if (client_ptr -> nxd_mqtt_protocol_version == NXD_MQTT_VERSION_5)
+            {
+                tx_mutex_put(client_ptr -> nxd_mqtt_client_mutex_ptr);
+            }
             return(NXD_MQTT_PACKET_POOL_FAILURE);
         }
 
@@ -4379,6 +4606,10 @@ UINT       ret = NXD_MQTT_SUCCESS;
             /* Decrease the transmit queue depth.  */
             client_ptr -> message_transmit_queue_depth--;
 #endif /* NXD_MQTT_MAXIMUM_TRANSMIT_QUEUE_DEPTH */
+            if (client_ptr -> nxd_mqtt_protocol_version == NXD_MQTT_VERSION_5)
+            {
+                tx_mutex_put(client_ptr -> nxd_mqtt_client_mutex_ptr);
+            }
             return(NXD_MQTT_MUTEX_FAILURE);
         }
 
@@ -4391,6 +4622,10 @@ UINT       ret = NXD_MQTT_SUCCESS;
             client_ptr -> message_transmit_queue_tail -> nx_packet_queue_next = transmit_packet_ptr;
         }
         client_ptr -> message_transmit_queue_tail = transmit_packet_ptr;
+        if (client_ptr -> nxd_mqtt_protocol_version == NXD_MQTT_VERSION_5)
+        {
+            client_ptr -> nxd_mqtt5_inflight++;
+        }
     }
     else
     {
@@ -4400,6 +4635,10 @@ UINT       ret = NXD_MQTT_SUCCESS;
 
         if (status != TX_SUCCESS)
         {
+            if (client_ptr -> nxd_mqtt_protocol_version == NXD_MQTT_VERSION_5)
+            {
+                tx_mutex_put(client_ptr -> nxd_mqtt_client_mutex_ptr);
+            }
             return(NXD_MQTT_MUTEX_FAILURE);
         }
     }
@@ -4410,6 +4649,11 @@ UINT       ret = NXD_MQTT_SUCCESS;
 
     /* Release the mutex. */
     tx_mutex_put(client_ptr -> nxd_mqtt_client_mutex_ptr);
+
+    if (client_ptr -> nxd_mqtt_protocol_version == NXD_MQTT_VERSION_5)
+    {
+        tx_mutex_put(client_ptr -> nxd_mqtt_client_mutex_ptr);
+    }
 
     /* Ready to send the connect message to the server. */
     status = _nxd_mqtt_packet_send(client_ptr, packet_ptr, wait_option);
@@ -4473,13 +4717,55 @@ UINT       ret = NXD_MQTT_SUCCESS;
 UINT _nxd_mqtt_client_publish(NXD_MQTT_CLIENT *client_ptr, CHAR *topic_name, UINT topic_name_length,
                               CHAR *message, UINT message_length, UINT retain, UINT QoS, ULONG wait_option)
 {
+    return(nxd_mqtt_client_publish_properties(client_ptr, topic_name, topic_name_length,
+           message, message_length, retain, QoS, NX_NULL, 0, wait_option));
+}
+
+/* Publish a message with caller-owned MQTT 5 properties. No persistent pointers.
+   MISRA C:2012/2023 Rule 11.8 deviation: nx_packet_data_append takes VOID *
+   but only copies these const properties; it never modifies the source. */
+UINT nxd_mqtt_client_publish_properties(NXD_MQTT_CLIENT *client_ptr, CHAR *topic_name, UINT topic_name_length,
+                              CHAR *message, UINT message_length, UINT retain, UINT QoS, const UCHAR *properties, UINT properties_length, ULONG wait_option)
+{
 
 NX_PACKET *packet_ptr;
 UINT       status;
 UINT       length = 0;
+UCHAR      property_prefix[4];
+UINT       prefix_length = 0;
 UCHAR      flags;
 USHORT     packet_id = 0;
 UINT       ret = NXD_MQTT_SUCCESS;
+
+    if ((client_ptr == NX_NULL) || (topic_name == NX_NULL) || (topic_name_length == 0) ||
+        (topic_name_length > 65535u) || ((message == NX_NULL) && message_length && client_ptr -> nxd_mqtt_protocol_version == NXD_MQTT_VERSION_5) ||
+        ((properties == NX_NULL) && properties_length) || QoS > 2u || retain > 1u ||
+        message_length > 268435455u || properties_length > 268435455u)
+    {
+        return(NXD_MQTT_INVALID_PARAMETER);
+    }
+    if (client_ptr -> nxd_mqtt_protocol_version == NXD_MQTT_VERSION_5)
+    {
+        if (_nxd_mqtt5_topic_validate(topic_name, topic_name_length, 0) ||
+            _nxd_mqtt5_properties_validate(properties, properties_length, MQTT_CONTROL_PACKET_TYPE_PUBLISH))
+        {
+            return(NXD_MQTT_INVALID_PARAMETER);
+        }
+        if (client_ptr -> nxd_mqtt_client_state != NXD_MQTT_CLIENT_STATE_CONNECTED)
+        {
+            return(NXD_MQTT_NOT_CONNECTED);
+        }
+        if (QoS > client_ptr -> nxd_mqtt_peer_maximum_qos ||
+            (retain && !client_ptr -> nxd_mqtt_peer_retain_available))
+        {
+            return(NXD_MQTT_INVALID_PARAMETER);
+        }
+        prefix_length = _nxd_mqtt5_vbi_encode(properties_length, property_prefix);
+    }
+    else if (properties_length)
+    {
+        return(NXD_MQTT_INVALID_PARAMETER);
+    }
 
     if (QoS == 2)
     {
@@ -4512,7 +4798,7 @@ UINT       ret = NXD_MQTT_SUCCESS;
 
     /* Topic Name. */
     /* Compute Topic Name length. */
-    length = topic_name_length + 2;
+    length = topic_name_length + 2 + prefix_length + properties_length;
 
     /* Count packet ID for QoS 1 or QoS 2 message. */
     if ((QoS == 1) || (QoS == 2))
@@ -4527,6 +4813,11 @@ UINT       ret = NXD_MQTT_SUCCESS;
     }
 
     /* Write out the control header and remaining length field. */
+    if (length > 268435455u)
+    {
+        nx_packet_release(packet_ptr);
+        return(NXD_MQTT_INVALID_PARAMETER);
+    }
     ret = _nxd_mqtt_client_set_fixed_header(client_ptr, packet_ptr, flags, length, wait_option);
 
     if (ret)
@@ -4592,6 +4883,20 @@ UINT       ret = NXD_MQTT_SUCCESS;
     }
 
     /* Append message. */
+    if (prefix_length)
+    {
+        ret = nx_packet_data_append(packet_ptr, property_prefix, prefix_length, client_ptr -> nxd_mqtt_client_packet_pool_ptr, wait_option);
+        if (!ret && properties_length)
+        {
+            ret = nx_packet_data_append(packet_ptr, (VOID *)properties, properties_length, client_ptr -> nxd_mqtt_client_packet_pool_ptr, wait_option);
+        }
+        if (ret)
+        {
+            nx_packet_release(packet_ptr);
+            return(ret);
+        }
+    }
+
     if ((message != NX_NULL) && (message_length) != 0)
     {
         
@@ -4994,23 +5299,54 @@ UINT _nxd_mqtt_client_receive_notify_set(NXD_MQTT_CLIENT *client_ptr,
 UINT _nxd_mqtt_client_message_get(NXD_MQTT_CLIENT *client_ptr, UCHAR *topic_buffer, UINT topic_buffer_size, UINT *actual_topic_length,
                                   UCHAR *message_buffer, UINT message_buffer_size, UINT *actual_message_length)
 {
+    return(nxd_mqtt_client_message_get_properties(client_ptr, topic_buffer, topic_buffer_size,
+           actual_topic_length, message_buffer, message_buffer_size, actual_message_length, NX_NULL, 0, NX_NULL));
+}
+
+/* Copy one complete message. Insufficient buffers leave the message queued. */
+UINT nxd_mqtt_client_message_get_properties(NXD_MQTT_CLIENT *client_ptr, UCHAR *topic_buffer, UINT topic_buffer_size, UINT *actual_topic_length,
+                                  UCHAR *message_buffer, UINT message_buffer_size, UINT *actual_message_length, UCHAR *properties, UINT properties_size, UINT *properties_length)
+{
 
 UINT                status;
 NX_PACKET          *packet_ptr;
-ULONG               topic_offset;
-USHORT              topic_length;
-ULONG               message_offset;
-ULONG               message_length;
+ULONG               topic_offset = 0;
+USHORT              topic_length = 0;
+ULONG               message_offset = 0;
+ULONG               message_length = 0;
+ULONG               property_offset = 0;
+UINT                property_length = 0;
+ULONG               copied;
+
+    if (client_ptr == NX_NULL || topic_buffer == NX_NULL || actual_topic_length == NX_NULL ||
+        actual_message_length == NX_NULL || (message_buffer == NX_NULL && message_buffer_size) ||
+        (properties == NX_NULL && properties_size))
+    {
+        return(NXD_MQTT_INVALID_PARAMETER);
+    }
 
     tx_mutex_get(client_ptr -> nxd_mqtt_client_mutex_ptr, NX_WAIT_FOREVER);
     while (client_ptr -> message_receive_queue_depth)
     {
         packet_ptr = client_ptr -> message_receive_queue_head;
         status = _nxd_mqtt_process_publish_packet(packet_ptr, &topic_offset, &topic_length, &message_offset, &message_length);
+        if (status == NX_SUCCESS && client_ptr -> nxd_mqtt_protocol_version == NXD_MQTT_VERSION_5)
+        {
+            ULONG end = message_offset + message_length;
+            status = _nxd_mqtt5_publish_offsets(packet_ptr, &message_offset, &end, &property_offset, &property_length);
+            message_length = end;
+        }
+        *actual_topic_length = topic_length;
+        *actual_message_length = (UINT)message_length;
+        if (properties_length != NX_NULL)
+        {
+            *properties_length = property_length;
+        }
         if (status == NXD_MQTT_SUCCESS)
         {
             if ((topic_buffer_size < topic_length) ||
-                (message_buffer_size < message_length))
+                (message_buffer_size < message_length) ||
+                (properties_length != NX_NULL && properties_size < property_length))
             {
                 tx_mutex_put(client_ptr -> nxd_mqtt_client_mutex_ptr);
                 return(NXD_MQTT_INSUFFICIENT_BUFFER_SPACE);
@@ -5028,12 +5364,16 @@ ULONG               message_length;
         {
 
             /* Set topic and message lengths to avoid uninitialized value. */
-            *actual_topic_length = 0;
-            *actual_message_length = 0;
+            *actual_topic_length = topic_length;
+            *actual_message_length = (UINT)message_length;
             nx_packet_data_extract_offset(packet_ptr, topic_offset, topic_buffer,
-                                          topic_length, (ULONG *)actual_topic_length);
+                                          topic_length, &copied);
             nx_packet_data_extract_offset(packet_ptr, message_offset, message_buffer,
-                                          message_length, (ULONG *)actual_message_length);
+                                          message_length, &copied);
+            if (properties_length != NX_NULL && property_length)
+            {
+                nx_packet_data_extract_offset(packet_ptr, property_offset, properties, property_length, &copied);
+            }
             nx_packet_release(packet_ptr);
 
             tx_mutex_put(client_ptr -> nxd_mqtt_client_mutex_ptr);

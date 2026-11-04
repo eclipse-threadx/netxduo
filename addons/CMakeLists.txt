@@ -1,3 +1,4 @@
+# Portions of this file were generated with AI assistance.
 # Each protocol handler is listed below. If you want
 # to disable some / all of these, comment out the block(s) in question
 
@@ -16,6 +17,9 @@ set(SOURCES
 	${CMAKE_CURRENT_LIST_DIR}/http/nxd_http_server.c
 	${CMAKE_CURRENT_LIST_DIR}/mdns/nxd_mdns.c
 	${CMAKE_CURRENT_LIST_DIR}/mqtt/nxd_mqtt_client.c
+    ${CMAKE_CURRENT_LIST_DIR}/mqtt/nxd_mqtt5_client.c
+    ${CMAKE_CURRENT_LIST_DIR}/uprotocol/nxd_uprotocol.c
+    ${CMAKE_CURRENT_LIST_DIR}/uprotocol/nxd_uprotocol_codec.c
 	${CMAKE_CURRENT_LIST_DIR}/nat/nx_nat.c
 	${CMAKE_CURRENT_LIST_DIR}/pop3/nxd_pop3_client.c
 	${CMAKE_CURRENT_LIST_DIR}/ppp/nx_ppp.c
@@ -87,6 +91,7 @@ target_include_directories(${PROJECT_NAME} PUBLIC
     ${CMAKE_CURRENT_LIST_DIR}/http
     ${CMAKE_CURRENT_LIST_DIR}/mdns
     ${CMAKE_CURRENT_LIST_DIR}/mqtt
+    ${CMAKE_CURRENT_LIST_DIR}/uprotocol
     ${CMAKE_CURRENT_LIST_DIR}/nat
     ${CMAKE_CURRENT_LIST_DIR}/pop3
     ${CMAKE_CURRENT_LIST_DIR}/ppp
