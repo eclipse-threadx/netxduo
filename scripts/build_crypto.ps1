@@ -47,7 +47,7 @@ if (-not $BuildDir) {
 }
 
 if (-not $ThreadXDir) {
-    $ThreadXDir = Join-Path (Split-Path -Parent $repoRoot) 'threadx-fd'
+    $ThreadXDir = Join-Path (Split-Path -Parent $repoRoot) 'threadx'
 }
 
 $BuildDir   = Resolve-AbsolutePath $BuildDir
