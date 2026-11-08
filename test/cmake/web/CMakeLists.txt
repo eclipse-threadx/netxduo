@@ -79,6 +79,8 @@ if(MSVC)
   # timing-sensitive tests behave deterministically on the win64 simulator.
   target_compile_options(threadx PRIVATE -DTX_WIN32_NO_IDLE_ENABLE)
   target_compile_options(threadx PRIVATE -DTX_WIN32_TICKS_PER_INTERRUPT=1)
+  # The ThreadX Windows simulators default to a 10 ms timer interrupt.
+  target_compile_options(threadx PRIVATE -DTX_TIMER_PERIODIC=1)
   add_subdirectory(${FILEX_SOURCE_DIR} filex_build)
 endif()
 
