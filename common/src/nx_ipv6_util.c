@@ -8,6 +8,7 @@
  *
  * SPDX-License-Identifier: MIT
  **************************************************************************/
+// Portions of this file were generated with AI assistance.
 
 #define NX_SOURCE_CODE
 
@@ -61,6 +62,12 @@ ULONG high_prefix; /* Num of ULONG in prefix. */
 ULONG low_prefix;  /* Remaining bits in prefix after high prefix. */
 ULONG mask;
 
+
+    /* An IPv6 prefix cannot exceed 128 bits; a longer one would read past the addresses. */
+    if (prefix_len > 128U)
+    {
+        return(0);
+    }
 
     /* Get number of ULONGs that can fit in the specified prefix length. */
     high_prefix  = prefix_len >> 5;

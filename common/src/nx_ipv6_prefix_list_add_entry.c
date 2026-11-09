@@ -8,6 +8,7 @@
  *
  * SPDX-License-Identifier: MIT
  **************************************************************************/
+// Portions of this file were generated with AI assistance.
 
 #define NX_SOURCE_CODE
 
@@ -63,6 +64,8 @@
 /*                                             added to the prefix table. */
 /*                                          NX_OVERFLOW: The prefix table */
 /*                                             is full.                   */
+/*                                          NX_INVALID_PARAMETERS: The    */
+/*                                             prefix length exceeds 128. */
 /*                                                                        */
 /*  CALLS                                                                 */
 /*                                                                        */
@@ -94,6 +97,12 @@ NX_IPV6_PREFIX_ENTRY *current;        /* Pointer to the location where the
 NX_IPV6_PREFIX_ENTRY *prev = NX_NULL; /* Pointer to the location where the
                                          new entry is gonig to be inserted after it. */
 
+
+    /* Reject a prefix longer than an IPv6 address. */
+    if (prefix_length > 128U)
+    {
+        return(NX_INVALID_PARAMETERS);
+    }
 
     /*
        Insert the entry based on the prefix_length.
