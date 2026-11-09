@@ -151,6 +151,14 @@ NX_PACKET  *packet_ptr;
                                    NX_IP_TIME_TO_LIVE, 8192, NX_NULL, NX_NULL);
     status += nx_tcp_server_socket_listen(&ip_1, SERVER_PORT, &server_socket, 5, NX_NULL);
     status += nx_tcp_client_socket_bind(&client_socket, 60, NX_WAIT_FOREVER);
+
+    /* The retransmission below is held through a three-second sleep and then
+       through duplicate address detection, about six timeouts in all. Allow
+       the default ten retries, so that a build which lowers
+       NX_TCP_MAXIMUM_RETRIES does not reset the connection first. */
+    status += nx_tcp_socket_transmit_configure(&client_socket, client_socket.nx_tcp_socket_transmit_queue_maximum,
+                                               client_socket.nx_tcp_socket_timeout_rate, 10,
+                                               client_socket.nx_tcp_socket_timeout_shift);
     if (status)
         error_counter++;
 
