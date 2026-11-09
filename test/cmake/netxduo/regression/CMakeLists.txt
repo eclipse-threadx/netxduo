@@ -285,6 +285,7 @@ set(netxduo_test_cases
     ${SOURCE_DIR}/netxduo_test/netx_arp_nxe_api_test.c
     ${SOURCE_DIR}/netxduo_test/netx_8_02_test.c
     ${SOURCE_DIR}/netxduo_test/netx_ipv6_prefix_test.c
+    ${SOURCE_DIR}/netxduo_test/netx_ipv6_prefix_length_bound_test.c
     ${SOURCE_DIR}/netxduo_test/netx_11_26_test.c
     ${SOURCE_DIR}/netxduo_test/netx_tcp_socket_unaccept_test.c
     ${SOURCE_DIR}/netxduo_test/netx_6_28_test.c
