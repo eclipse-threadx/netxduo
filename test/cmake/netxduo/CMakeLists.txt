@@ -404,6 +404,8 @@ if(MSVC)
   # provides the suite's speedup, so single-tick interrupts cost no measurable
   # time here while restoring deterministic timing.
   target_compile_options(threadx PRIVATE -DTX_WIN32_TICKS_PER_INTERRUPT=1)
+  # The ThreadX Windows simulators default to a 10 ms timer interrupt.
+  target_compile_options(threadx PRIVATE -DTX_TIMER_PERIODIC=1)
   add_subdirectory(${FILEX_SOURCE_DIR} filex_build)
 endif()
 
