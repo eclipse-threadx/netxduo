@@ -9,6 +9,8 @@
  * SPDX-License-Identifier: MIT
  **************************************************************************/
 
+// Portions of this file were generated with AI assistance.
+
 
 /**************************************************************************/
 /**************************************************************************/
@@ -52,6 +54,8 @@
 /*    destination_ip                        Destination IP address        */
 /*    protocol                              Information that goes into    */
 /*                                             the next header field.     */
+/*    hop_limit                             Value for the hop limit field,*/
+/*                                             or zero for the IP default  */
 /*                                                                        */
 /*  OUTPUT                                                                */
 /*                                                                        */
@@ -72,8 +76,10 @@
 /**************************************************************************/
 UINT  _nxd_ipv6_raw_packet_send_internal(NX_IP *ip_ptr, NX_PACKET *packet_ptr,
                                          NXD_ADDRESS *destination_ip,
-                                         ULONG protocol)
+                                         ULONG protocol, UINT hop_limit)
 {
+
+ULONG packet_hop_limit;
 
 #ifdef TX_ENABLE_EVENT_TRACE
 ULONG ip_address_lsw;
@@ -90,6 +96,9 @@ ULONG ip_address_lsw;
 
     NX_ASSERT(packet_ptr -> nx_packet_address.nx_packet_ipv6_address_ptr != NX_NULL);
 
+    /* Zero retains the IP instance's default hop limit.  */
+    packet_hop_limit = (hop_limit == 0) ? ip_ptr -> nx_ipv6_hop_limit : (ULONG)(hop_limit & 0xFF);
+
     /* Tag the IP version for this packet. */
     packet_ptr -> nx_packet_ip_version = NX_IP_VERSION_V6;
 
@@ -97,7 +106,7 @@ ULONG ip_address_lsw;
     tx_mutex_get(&(ip_ptr -> nx_ip_protection), TX_WAIT_FOREVER);
 
     /* Ok to send the packet! */
-    _nx_ipv6_packet_send(ip_ptr, packet_ptr, protocol, packet_ptr -> nx_packet_length, ip_ptr -> nx_ipv6_hop_limit,
+    _nx_ipv6_packet_send(ip_ptr, packet_ptr, protocol, packet_ptr -> nx_packet_length, packet_hop_limit,
                          packet_ptr -> nx_packet_address.nx_packet_ipv6_address_ptr -> nxd_ipv6_address,
                          destination_ip -> nxd_ip_address.v6);
 
