@@ -32,6 +32,7 @@ jobs:
       full: ${{ steps.route.outputs.full }}
       reason: ${{ steps.route.outputs.reason }}
       changed_files: ${{ steps.route.outputs.changed_files }}
+      netxduo_compile_all: ${{ steps.route.outputs.netxduo_compile_all }}
       netxduo_matrix: ${{ steps.route.outputs.netxduo_matrix }}
       web_profiles: ${{ steps.route.outputs.web_profiles }}
       ptp_profiles: ${{ steps.route.outputs.ptp_profiles }}
@@ -104,6 +105,33 @@ jobs:
       result_name: Dev-NetXDuo-smoke
       upload_coverage: true
       test_timeout_minutes: 30
+
+  netxduo_compile_only:
+    name: NetXDuo / compile only (all 43 profiles)
+    needs: classify
+    if: ${{ needs.classify.result == 'success' && needs.classify.outputs.netxduo_compile_all == 'true' }}
+    permissions:
+      contents: read
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - name: Check out sources and submodules
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          submodules: recursive
+          persist-credentials: false
+
+      - name: Install dependencies
+        timeout-minutes: 10
+        run: |
+          set -euo pipefail
+          ./scripts/install.sh
+
+      - name: Compile NetX Duo library across all 43 profiles
+        timeout-minutes: 15
+        run: |
+          set -euo pipefail
+          ./scripts/compile_netxduo_profiles.sh
 
   netxduo_profiles:
     needs: classify
@@ -234,6 +262,7 @@ jobs:
     needs:
       - classify
       - smoke
+      - netxduo_compile_only
       - netxduo_profiles
       - web
       - ptp
@@ -261,6 +290,7 @@ jobs:
               --required "classify=${{ needs.classify.result }}" \
               --required "classifier-health=${{ needs.classify.outputs.healthy == 'true' && 'success' || 'failure' }}" \
               --required "smoke=${{ needs.smoke.result }}" \
+              --conditional "netxduo-compile-only=${{ needs.classify.result == 'success' && needs.classify.outputs.netxduo_compile_all == 'true' }}:${{ needs.netxduo_compile_only.result }}" \
               --conditional "netxduo=${{ needs.classify.result == 'success' && needs.classify.outputs.netxduo_matrix != '[]' }}:${{ needs.netxduo_profiles.result }}" \
               --conditional "web=${{ needs.classify.result == 'success' && needs.classify.outputs.web_profiles != '' }}:${{ needs.web.result }}" \
               --conditional "ptp=${{ needs.classify.result == 'success' && needs.classify.outputs.ptp_profiles != '' }}:${{ needs.ptp.result }}" \
