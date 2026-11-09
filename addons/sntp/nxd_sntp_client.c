@@ -4152,7 +4152,7 @@ UINT seconds_into_currenthour;
 
         current_year++;
 
-    }while(seconds_into_currentyear > seconds_of_year);
+    }while(seconds_into_currentyear >= seconds_of_year);
 
     /* Initialize month to January till we find out what the month is. */
     current_date_time_ptr -> month = JANUARY;
