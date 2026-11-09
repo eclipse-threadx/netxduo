@@ -9,6 +9,8 @@
  * SPDX-License-Identifier: MIT
  **************************************************************************/
 
+// Portions of this file were generated with AI assistance.
+
 
 /**************************************************************************/
 /**************************************************************************/
@@ -477,6 +479,7 @@ ULONG             dest_address[4];
                          NX_PROTOCOL_ICMPV6,
                          packet_ptr -> nx_packet_length,
                          255 /* NA message must have hop limit 255 */,
+                         0,
                          interface_addr -> nxd_ipv6_address,
                          dest_address);
 

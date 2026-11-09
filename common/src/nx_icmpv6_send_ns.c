@@ -9,6 +9,8 @@
  * SPDX-License-Identifier: MIT
  **************************************************************************/
 
+// Portions of this file were generated with AI assistance.
+
 
 /**************************************************************************/
 /**************************************************************************/
@@ -260,7 +262,7 @@ NX_IP_DRIVER  driver_request;
 
     /* Add IPv6 header. */
     if (_nx_ipv6_header_add(ip_ptr, &pkt_ptr, NX_PROTOCOL_ICMPV6, pkt_ptr -> nx_packet_length,
-                            255, src_address, dest_address, NX_NULL) != NX_SUCCESS)
+                            255, 0, src_address, dest_address, NX_NULL) != NX_SUCCESS)
     {
 
         /* Failed to add header. */
