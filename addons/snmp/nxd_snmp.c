@@ -17528,7 +17528,7 @@ INT         buffer_length;
         /*         Get the security username                    */
         /********************************************************/
         length =  _nx_snmp_utility_octet_get(buffer_ptr, agent_ptr -> nx_snmp_agent_v3_security_user_name,
-                                             sizeof(agent_ptr -> nx_snmp_agent_v3_security_user_name), &(agent_ptr -> nx_snmp_agent_v3_security_user_name_size), buffer_length);
+                                             sizeof(agent_ptr -> nx_snmp_agent_v3_security_user_name) - 1, &(agent_ptr -> nx_snmp_agent_v3_security_user_name_size), buffer_length);
             
 #ifdef NX_SNMPV3_PRINT_DEBUG_MESSAGE
         NX_SNMPV3_DBG_PRINTF("Security name parsed: %s Size: %d\n\r", &agent_ptr -> nx_snmp_agent_v3_security_user_name[0], agent_ptr -> nx_snmp_agent_v3_security_user_name_size);
