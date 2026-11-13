@@ -380,9 +380,17 @@ extern   "C" {
 #define NX_BSD_TCP_LISTEN_MIN_BACKLOG   1
 #endif
 
-/* Define the maximum number of packets that can be queued on a UDP socket or RAW socket. */
+/* Define the default maximum number of packets that can be queued on a UDP socket or RAW socket.
+   SO_RCVBUF changes it per socket.  */
 #ifndef NX_BSD_SOCKET_QUEUE_MAX
 #define NX_BSD_SOCKET_QUEUE_MAX 5
+#endif
+
+/* Define the maximum number of packets that SO_RCVBUF can set on a UDP socket or RAW socket.
+   Larger requests are lowered to it silently. If it is not defined, the limit is the total
+   number of packets in the BSD packet pool.  */
+#if defined(NX_BSD_SOCKET_QUEUE_MAX_LIMIT) && (NX_BSD_SOCKET_QUEUE_MAX_LIMIT < 1)
+#error "NX_BSD_SOCKET_QUEUE_MAX_LIMIT must be at least 1."
 #endif
 
 /* Define the constants that determine how big the hash table is for raw socket Protocol. The
