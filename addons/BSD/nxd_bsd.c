@@ -6586,18 +6586,28 @@ ULONG                                   ticks;
 
         case SO_RCVBUF:
 
-            /* Only available to TCP sockets. */
+            /* UDP and raw sockets report the maximum depth of the BSD receive queue,
+               multiplied by the payload size of the BSD packet pool (see setsockopt).  */
             if (!bsd_socket_ptr -> nx_bsd_socket_tcp_socket)
             {
 
-                tx_mutex_put(nx_bsd_protection_ptr);
+                if (*option_length < (INT)sizeof(INT))
+                {
 
-                /* Set the socket error if extended socket options enabled. */
-                nx_bsd_set_errno(ENOPROTOOPT);
+                    tx_mutex_put(nx_bsd_protection_ptr);
 
-                /* Return an error status. */
-                NX_BSD_ERROR(NX_SOC_ERROR, __LINE__);
-                return NX_SOC_ERROR;
+                    /* Set the socket error if extended socket options enabled. */
+                    nx_bsd_set_errno(EINVAL);
+
+                    NX_BSD_ERROR(NX_SOC_ERROR, __LINE__);
+                    return(NX_SOC_ERROR);
+                }
+
+                *((INT *)option_value) = (INT)(bsd_socket_ptr -> nx_bsd_socket_received_packet_count_max *
+                                               nx_bsd_default_packet_pool -> nx_packet_pool_payload_size);
+                *option_length = (INT)sizeof(INT);
+
+                break;
             }
 
             soc_window_size = (struct nx_bsd_sock_winsize *)option_value;
@@ -6794,6 +6804,8 @@ INT  nx_bsd_setsockopt(INT sockID, INT option_level, INT option_name, const VOID
 UINT                    reuse_enabled;
 NX_BSD_SOCKET           *bsd_socket_ptr;
 ULONG                   window_size;
+INT                     receive_buffer_size;
+UINT                    receive_queue_max;
 ULONG                   timer_ticks;
 struct nx_bsd_timeval   *time_val;
 #if defined(NX_ENABLE_IP_RAW_PACKET_FILTER) || !defined(NX_DISABLE_IPV4)
@@ -7110,16 +7122,64 @@ ULONG           physical_addr_lsw;
 
         case SO_RCVBUF:
 
-            /* Only available to TCP sockets. */
+            /* UDP and raw sockets have no receive window. For them the option sets the
+               maximum depth of the BSD receive queue.  */
             if (!bsd_socket_ptr -> nx_bsd_socket_tcp_socket)
             {
 
-                /* Set the socket error if extended socket options enabled. */
-                nx_bsd_set_errno(ENOPROTOOPT);
+                if (option_length < (INT)sizeof(INT))
+                {
 
-                /* Return an error status. */
-                NX_BSD_ERROR(NX_SOC_ERROR, __LINE__);
-                return NX_SOC_ERROR;
+                    /* Set the socket error if extended socket options enabled. */
+                    nx_bsd_set_errno(EINVAL);
+
+                    NX_BSD_ERROR(NX_SOC_ERROR, __LINE__);
+                    return NX_SOC_ERROR;
+                }
+
+                receive_buffer_size = *((const INT *)option_value);
+
+                if (receive_buffer_size < 0)
+                {
+
+                    /* Set the socket error if extended socket options enabled. */
+                    nx_bsd_set_errno(EINVAL);
+
+                    NX_BSD_ERROR(NX_SOC_ERROR, __LINE__);
+                    return NX_SOC_ERROR;
+                }
+
+                /* Every queued datagram holds at least one packet of the BSD packet pool.
+                   Round the size down to whole packets of the pool's payload size, and
+                   keep at least one packet. A datagram that spans several packets still
+                   counts as one.  */
+                receive_queue_max = (UINT)((ULONG)receive_buffer_size /
+                                           nx_bsd_default_packet_pool -> nx_packet_pool_payload_size);
+
+                if (receive_queue_max == 0)
+                {
+                    receive_queue_max = 1;
+                }
+
+                /* Limit the depth, so that one socket cannot hold every packet of the pool.  */
+#ifdef NX_BSD_SOCKET_QUEUE_MAX_LIMIT
+                if (receive_queue_max > (UINT)NX_BSD_SOCKET_QUEUE_MAX_LIMIT)
+                {
+                    receive_queue_max = (UINT)NX_BSD_SOCKET_QUEUE_MAX_LIMIT;
+                }
+#else
+                if (receive_queue_max > (UINT)nx_bsd_default_packet_pool -> nx_packet_pool_total)
+                {
+                    receive_queue_max = (UINT)nx_bsd_default_packet_pool -> nx_packet_pool_total;
+                }
+#endif /* NX_BSD_SOCKET_QUEUE_MAX_LIMIT */
+
+                /* setsockopt runs without the protection mutex, which the receive notify
+                   holds. Store the depth in one write so that the notify never sees an
+                   intermediate value.  */
+                bsd_socket_ptr -> nx_bsd_socket_received_packet_count_max = receive_queue_max;
+
+                break;
             }
 
 
