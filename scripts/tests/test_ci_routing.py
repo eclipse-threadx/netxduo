@@ -95,6 +95,7 @@ class ClassifierTests(unittest.TestCase):
             with self.subTest(paths=paths):
                 outputs = self.classify(*paths)
                 self.assertEqual("false", outputs["full"])
+                self.assertEqual("false", outputs["netxduo_compile_all"])
                 self.assertEqual("[]", outputs["netxduo_matrix"])
                 self.assertEqual(
                     "[]", outputs["nx_secure_interoperability_matrix"]
@@ -106,6 +107,7 @@ class ClassifierTests(unittest.TestCase):
         """A public header produces full routing without duplicating smoke."""
         outputs = self.classify("common/inc/nx_api.h")
         self.assertEqual("true", outputs["full"])
+        self.assertEqual("true", outputs["netxduo_compile_all"])
         matrix = json.loads(outputs["netxduo_matrix"])
         self.assertEqual(8, len(matrix))
         expected = set(self.profile_map["suites"]["netxduo"]["profiles"])
@@ -125,6 +127,44 @@ class ClassifierTests(unittest.TestCase):
         )
         for output_name in classify_changes.SUITE_OUTPUTS.values():
             self.assertEqual("all", outputs[output_name])
+
+    def test_addons_select_compile_all_job(self):
+        """Every add-on path selects the compile-all job across all 43 profiles."""
+        addon_paths = (
+            "addons/web/nx_web_http_client.c",
+            "addons/http/nx_http_server.c",
+            "addons/mqtt/nxd_mqtt_client.c",
+            "addons/websocket/nx_websocket_client.c",
+            "addons/ptp/nxd_ptp_client.c",
+            "addons/cloud/nx_cloud.c",
+            "addons/dhcp/nxd_dhcp_client.c",
+            "addons/dns/nxd_dns.c",
+            "addons/sntp/nxd_sntp_client.c",
+            "addons/tftp/nxd_tftp_client.c",
+            "addons/telnet/nxd_telnet_client.c",
+            "addons/auto_ip/nx_auto_ip.c",
+            "addons/nat/nx_nat.c",
+            "addons/ppp/nx_ppp.c",
+            "addons/pppoe/nx_pppoe_client.c",
+            "addons/pop3/nxd_pop3_client.c",
+            "addons/smtp/nxd_smtp_client.c",
+            "addons/snmp/nxd_snmp.c",
+            "addons/rtp/nx_rtp_sender.c",
+            "addons/rtsp/nx_rtsp_server.c",
+            "utility/iperf/nx_iperf.c",
+            "tsn/src/nx_shaper.c",
+            "nx_secure/src/nx_secure_tls_session_create.c",
+            "crypto_libraries/src/nx_crypto_aes.c",
+            "common/src/nx_tcp_socket_send.c",
+        )
+        for path in addon_paths:
+            with self.subTest(path=path):
+                outputs = self.classify(path)
+                self.assertEqual(
+                    "true",
+                    outputs["netxduo_compile_all"],
+                    f"{path} must select netxduo_compile_all",
+                )
 
     def test_secure_interoperability_matrix_filters_partial_shards(self):
         """Only selected secure profiles and non-empty shards enter the matrix."""
