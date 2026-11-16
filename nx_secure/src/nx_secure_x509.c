@@ -165,6 +165,14 @@ UINT         status;
         return(NX_CRYPTO_PTR_ERROR);
     }
 
+    /* Initialize optional fields to NULL/0. */
+    cert -> nx_secure_x509_issuer_identifier = NX_CRYPTO_NULL;
+    cert -> nx_secure_x509_issuer_identifier_length = 0;
+    cert -> nx_secure_x509_subject_identifier = NX_CRYPTO_NULL;
+    cert -> nx_secure_x509_subject_identifier_length = 0;
+    cert -> nx_secure_x509_extensions_data = NX_CRYPTO_NULL;
+    cert -> nx_secure_x509_extensions_data_length = 0;
+
     /*  Parse a TLV block and get information to continue parsing. */
     status = _nx_secure_x509_asn1_tlv_block_parse(buffer, (ULONG *)&length, &tlv_type, &tlv_type_class, &tlv_length, &tlv_data, &header_length);
 

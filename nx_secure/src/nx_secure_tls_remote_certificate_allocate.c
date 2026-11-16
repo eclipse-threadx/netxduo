@@ -85,11 +85,14 @@ UINT status;
     tx_mutex_get(&_nx_secure_tls_protection, TX_WAIT_FOREVER);
 
 
+    /* Clear the certificate structure. */
+    NX_SECURE_MEMSET(certificate, 0, sizeof(NX_SECURE_X509_CERT));
+
     certificate -> nx_secure_x509_certificate_raw_data = raw_certificate_buffer;
     certificate -> nx_secure_x509_certificate_raw_buffer_size = buffer_size;
 
     /* This certificate was allocated by the user application and not by TLS. */
-    certificate->nx_secure_x509_user_allocated_cert = NX_TRUE;
+    certificate -> nx_secure_x509_user_allocated_cert = NX_TRUE;
 
     /* Add the certificate to the TLS session credentials X509 store. */
     status = _nx_secure_x509_store_certificate_add(certificate, &tls_session -> nx_secure_tls_credentials.nx_secure_tls_certificate_store,
