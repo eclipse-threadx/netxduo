@@ -74,6 +74,14 @@ if(NOT NXD_ENABLE_FILE_SERVERS)
     )
 endif()
 
+if(NXD_NO_PACKET_CHAIN)
+    list(REMOVE_ITEM SOURCES
+        "${CMAKE_CURRENT_LIST_DIR}/mqtt/nxd_mqtt_client.c"
+        "${CMAKE_CURRENT_LIST_DIR}/websocket/nx_websocket_client.c"
+        "${CMAKE_CURRENT_LIST_DIR}/rtp/nx_rtp_sender.c"
+    )
+endif()
+
 target_sources(${PROJECT_NAME} PRIVATE ${SOURCES})
 
 target_include_directories(${PROJECT_NAME} PUBLIC
