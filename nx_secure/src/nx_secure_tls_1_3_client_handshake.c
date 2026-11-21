@@ -603,6 +603,11 @@ const UCHAR    *server_random;
 
             status = _nx_secure_tls_send_handshake_record(tls_session, send_packet, NX_SECURE_TLS_FINISHED, wait_option);
 
+            if (status != NX_SUCCESS)
+            {
+                break;
+            }
+
             /* Save the transcript hash to this point for key generation - Client Finished was just sent so save it. */
             status = _nx_secure_tls_1_3_transcript_hash_save(tls_session, NX_SECURE_TLS_TRANSCRIPT_IDX_CLIENT_FINISHED, NX_TRUE);
             if(status != NX_SUCCESS)

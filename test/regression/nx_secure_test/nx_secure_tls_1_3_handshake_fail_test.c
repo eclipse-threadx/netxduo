@@ -337,6 +337,29 @@ UINT status;
     nx_tcp_server_socket_unaccept(&server_socket_0);
     nx_tcp_server_socket_relisten(&ip_0, SERVER_PORT, &server_socket_0);
 
+    /* Test 2: client Finished send failure. */
+    server_tls_setup(&tls_server_session_0);
+
+    status = nx_tcp_server_socket_accept(&server_socket_0, NX_WAIT_FOREVER);
+    if (status)
+    {
+        ERROR_COUNTER();
+    }
+
+    status = nx_secure_tls_session_start(&tls_server_session_0, &server_socket_0, 20);
+    if (status == NX_SUCCESS)
+    {
+        ERROR_COUNTER();
+    }
+
+    nx_secure_tls_session_end(&tls_server_session_0, NX_NO_WAIT);
+    nx_secure_tls_session_delete(&tls_server_session_0);
+
+    nx_tcp_socket_disconnect(&server_socket_0, NX_NO_WAIT);
+    nx_tcp_server_socket_unaccept(&server_socket_0);
+
+    tx_thread_sleep(10);
+
     if (error_counter)
     {
         printf("ERROR!\n");
@@ -349,11 +372,26 @@ UINT status;
     }
 }
 
+static UINT client_test_case = 1;
+static UINT client_packet_count = 0;
+
 static VOID test_tcp_receive(NX_TCP_SOCKET *tcp_socket)
 {
 
-    /* Modify the ciphersuite, client should abort handshake with an "illegal_parameter" alert.  */
-    tls_client_session_0.nx_secure_tls_crypto_table -> nx_secure_tls_ciphersuite_lookup_table = &_nx_crypto_ciphersuite_tls_1_3[1];
+    if (client_test_case == 1)
+    {
+        /* Modify the ciphersuite, client should abort handshake with an "illegal_parameter" alert.  */
+        tls_client_session_0.nx_secure_tls_crypto_table -> nx_secure_tls_ciphersuite_lookup_table = &_nx_crypto_ciphersuite_tls_1_3[1];
+    }
+    else if (client_test_case == 2)
+    {
+        client_packet_count++;
+        if (client_packet_count == 5)
+        {
+            /* Server flight received. Close client socket so Finished send will fail. */
+            client_socket_0.nx_tcp_socket_state = NX_TCP_CLOSED;
+        }
+    }
 }
 
 static void ntest_1_entry(ULONG thread_input)
@@ -391,6 +429,48 @@ NXD_ADDRESS server_address;
     /* Start TLS session. */
     status = nx_secure_tls_session_start(&tls_client_session_0, &client_socket_0, NX_WAIT_FOREVER);
     if (!status)
+    {
+        ERROR_COUNTER();
+    }
+
+    nx_secure_tls_session_end(&tls_client_session_0, NX_NO_WAIT);
+    nx_secure_tls_session_delete(&tls_client_session_0);
+
+    nx_tcp_socket_disconnect(&client_socket_0, NX_NO_WAIT);
+    nx_tcp_client_socket_unbind(&client_socket_0);
+    nx_tcp_socket_delete(&client_socket_0);
+
+    /* Test 2: client Finished send failure. */
+    client_test_case = 2;
+    client_packet_count = 0;
+    nx_crypto_tls_1_3_ciphers_ecc.nx_secure_tls_ciphersuite_lookup_table = _nx_crypto_ciphersuite_tls_1_3;
+
+    status = nx_tcp_socket_create(&ip_0, &client_socket_0, "Client socket 2", NX_IP_NORMAL,
+                                  NX_DONT_FRAGMENT, NX_IP_TIME_TO_LIVE, 8192, NX_NULL, NX_NULL);
+    if (status)
+    {
+        ERROR_COUNTER();
+    }
+
+    status = nx_tcp_client_socket_bind(&client_socket_0, NX_ANY_PORT, NX_NO_WAIT);
+    if (status)
+    {
+        ERROR_COUNTER();
+    }
+
+    client_tls_setup(&tls_client_session_0);
+
+    nx_tcp_socket_receive_notify(&client_socket_0, test_tcp_receive);
+
+    status =  nxd_tcp_client_socket_connect(&client_socket_0, &server_address, SERVER_PORT, NX_WAIT_FOREVER);
+    if (status)
+    {
+        ERROR_COUNTER();
+    }
+
+    /* Start TLS session. When sending Finished fails, this must return an error. */
+    status = nx_secure_tls_session_start(&tls_client_session_0, &client_socket_0, NX_WAIT_FOREVER);
+    if (status == NX_SUCCESS)
     {
         ERROR_COUNTER();
     }
