@@ -114,23 +114,33 @@ TX_THREAD *thread_ptr;
        block.  */
     thread_ptr -> tx_thread_suspend_control_block =  (void *)socket_ptr;
 
-    /* Set the state to suspended.  */
-    thread_ptr -> tx_thread_state =  TX_TCP_IP;
-
-    /* Set the suspending flag.  */
-    thread_ptr -> tx_thread_suspending =  TX_TRUE;
-
     /* Temporarily disable preemption.  */
     _tx_thread_preempt_disable++;
-
-    /* Save the timeout value.  */
-    thread_ptr -> tx_thread_timer.tx_timer_internal_remaining_ticks =  wait_option;
 
     /* Restore interrupts.  */
     TX_RESTORE
 
     /* Release protection.  */
     tx_mutex_put(mutex_ptr);
+
+    /* Mark the thread as suspended only now. With a priority inheritance
+       mutex, tx_mutex_put() may restore an inherited priority. ThreadX moves
+       only a TX_READY thread between ready lists and clears its timeout.
+       Marked earlier, the thread would corrupt the ready list. Preemption is
+       still disabled, so no other thread runs in between.  */
+    TX_DISABLE
+
+    /* Set the state to suspended.  */
+    thread_ptr -> tx_thread_state =  TX_TCP_IP;
+
+    /* Set the suspending flag.  */
+    thread_ptr -> tx_thread_suspending =  TX_TRUE;
+
+    /* Save the timeout value.  */
+    thread_ptr -> tx_thread_timer.tx_timer_internal_remaining_ticks =  wait_option;
+
+    /* Restore interrupts.  */
+    TX_RESTORE
 
     /* Call actual thread suspension routine.  */
     _tx_thread_system_suspend(thread_ptr);

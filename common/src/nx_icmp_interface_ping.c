@@ -334,15 +334,6 @@ UINT            ret = 0;
 
         /* Increment the suspended thread count.  */
         ip_ptr -> nx_ip_icmp_ping_suspended_count++;
-
-        /* Set the state to suspended.  */
-        thread_ptr -> tx_thread_state =  TX_TCP_IP;
-
-        /* Set the suspending flag.  */
-        thread_ptr -> tx_thread_suspending =  TX_TRUE;
-
-        /* Save the timeout value.  */
-        thread_ptr -> tx_thread_timer.tx_timer_internal_remaining_ticks =  wait_option;
     }
 
     /* Restore interrupts.  */
@@ -359,6 +350,22 @@ UINT            ret = 0;
 
         /* Release the protection on the ARP list.  */
         tx_mutex_put(&(ip_ptr -> nx_ip_protection));
+
+        /* Mark the thread only after tx_mutex_put().
+           See _nx_tcp_socket_thread_suspend().  */
+        TX_DISABLE
+
+        /* Set the state to suspended.  */
+        thread_ptr -> tx_thread_state =  TX_TCP_IP;
+
+        /* Set the suspending flag.  */
+        thread_ptr -> tx_thread_suspending =  TX_TRUE;
+
+        /* Save the timeout value.  */
+        thread_ptr -> tx_thread_timer.tx_timer_internal_remaining_ticks =  wait_option;
+
+        /* Restore interrupts.  */
+        TX_RESTORE
 
         /* Call actual thread suspension routine.  */
         _tx_thread_system_suspend(thread_ptr);
