@@ -448,10 +448,13 @@ NX_PACKET  *packet_ptr;
         if (nx_tcp_server_socket_accept(&server_socket, NX_IP_PERIODIC_RATE))
             error_counter++;
 
-        /* Reset the connection and listen again.  */
+        /* Close the connection and listen again. The client resets it, or
+           sends a FIN with NX_DISABLE_RESET_DISCONNECT. Then the server
+           closes its side, and unbind takes the client out of TIMED_WAIT.  */
         nx_tcp_socket_disconnect(&client_socket, NX_NO_WAIT);
-        nx_tcp_client_socket_unbind(&client_socket);
-        nx_tcp_socket_disconnect(&server_socket, NX_NO_WAIT);
+        nx_tcp_socket_disconnect(&server_socket, NX_IP_PERIODIC_RATE);
+        if (nx_tcp_client_socket_unbind(&client_socket))
+            error_counter++;
         nx_tcp_server_socket_unaccept(&server_socket);
         if (nx_tcp_server_socket_relisten(&ip_1, TCP_TEST_PORT, &server_socket))
             error_counter++;
