@@ -497,6 +497,7 @@ set(netxduo_test_cases
     ${SOURCE_DIR}/netxduo_test/netx_9_18_test.c
     ${SOURCE_DIR}/netxduo_test/netx_12_19_test.c
     ${SOURCE_DIR}/netxduo_test/netx_ip_driver_deferred_test.c
+    ${SOURCE_DIR}/netxduo_test/netx_ip_mutex_inherit_suspend_test.c
     ${SOURCE_DIR}/netxduo_test/netx_udp_tunnel_ipv4_ipv4_basic_test.c
     ${SOURCE_DIR}/netxduo_test/netx_9_21_02_test.c
     ${SOURCE_DIR}/netxduo_test/netx_udp_packet_receive_test.c
